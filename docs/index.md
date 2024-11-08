@@ -8,7 +8,7 @@ O objetivo deste projeto é desenvolver uma solução de software utilizando a E
 
 ## A Ideia Space 🚀
 
-A [Ideia Space](https://www.ideiaspace.com.br/) é uma startup brasileira de educação que tem como objetivo melhorar a qualidade do ensino, especialmente nas áreas de STEAM (Ciência, Tecnologia, Engenharia, Artes e Matemática). Sua proposa é utilizar o fascínio pelo espaço como tema central para envolver e capacitar os alunos em projetos que estimulam a criatividade e a resolução de problemas.
+A [Ideia Space](https://www.ideiaspace.com.br/) é uma startup brasileira de educação que tem como objetivo melhorar a qualidade do ensino, especialmente nas áreas de STEAM (Ciência, Tecnologia, Engenharia, Artes e Matemática). Sua proposta é utilizar o fascínio pelo espaço como tema central para envolver e capacitar os alunos em projetos que estimulam a criatividade e a resolução de problemas.
 
 Portanto, para este projeto, a Ideia Space é o cliente que necessita de uma solução de software capaz de criar uma experiência de aprendizado gamificada, associado à obtenção de métricas de desempenho dos alunos, para que possa avaliar a eficácia de seus métodos de ensino, associado ao engajamento dos alunos.
 
