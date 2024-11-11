@@ -33,7 +33,7 @@ A necessidade de uma nova abordagem foi intensificada pelo avanço da tecnologia
 
 > **Nota**: A figura a seguir apresenta o diagrama de Ishikawa contendo as causas (organizadas pelos 6M’s) e o problema da Ideia Space.
 
-![Diagrama de Ishikawa](path_to_image/diagrama_ishikawa.png)
+<img src="./assets/ishikawa.png">
 
 ### Desafios do Projeto
 
