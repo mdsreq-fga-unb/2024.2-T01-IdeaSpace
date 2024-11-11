@@ -3,6 +3,11 @@ site_name: Documentação IdeiaSpace
 repo_url: https://github.com/mdsreq-fga-unb/2024.2-T01-IdeaSpace
 repo_name: IdeiaSpace
 
+nav:
+  - Home: 'index.md'
+  - Visão de Produto e Projetos:
+    - Estratégias de Engenharia de Software: produto/estrategias.md
+
 theme:
   name: material
   favicon: assets/ideaspace_icon.png
