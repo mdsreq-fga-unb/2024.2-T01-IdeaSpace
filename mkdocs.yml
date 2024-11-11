@@ -8,6 +8,9 @@ nav:
   - Visão de Produto e Projetos:
       - Estratégias de Engenharia de Software: produto/estrategias.md
       - Interação entre equipe e cliente: interação/composição.md
+      - Cronograma e entregas: produto/cronograma-entregas.md
+      - Solução proposta: produto/solucao.md
+      - Visão do Produto e Projeto: produto/visao-produto-projeto.md
 
 theme:
   name: material
