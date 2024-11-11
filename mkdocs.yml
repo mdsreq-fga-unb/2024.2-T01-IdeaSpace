@@ -1,0 +1,44 @@
+site_name: Documentação IdeiaSpace
+
+repo_url: https://github.com/mdsreq-fga-unb/2024.2-T01-IdeaSpace
+repo_name: IdeiaSpace
+
+nav:
+  - Home: "index.md"
+  - Visão de Produto e Projetos:
+      - Estratégias de Engenharia de Software: produto/estrategias.md
+      - Interação entre equipe e cliente: interação/composição.md
+      - Cronograma e entregas: produto/cronograma-entregas.md
+      - Solução proposta: produto/solucao.md
+      - Visão do Produto e Projeto: produto/visao-produto-projeto.md
+
+theme:
+  name: material
+  favicon: assets/ideaspace_icon.png
+  logo: assets/ideaspace_icon.png
+
+  palette:
+    - scheme: default
+      primary: "indigo"
+      accent: "pink"
+      toggle:
+        icon: material/lightbulb
+        name: Dark mode
+
+    - scheme: slate
+      primary: "indigo"
+      accent: "pink"
+      toggle:
+        icon: material/lightbulb-outline
+        name: Light mode
+
+  features:
+    - search
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.path
+    - navigation.top
+
+extra_css:
+  - stylesheets/style.css
