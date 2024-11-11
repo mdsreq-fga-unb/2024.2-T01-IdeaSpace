@@ -4,9 +4,10 @@ repo_url: https://github.com/mdsreq-fga-unb/2024.2-T01-IdeaSpace
 repo_name: IdeiaSpace
 
 nav:
-  - Home: 'index.md'
+  - Home: "index.md"
   - Visão de Produto e Projetos:
-    - Estratégias de Engenharia de Software: produto/estrategias.md
+      - Estratégias de Engenharia de Software: produto/estrategias.md
+      - Interação entre equipe e cliente: interação/composição.md
 
 theme:
   name: material
@@ -15,15 +16,15 @@ theme:
 
   palette:
     - scheme: default
-      primary: 'indigo'
-      accent: 'pink'
+      primary: "indigo"
+      accent: "pink"
       toggle:
         icon: material/lightbulb
         name: Dark mode
-        
+
     - scheme: slate
-      primary: 'indigo'
-      accent: 'pink'
+      primary: "indigo"
+      accent: "pink"
       toggle:
         icon: material/lightbulb-outline
         name: Light mode
