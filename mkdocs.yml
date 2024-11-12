@@ -6,11 +6,11 @@ repo_name: IdeiaSpace
 nav:
   - Home: "index.md"
   - Visão de Produto e Projetos:
-      - Estratégias de Engenharia de Software: produto/estrategias.md
-      - Interação entre equipe e cliente: interação/composição.md
-      - Cronograma e entregas: produto/cronograma-entregas.md
-      - Solução proposta: produto/solucao.md
       - Visão do Produto e Projeto: produto/visao-produto-projeto.md
+      - Solução proposta: produto/solucao.md
+      - Estratégias de Engenharia de Software: produto/estrategias.md
+      - Cronograma e entregas: produto/cronograma-entregas.md
+      - Interação entre equipe e cliente: interação/composição.md
 
 theme:
   name: material

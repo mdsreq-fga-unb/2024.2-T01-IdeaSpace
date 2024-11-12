@@ -22,7 +22,6 @@ A solução será desenvolvida em torno das seguintes características:
 - **React**: Utilizado no frontend para criar uma interface de usuário responsiva e interativa, permitindo que alunos e educadores acessem as funcionalidades da plataforma de forma dinâmica.
 - **FastAPI**: Framework backend para desenvolvimento de APIs seguras e escaláveis, gerenciando dados dos alunos, autenticação e funcionalidades da plataforma.
 - **Docker**: Ferramenta de conteinerização que isola os serviços da aplicação, assegurando portabilidade e consistência entre os ambientes de desenvolvimento e produção.
-- **MongoDB**: Banco de dados para armazenamento flexível de informações sobre o progresso e atividades dos alunos, facilitando a análise de dados e o crescimento da plataforma.
 - **Supabase**: Banco de dados como serviço que fornece um armazenamento flexível e seguro de informações sobre o progresso e atividades dos alunos, facilitando a análise de dados e o crescimento da plataforma.
 
 ---
