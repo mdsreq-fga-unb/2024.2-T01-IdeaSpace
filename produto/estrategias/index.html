@@ -1,0 +1,1693 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../solucao/">
+      
+      
+        <link rel="next" href="../cronograma-entregas/">
+      
+      
+      <link rel="icon" href="../../assets/ideaspace_icon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.46">
+    
+    
+      
+        <title>Estratégias de Engenharia de Software - Documentação IdeiaSpace</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/style.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="pink">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#estrategias-de-engenharia-de-software" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Documentação IdeiaSpace" class="md-header__button md-logo" aria-label="Documentação IdeiaSpace" data-md-component="logo">
+      
+  <img src="../../assets/ideaspace_icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Documentação IdeiaSpace
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Estratégias de Engenharia de Software
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="pink"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="pink"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mdsreq-fga-unb/2024.2-T01-IdeaSpace" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    IdeiaSpace
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../visao-produto-projeto/" class="md-tabs__link">
+          
+  
+  Visão de Produto e Projetos
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Documentação IdeiaSpace" class="md-nav__button md-logo" aria-label="Documentação IdeiaSpace" data-md-component="logo">
+      
+  <img src="../../assets/ideaspace_icon.png" alt="logo">
+
+    </a>
+    Documentação IdeiaSpace
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mdsreq-fga-unb/2024.2-T01-IdeaSpace" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    IdeiaSpace
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Visão de Produto e Projetos
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Visão de Produto e Projetos
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visao-produto-projeto/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visão do Produto e Projeto
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../solucao/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Solução proposta
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Estratégias de Engenharia de Software
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Estratégias de Engenharia de Software
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#estrategias-de-engenharia-de-software" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estratégias de Engenharia de Software
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Estratégias de Engenharia de Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#estrategia-priorizada" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estratégia Priorizada
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quadro-comparativo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quadro Comparativo
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#justificativa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Justificativa
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#engenharia-de-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      ENGENHARIA DE REQUISITOS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ENGENHARIA DE REQUISITOS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atividades-e-tecnicas-de-er" class="md-nav__link">
+    <span class="md-ellipsis">
+      Atividades e Técnicas de ER
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Atividades e Técnicas de ER">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planejamento-da-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planejamento da Release
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Planejamento da Release">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#declaracao-de-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Declaração de Requisitos:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#planejamento-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planejamento da Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Planejamento da Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#declaracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Declaração:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organizacao-e-atualizacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Organização e Atualização:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execucao-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execução da Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execução da Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#representacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Representação:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verificacao-e-validacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificação e Validação:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#desenvolvimento-colaborativo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Desenvolvimento Colaborativo:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organizacao-e-atualizacao_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Organização e Atualização:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revisao-de-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Revisão de Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Revisão de Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verificacao-e-validacao_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificação e Validação:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrospectiva-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retrospectiva da Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Retrospectiva da Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-organizacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Organização:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atualizacao-do-processo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Atualização do Processo:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#planejamento-da-proxima-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planejamento da Próxima Release
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Planejamento da Próxima Release">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#declaracao_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Declaração:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organizacao-e-atualizacao_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Organização e Atualização:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#engenharia-de-requisitos-e-scrumxp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Engenharia de Requisitos e ScrumXP
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cronograma-entregas/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cronograma e entregas
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intera%C3%A7%C3%A3o/composi%C3%A7%C3%A3o/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Interação entre equipe e cliente
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#estrategias-de-engenharia-de-software" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estratégias de Engenharia de Software
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Estratégias de Engenharia de Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#estrategia-priorizada" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estratégia Priorizada
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quadro-comparativo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quadro Comparativo
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#justificativa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Justificativa
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#engenharia-de-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      ENGENHARIA DE REQUISITOS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ENGENHARIA DE REQUISITOS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atividades-e-tecnicas-de-er" class="md-nav__link">
+    <span class="md-ellipsis">
+      Atividades e Técnicas de ER
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Atividades e Técnicas de ER">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planejamento-da-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planejamento da Release
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Planejamento da Release">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#declaracao-de-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Declaração de Requisitos:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#planejamento-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planejamento da Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Planejamento da Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#declaracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Declaração:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organizacao-e-atualizacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Organização e Atualização:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execucao-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execução da Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execução da Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#representacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Representação:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verificacao-e-validacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificação e Validação:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#desenvolvimento-colaborativo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Desenvolvimento Colaborativo:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organizacao-e-atualizacao_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Organização e Atualização:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revisao-de-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Revisão de Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Revisão de Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verificacao-e-validacao_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificação e Validação:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrospectiva-da-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retrospectiva da Sprint
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Retrospectiva da Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-organizacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Organização:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atualizacao-do-processo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Atualização do Processo:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#planejamento-da-proxima-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planejamento da Próxima Release
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Planejamento da Próxima Release">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#elicitacao-e-descoberta_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elicitação e Descoberta:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-consenso_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Consenso:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#declaracao_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Declaração:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#organizacao-e-atualizacao_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Organização e Atualização:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#engenharia-de-requisitos-e-scrumxp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Engenharia de Requisitos e ScrumXP
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h2 id="estrategias-de-engenharia-de-software">Estratégias de Engenharia de Software</h2>
+<h3 id="estrategia-priorizada">Estratégia Priorizada</h3>
+<p><strong>Abordagem</strong>: Ágil</p>
+<p><strong>Ciclo de Vida</strong>: Incremental e Iterativo</p>
+<p><strong>Processo</strong>: ScrumXP</p>
+<h3 id="quadro-comparativo">Quadro Comparativo</h3>
+<p>O quadro a seguir, apresenta algumas características relacionadas ao RAD e ao ScrumXP, visando auxiliar no entendimento e justificativa da escolha do processo mais adequado ao caso da Ideia Space.</p>
+<table>
+<thead>
+<tr>
+<th>Características</th>
+<th>RAD</th>
+<th>ScrumXP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Abordagem Geral</strong></td>
+<td>Iterativo e incremental orientado à prototipagem e adaptação.</td>
+<td>Iterativo e incremental com foco em entregas rápidas e feedback contínuo.</td>
+</tr>
+<tr>
+<td><strong>Foco em Arquitetura</strong></td>
+<td>Arquitetura básica e flexível que pode ser rapidamente adaptada. A estrutura arquitetural inicial tende a ser simples, permitindo ajustes conforme as necessidades surgem ao longo do desenvolvimento.</td>
+<td>Arquitetura que evolui gradualmente, adaptando-se ao longo dos sprints. O foco é garantir uma estrutura flexível que responda às mudanças sem precisar de uma definição completa logo no início.</td>
+</tr>
+<tr>
+<td><strong>Estrutura de Processos</strong></td>
+<td>Organiza o processo em fases rápidas: planejamento, design, construção e implementação. Visa colocar uma versão funcional do produto nas mãos dos usuários o quanto antes.</td>
+<td>Estruturado em sprints de 2-4 semanas, com entregas incrementais e feedback contínuo.</td>
+</tr>
+<tr>
+<td><strong>Flexibilidade de Requisitos</strong></td>
+<td>Permite alterações de requisitos rapidamente entre as fases, adaptando-se ao feedback dos usuários e às mudanças de demanda sem um processo rígido de controle de escopo.</td>
+<td>Alta flexibilidade, permitindo mudanças de requisitos a cada sprint com base no feedback obtido.</td>
+</tr>
+<tr>
+<td><strong>Colaboração com Cliente</strong></td>
+<td>O cliente é envolvido diretamente em cada fase de prototipagem, revisando as versões iniciais do produto e fornecendo feedback para orientar melhorias e ajustes imediatos.</td>
+<td>Envolve o cliente continuamente, buscando seu feedback ao final de cada sprint para garantir que o produto evolua conforme as expectativas e necessidades.</td>
+</tr>
+<tr>
+<td><strong>Complexidade do Processo</strong></td>
+<td>Simples e rápido, com foco na prototipagem e na entrega de resultados visíveis em menor tempo. Reduz etapas complexas de planejamento e documentação.</td>
+<td>Leve e ágil, com foco na entrega funcional e menos foco na documentação formal. Papéis e etapas bem definidos, facilitando a adaptação e o gerenciamento de tarefas.</td>
+</tr>
+<tr>
+<td><strong>Qualidade Técnica</strong></td>
+<td>A velocidade do RAD pode resultar em uma menor atenção inicial à qualidade técnica. A prioridade está em alcançar rapidamente uma versão funcional, e revisões de qualidade são feitas posteriormente.</td>
+<td>Inclui práticas de qualidade como TDD (Test-Driven Development), integração contínua e pair programming, que garantem um código limpo e funcional.</td>
+</tr>
+<tr>
+<td><strong>Práticas de Desenvolvimento</strong></td>
+<td>A prototipagem rápida é o foco central, com práticas de desenvolvimento centradas em construir versões funcionais e viáveis, visando adaptações e melhorias ágeis durante o processo.</td>
+<td>Inclui práticas técnicas robustas como TDD, refatoração contínua, integração contínua e pair programming,promovendo alta qualidade no código.</td>
+</tr>
+<tr>
+<td><strong>Adaptação ao Projeto da Ideia Space</strong></td>
+<td>Ideal para projetos que precisam de uma primeira versão rápida e visualizável para validação inicial, ideal para um ambiente em que o feedback imediato pode acelerar decisões de produto.</td>
+<td>Ideal para projetos que exigem interação e adaptação contínuas, pois permite responder a mudanças de forma rápida, mantendo o cliente envolvido em cada ciclo de desenvolvimento.</td>
+</tr>
+<tr>
+<td><strong>Documentação</strong></td>
+<td>Documentação leve, com pouca estrutura formal, priorizando rapidez.</td>
+<td>Documentação mínima e essencial, focada em comunicação ágil e feedback.</td>
+</tr>
+<tr>
+<td><strong>Controle de Qualidade</strong></td>
+<td>Feito após a prototipagem inicial. A ênfase é em revisar o produto após cada fase, possibilitando ajustes incrementais para refinar a qualidade conforme necessário.</td>
+<td>Controle de qualidade embutido nas práticas do XP e em revisões em cada sprint, garantindo que o software seja testado a cada nova funcionalidade.</td>
+</tr>
+<tr>
+<td><strong>Escalabilidade</strong></td>
+<td>Mais adequado para equipes pequenas e projetos de menor escala, onde uma coordenação mais leve e rápida é viável.</td>
+<td>Escalável, mas mais indicado para equipes menores e médias devido à sua abordagem colaborativa e interativa constante.</td>
+</tr>
+<tr>
+<td><strong>Suporte a Equipes de Desenvolvimento</strong></td>
+<td>Funciona bem em equipes pequenas, com desenvolvedores envolvidos diretamente nas fases rápidas de prototipagem. Não há papéis definidos formalmente, incentivando uma estrutura de trabalho colaborativa e ágil.</td>
+<td>Suporta equipes menores e mais colaborativas, com papéis mais flexíveis, permitindo maior adaptação ao ritmo do projeto.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="justificativa">Justificativa</h3>
+<ul>
+<li>
+<p><strong>Maior Escalabilidade</strong>: ScrumXP é mais adequado para equipes com projetos em crescimento. Ele possui papéis e processos bem definidos que permitem uma expansão maior do projeto. RAD, por outro lado, tende a se ajustar melhor a projetos pequenos, fazendo com que a sua expansão seja limitada .</p>
+</li>
+<li>
+<p><strong>Maior Flexibilidade nos Requisitos</strong>: ScrumXP permite revisões e ajustes de requisitos a cada sprint, essencial para um projeto que precisa se adaptar rapidamente ao feedback e às demandas do cliente. RAD, por focar em protótipos rápidos, pode não acompanhar mudanças frequentes no mesmo nível de detalhe.</p>
+</li>
+<li>
+<p><strong>Integração Contínua  com o Cliente</strong>: ScrumXP envolve o cliente de forma constante, promovendo feedback a cada sprint. No RAD, o feedback do cliente é mais pontual e menos estruturado, o que pode resultar em um desalinhamento nos requisitos ao longo do projeto.</p>
+</li>
+</ul>
+<h1 id="engenharia-de-requisitos">ENGENHARIA DE REQUISITOS</h1>
+<h2 id="atividades-e-tecnicas-de-er">Atividades e Técnicas de ER</h2>
+<h3 id="planejamento-da-release">Planejamento da Release</h3>
+<h4 id="elicitacao-e-descoberta">Elicitação e Descoberta:</h4>
+<ul>
+<li><strong>Entrevistas:</strong> Entrevistas realizadas com o cliente, representante da Ideia Space, com o objetivo de entender melhor suas expectativas (associada a prioridades e necessidades) para uma nova versão.</li>
+<li><strong>Brainstorming:</strong> Reuniões que permitem o surgimento de novas ideias para agregar na solução do produto de software.</li>
+</ul>
+<h4 id="analise-e-consenso">Análise e Consenso:</h4>
+<ul>
+<li><strong>Storyboarding:</strong> Narrativa para ilustrar o funcionamento esperado de novas funcionalidades.</li>
+<li><strong>Mapas mentais:</strong> Utilização de mapas mentais para a organização de ideias e desenvolvimento de conceitos quando informações relacionadas ao produto não estão claras.</li>
+<li><strong>Sessões de validação:</strong> Apresentação e validação de propostas com o cliente e a equipe para alinhamento e consenso.</li>
+<li><strong>Análise de custo-benefício:</strong> Avaliação do impacto e custo de cada funcionalidade para definição da melhor escolha no momento.</li>
+</ul>
+<h4 id="declaracao-de-requisitos">Declaração de Requisitos:</h4>
+<ul>
+<li><strong>Critérios de aceitação:</strong> Estabelecer critérios para cada funcionalidade para ajudar na validação e desenvolvimento.</li>
+<li><strong>Temas, Épicos e User Stories:</strong> A organização dos requisitos em diferentes níveis proporciona uma melhor clareza do que deve ser desenvolvido.</li>
+</ul>
+<h3 id="planejamento-da-sprint">Planejamento da Sprint</h3>
+<h4 id="elicitacao-e-descoberta_1">Elicitação e Descoberta:</h4>
+<ul>
+<li><strong>Refinamento de Requisitos:</strong> Revisão e detalhamento dos requisitos no backlog, priorizando os itens para a sprint.</li>
+<li><strong>Análise Documental:</strong> Avaliação de relatórios ou registros existentes para detalhar requisitos adicionais.</li>
+</ul>
+<h4 id="analise-e-consenso_1">Análise e Consenso:</h4>
+<ul>
+<li><strong>Planning Poker:</strong> Estimativa colaborativa do esforço e complexidade dos requisitos priorizados.</li>
+<li><strong>Diagramas de Sequência:</strong> Representação visual de fluxos entre componentes do sistema para facilitar o entendimento técnico.</li>
+<li><strong>Discussões Técnicas:</strong> Reuniões entre desenvolvedores para identificar dependências e alinhar estratégias de implementação.</li>
+</ul>
+<h4 id="declaracao">Declaração:</h4>
+<ul>
+<li><strong>Definition of Done (DoD):</strong> Lista de critérios para considerar uma funcionalidade concluída, incluindo testes e validações.</li>
+<li><strong>Critérios de Aceitação Detalhados:</strong> Requisitos objetivos para validar que a funcionalidade atende às expectativas do cliente.</li>
+<li><strong>Kanban:</strong> Utilizado para organizar e rastrear o progresso dos itens da sprint em colunas como "Planejado", "Em Progresso", "Em Teste" e "Concluído", proporcionando visibilidade contínua do status das funcionalidades e alinhamento com o DoD e os Critérios de Aceitação.</li>
+</ul>
+<h4 id="organizacao-e-atualizacao">Organização e Atualização:</h4>
+<ul>
+<li><strong>Revisão do Backlog com Critérios DEEP:</strong> Garantia de que os itens do backlog estão Detalhados, Estimáveis e Priorizados.</li>
+<li><strong>Priorização WSJF (Weighted Shortest Job First):</strong> Técnica para priorizar tarefas com base em valor comercial, urgência e esforço necessário.</li>
+</ul>
+<hr />
+<h3 id="execucao-da-sprint">Execução da Sprint</h3>
+<h4 id="elicitacao-e-descoberta_2">Elicitação e Descoberta:</h4>
+<ul>
+<li><strong>Daily Scrum:</strong> Reuniões diárias rápidas, geralmente de 15 minutos, realizadas para alinhar o progresso da equipe, identificar impedimentos e planejar as atividades do dia.</li>
+</ul>
+<h4 id="representacao">Representação:</h4>
+<ul>
+<li><strong>Protótipos:</strong> Utilizados para validar a interface e o fluxo de funcionalidades antes do desenvolvimento completo. Eles permitem que a equipe visualize o produto final e realizem ajustes necessários no início da execução.</li>
+</ul>
+<h4 id="verificacao-e-validacao">Verificação e Validação:</h4>
+<ul>
+<li><strong>Revisões de Código:</strong> Atividade realizada entre pares para garantir que o código atenda aos padrões de qualidade e esteja alinhado aos requisitos.</li>
+<li><strong>Testes Automatizados:</strong> Utilização de pipelines de integração contínua (CI) para validar o funcionamento correto das funcionalidades desenvolvidas.</li>
+</ul>
+<h4 id="desenvolvimento-colaborativo">Desenvolvimento Colaborativo:</h4>
+<ul>
+<li><strong>Pair Programming:</strong> Técnica onde dois desenvolvedores trabalham juntos no mesmo código, alternando os papéis de "piloto" (quem escreve) e "navegador" (quem revisa).</li>
+</ul>
+<h4 id="organizacao-e-atualizacao_1">Organização e Atualização:</h4>
+<ul>
+<li><strong>Kanban:</strong> Quadro visual para acompanhar o progresso dos itens, com colunas como "Planejado", "Em Progresso", "Em Teste" e "Concluído", proporcionando visibilidade contínua do progresso da sprint.</li>
+</ul>
+<hr />
+<h3 id="revisao-de-sprint">Revisão de Sprint</h3>
+<h4 id="verificacao-e-validacao_1">Verificação e Validação:</h4>
+<ul>
+<li><strong>Checklist de Validação:</strong> Garantir que os requisitos implementados atendem a todas as necessidades do cliente; apenas requisitos que completam totalmente o checklist serão apresentados.</li>
+<li><strong>Checklist de Verificação:</strong> Garante que os requisitos implementados foram realizados corretamente; requisitos que não completem a checklist não poderão ser apresentados.</li>
+<li><strong>Definition of Done (DoD):</strong> Será usado como base para a elaboração das checklists de validação e verificação.</li>
+<li><strong>Feedback do Cliente:</strong> Durante a reunião de revisão, os comentários e sugestões do cliente sobre os requisitos implementados que foram apresentados serão documentados para uso futuro.</li>
+<li><strong>Revisão Informal:</strong> A forma de apresentar os requisitos implementados ao cliente será por meio de demonstrações e explicações do seu funcionamento. As explicações serão orais e não se concentrarão muito no aspecto técnico, favorecendo casos de uso práticos.</li>
+</ul>
+<h4 id="analise-e-consenso_2">Análise e Consenso:</h4>
+<ul>
+<li><strong>Análise de Custo / Benefício:</strong> Verificar se as modificações e sugestões apresentadas pelo cliente geram valor suficiente para o negócio para serem implementadas.</li>
+<li><strong>Análise de Risco / Viabilidade:</strong> Revisar, considerando o conhecimento do equipamento e as limitações do software utilizado, se é possível implementar as modificações e sugestões apresentadas pelo cliente.</li>
+<li><strong>Casos de Uso:</strong> Verificar se existem casos de uso para as modificações e sugestões apresentadas pelo cliente para determinar se tais funcionalidades são necessárias. Caso existam, verificar o que deveria ou não ser permitido em cada uma delas.</li>
+</ul>
+<hr />
+<h3 id="retrospectiva-da-sprint">Retrospectiva da Sprint</h3>
+<h4 id="analise-e-organizacao">Análise e Organização:</h4>
+<ul>
+<li><strong>Feedback da Equipe:</strong> Coleta de opiniões dos membros da equipe sobre pontos positivos e desafios enfrentados, com foco na melhoria contínua do processo.</li>
+</ul>
+<h4 id="atualizacao-do-processo">Atualização do Processo:</h4>
+<ul>
+<li><strong>Definição de Ações Corretivas:</strong> Planejamento de medidas para resolver os problemas identificados durante a sprint e melhorar a colaboração e eficiência do time.</li>
+</ul>
+<h3 id="planejamento-da-proxima-release">Planejamento da Próxima Release</h3>
+<h4 id="elicitacao-e-descoberta_3">Elicitação e Descoberta:</h4>
+<ul>
+<li><strong>Revisão de Requisitos Pendentes:</strong> Avaliação dos requisitos que não foram concluídos em sprints anteriores para decidir se ainda são relevantes e devem ser priorizados na próxima release.</li>
+<li><strong>Revisão do Backlog:</strong> Análise do backlog existente para identificar requisitos alinhados com os objetivos do projeto e as necessidades do cliente.</li>
+</ul>
+<h4 id="analise-e-consenso_3">Análise e Consenso:</h4>
+<ul>
+<li><strong>Priorização MoSCoW:</strong> Técnica utilizada para classificar os requisitos em Must Have, Should Have, Could Have e Won’t Have, permitindo uma priorização clara baseada em impacto e valor.</li>
+<li><strong>Estimativas de Esforço e Tempo:</strong> Utilização de práticas como o Planning Poker para estimar o esforço necessário para implementar cada requisito e prever o cronograma da próxima release.</li>
+</ul>
+<h4 id="declaracao_1">Declaração:</h4>
+<ul>
+<li><strong>Definição de Objetivos da Release:</strong> Estabelecimento das metas da próxima release por meio de sessões de brainstorming e reuniões colaborativas, garantindo alinhamento entre a equipe e os stakeholders.</li>
+</ul>
+<h4 id="organizacao-e-atualizacao_2">Organização e Atualização:</h4>
+<ul>
+<li><strong>Backlog Organizado:</strong> Aplicação de técnicas para organizar e priorizar os requisitos do backlog, garantindo que estejam prontos para o início do desenvolvimento.</li>
+<li><strong>Atualização do Backlog:</strong> Revisão contínua do backlog para refletir as mudanças nas prioridades e no escopo do projeto.</li>
+</ul>
+<h3 id="engenharia-de-requisitos-e-scrumxp">Engenharia de Requisitos e ScrumXP</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Fases do Processo</strong></th>
+<th><strong>Atividades ER</strong></th>
+<th><strong>Prática</strong></th>
+<th><strong>Técnica</strong></th>
+<th><strong>Resultado Esperado</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Planejamento da Release</strong></td>
+<td><strong>Elicitação e Descoberta</strong></td>
+<td>Levantamento de requisitos</td>
+<td>Entrevistas, brainstorming</td>
+<td>Requisitos na sua forma mais bruta levantados</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Análise e Consenso</strong></td>
+<td>Confirmação dos requisitos</td>
+<td>Mapas mentais, sessões de validação, análise de custo-benefício, storyboarding</td>
+<td>Entendimento dos requisitos levantados e seleção para a release</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Declaração</strong></td>
+<td>Registro dos requisitos confirmados</td>
+<td>Critérios de aceitação, temas, épicos e user stories</td>
+<td>Registros que auxiliam no desenvolvimento e validação das funcionalidades</td>
+</tr>
+<tr>
+<td><strong>Planejamento da Sprint</strong></td>
+<td><strong>Refinamento de Requisitos</strong></td>
+<td>Revisão Colaborativa</td>
+<td>Análise Documental</td>
+<td>Requisitos detalhados e prontos para desenvolvimento</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Estimativa e Priorização</strong></td>
+<td>Estimativa de Complexidade</td>
+<td>Planning Poker</td>
+<td>Requisitos priorizados com estimativas consensuais entre a equipe</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Representação de Fluxos</strong></td>
+<td>Planejamento Técnico</td>
+<td>Diagramas de Sequência</td>
+<td>Fluxos entre componentes do sistema detalhados para facilitar o entendimento técnico</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Discussões Técnicas</strong></td>
+<td>Definição de Padrões</td>
+<td>Reuniões entre desenvolvedores</td>
+<td>Estratégias alinhadas para resolver dependências e implementar requisitos</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Validação de Conclusão</strong></td>
+<td>Planejamento Visual</td>
+<td>Kanban, Definition of Done (DoD)</td>
+<td>Funcionalidades validadas conforme critérios predefinidos e organizadas visualmente</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Revisão do Backlog</strong></td>
+<td>Alinhamento Estratégico</td>
+<td>Critérios DEEP, Priorização WSJF</td>
+<td>Backlog refinado, com tarefas organizadas, priorizadas e alinhadas com os objetivos</td>
+</tr>
+<tr>
+<td><strong>Execução da Sprint</strong></td>
+<td><strong>Alinhamento Diário</strong></td>
+<td>Planejamento Operacional</td>
+<td>Daily Scrum</td>
+<td>Progresso da equipe alinhado diariamente, com impedimentos identificados e resolvidos rapidamente</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Desenvolvimento Colaborativo</strong></td>
+<td>Colaboração entre Desenvolvedores</td>
+<td>Pair Programming</td>
+<td>Código desenvolvido com maior qualidade e compartilhamento de conhecimento entre os membros da equipe</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Validação de Interface</strong></td>
+<td>Prototipagem Ágil</td>
+<td>Protótipos</td>
+<td>Interface e fluxo validados antes do desenvolvimento completo, reduzindo retrabalho</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Garantia de Qualidade</strong></td>
+<td>Revisão Contínua</td>
+<td>Revisões de Código, Testes Automatizados</td>
+<td>Funcionalidades desenvolvidas com qualidade garantida e alinhadas aos requisitos</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Rastreamento do Progresso</strong></td>
+<td>Monitoramento Visual</td>
+<td>Kanban</td>
+<td>Progresso visualizado e rastreado continuamente, com itens atualizados durante a sprint</td>
+</tr>
+<tr>
+<td><strong>Revisão da Sprint</strong></td>
+<td><strong>Verificação e Validação</strong></td>
+<td>Definição de requisitos a serem apresentados</td>
+<td>Checklist de Validação, Checklist de Verificação, Definition of Done (DoD)</td>
+<td>Lista de requisitos que serão apresentados ao cliente para revisão</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Verificação e Validação</strong></td>
+<td>Aprovação ou rejeição dos requisitos implementados</td>
+<td>Feedback do cliente, Revisão informal</td>
+<td>Requisito concluído, lista de modificações a serem feitas</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Análise e Consenso</strong></td>
+<td>Definição de novos requisitos</td>
+<td>Análise de Custo / Benefício, Análise de Risco / Viabilidade, Casos de Uso</td>
+<td>Lista de Requisitos RFs e RNFs com base nas modificações solicitadas pelo cliente</td>
+</tr>
+<tr>
+<td><strong>Retrospectiva da Sprint</strong></td>
+<td><strong>Feedback da Equipe</strong></td>
+<td>Análise e Organização</td>
+<td>Discussões em Grupo</td>
+<td>Opiniões coletadas sobre pontos positivos e desafios enfrentados na sprint</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Definição de Ações Corretivas</strong></td>
+<td>Atualização do Processo</td>
+<td>Planejamento de Melhorias</td>
+<td>Medidas planejadas para resolver problemas e melhorar a eficiência do time</td>
+</tr>
+<tr>
+<td><strong>Planejamento da Próxima Release</strong></td>
+<td><strong>Organização e Atualização</strong></td>
+<td>Revisão dos Requisitos Pendentes</td>
+<td>Revisão do backlog</td>
+<td>Requisitos alinhados e priorizados novamente</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Análise e Consenso, Representação</strong></td>
+<td>Priorização e Seleção de Requisitos</td>
+<td>Técnica MoSCoW</td>
+<td>Backlog organizado</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Análise e Consenso</strong></td>
+<td>Estimativas de Esforço e Tempo</td>
+<td>Planning Poker</td>
+<td>Previsão de cronograma</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Análise e Consenso</strong></td>
+<td>Definição dos Objetivos da Release</td>
+<td>Brainstorm, reuniões entre a equipe, entrevistas</td>
+<td>Metas da release definidas</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["search", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.path", "navigation.top"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>
