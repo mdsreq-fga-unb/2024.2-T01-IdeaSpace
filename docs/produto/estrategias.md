@@ -29,6 +29,15 @@ O quadro a seguir, apresenta algumas características relacionadas ao RAD e ao S
 **Escalabilidade**|Mais adequado para equipes pequenas e projetos de menor escala, onde uma coordenação mais leve e rápida é viável. |Escalável, mas mais indicado para equipes menores e médias devido à sua abordagem colaborativa e interativa constante.
 |**Suporte a Equipes de Desenvolvimento**|Funciona bem em equipes pequenas, com desenvolvedores envolvidos diretamente nas fases rápidas de prototipagem. Não há papéis definidos formalmente, incentivando uma estrutura de trabalho colaborativa e ágil.|Suporta equipes menores e mais colaborativas, com papéis mais flexíveis, permitindo maior adaptação ao ritmo do projeto.
 
+ >Blibliografia
+ >
+ >GOMES, ANDRÉ: Scrum: o Framework Mínimo Viável. Disponível em: https://www.linkedin.com/pulse/scrum-o-framework-m%C3%ADnimo-vi%C3%A1vel-andr%C3%A9-gomes
+ >
+ > SCHWABER, KEN: SCRUM Development Process. Disponível em: http://www.jeffsutherland.org/oopsla/schwapub.pdf
+ >
+ > CIPULLO, GIOVANNA: RAD: você sabe como funciona o desenvolvimento ágil de aplicações? Disponível em: https://www.korp.com.br/rad-voce-sabe-como-funciona-o-desenvolvimento-agil-de-aplicacoes/
+
+
 ### Justificativa
     
 -   **Maior Escalabilidade**: ScrumXP é mais adequado para equipes com projetos em crescimento. Ele possui papéis e processos bem definidos que permitem uma expansão maior do projeto. RAD, por outro lado, tende a se ajustar melhor a projetos pequenos, fazendo com que a sua expansão seja limitada .
