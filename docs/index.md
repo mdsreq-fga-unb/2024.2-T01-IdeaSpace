@@ -1,5 +1,12 @@
 # Início
 
+## Histórico de Revisão
+
+| Data       | Versão | Descrição             | Autor          |
+|------------|--------|-----------------------|----------------|
+| 01/11/24   | 1.0    | Criação do documento  | Edilson Ribeiro |
+| 04/11/24   | 1.0    | Correções do documento | Matheus Brant |
+
 ## Projeto
 
 Este projeto é parte da disciplina de Requisitos de Software, orientada pelo professor Dr. George Marsicano Corrêa, do curso de Engenharia de Software da Universidade de Brasília.
@@ -47,3 +54,4 @@ Portanto, para este projeto, a Ideia Space é o cliente que necessita de uma sol
     <p style="margin: 0 0 0 0"><strong>Sebastian Zuzunaga</strong></p>
 </div>
 </div>
+

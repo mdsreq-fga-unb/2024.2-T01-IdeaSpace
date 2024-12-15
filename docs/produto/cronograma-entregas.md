@@ -1,5 +1,3 @@
-## CRONOGRAMA E ENTREGAS
-
 | Sprint     | Início       | Fim         | Objetivo Principal                        | Entregas Esperadas                                                                                                                                                 | Validação do Cliente                                  |
 |------------|--------------|-------------|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|
 | Sprint 1    | 14/11/2024    | 27/11/2024    | Planejamento e Definição de Backlog         | - Definição do backlog inicial <br> - Configuração da arquitetura (React, FastAPI, MongoDB) <br> - Ambiente de desenvolvimento configurado | Revisão do backlog e confirmação de prioridade         |
@@ -15,8 +13,8 @@
 
 ---
 
-### Considerações Importantes
+## Considerações Importantes
 
-- **Datas de Início e Fim**: Cada sprint tem duração média de duas semanas,porém existem variações.
+- **Datas de Início e Fim**: Cada sprint tem duração média de duas semanas, porém existem variações.
 - **Validações**: Cada sprint inclui uma revisão de entregas com o cliente para feedback contínuo e ajustes no backlog.
 - **Entregas Parciais**: Entregas das funcionalidades principais, como integração de conteúdo, gamificação e análise dos dados, são distribuídas ao longo do projeto para garantir uma validação contínua antes do lançamento final.
