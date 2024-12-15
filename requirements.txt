@@ -1,1 +1,4 @@
+# MkDocs
+mkdocs-material
 mkdocs-video
+mkdocs-glightbox
