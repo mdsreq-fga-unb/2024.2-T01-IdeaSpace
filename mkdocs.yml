@@ -6,11 +6,12 @@ repo_name: IdeiaSpace
 nav:
   - Home: "index.md"
   - Visão de Produto e Projetos:
-      - Visão do Produto e Projeto: produto/visao-produto-projeto.md
+      - Cenário atual do cliente e do negócio: produto/visao-produto-projeto.md
       - Solução proposta: produto/solucao.md
       - Estratégias de Engenharia de Software: produto/estrategias.md
       - Cronograma e entregas: produto/cronograma-entregas.md
-      - Interação entre equipe e cliente: interação/composição.md
+      - Interação entre equipe e cliente: produto/interacao.md
+  - Apresentações: apresentacoes/index.md
 
 theme:
   name: material
@@ -31,6 +32,20 @@ theme:
       toggle:
         icon: material/lightbulb-outline
         name: Light mode
+  icon:
+    admonition:
+      note: fontawesome/solid/note-sticky
+      abstract: fontawesome/solid/book
+      info: fontawesome/solid/circle-info
+      tip: fontawesome/solid/bullhorn
+      success: fontawesome/solid/check
+      question: fontawesome/solid/circle-question
+      warning: fontawesome/solid/triangle-exclamation
+      failure: fontawesome/solid/bomb
+      danger: fontawesome/solid/skull
+      bug: fontawesome/solid/robot
+      example: fontawesome/solid/flask
+      quote: fontawesome/solid/quote-left
 
   features:
     - search
@@ -42,3 +57,11 @@ theme:
 
 extra_css:
   - stylesheets/style.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - mkdocs-video

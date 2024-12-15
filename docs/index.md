@@ -1,5 +1,12 @@
 # Início
 
+## Histórico de Revisão
+
+| Data       | Versão | Descrição             | Autor          |
+|------------|--------|-----------------------|----------------|
+| 01/11/24   | 1.0    | Criação do documento  | Edilson Ribeiro |
+| 04/11/24   | 1.0    | Correções do documento | Matheus Brant |
+
 ## Projeto
 
 Este projeto é parte da disciplina de Requisitos de Software, orientada pelo professor Dr. George Marsicano Corrêa, do curso de Engenharia de Software da Universidade de Brasília.
@@ -41,4 +48,10 @@ Portanto, para este projeto, a Ideia Space é o cliente que necessita de uma sol
     <a href="https://github.com/Matheussbrant" target="_blank"><img src="https://github.com/Matheussbrant.png" width="100" style="border-radius: 50%; margin: 5px 20px 5px 20px;"/></a>
     <p style="margin: 0 0 0 0"><strong>Matheus Brant</strong></p>
 </div>
+
+<div style="text-align: center;">
+    <a href="https://github.com/sebazac332" target="_blank"><img src="https://github.com/sebazac332.png" width="100" style="border-radius: 50%; margin: 5px 20px 5px 20px;"/></a>
+    <p style="margin: 0 0 0 0"><strong>Sebastian Zuzunaga</strong></p>
 </div>
+</div>
+
