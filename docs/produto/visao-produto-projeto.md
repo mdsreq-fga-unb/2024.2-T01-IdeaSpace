@@ -1,9 +1,5 @@
 # Ideia Space - Visão do Produto e Projeto
 
-**Versão 1.0**
-
-Link para o vídeo da apresentação: [Google Drive](https://drive.google.com/file/d/1OF8X91xykGekYA8f2y5i1VYCJQ4NEa9C/view)
-
 ## Histórico de Revisão
 
 | Data       | Versão | Descrição             | Autor          |
