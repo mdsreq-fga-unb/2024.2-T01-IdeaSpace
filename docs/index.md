@@ -6,6 +6,8 @@
 |------------|--------|-----------------------|----------------|
 | 01/11/24   | 1.0    | Criação do documento  | Edilson Ribeiro |
 | 04/11/24   | 1.0    | Correções do documento | Matheus Brant |
+| 15/12/24   | 1.1    | Estilização do documento | Caio Felipe |
+
 
 ## Projeto
 
