@@ -41,4 +41,9 @@ Portanto, para este projeto, a Ideia Space é o cliente que necessita de uma sol
     <a href="https://github.com/Matheussbrant" target="_blank"><img src="https://github.com/Matheussbrant.png" width="100" style="border-radius: 50%; margin: 5px 20px 5px 20px;"/></a>
     <p style="margin: 0 0 0 0"><strong>Matheus Brant</strong></p>
 </div>
+
+<div style="text-align: center;">
+    <a href="https://github.com/sebazac332" target="_blank"><img src="https://github.com/sebazac332.png" width="100" style="border-radius: 50%; margin: 5px 20px 5px 20px;"/></a>
+    <p style="margin: 0 0 0 0"><strong>Sebastian Zuzunaga</strong></p>
+</div>
 </div>
