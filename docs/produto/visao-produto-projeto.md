@@ -10,9 +10,9 @@ Com o objetivo de se tornar referência em educação na América Latina nos pr�
 
 ## Identificação da Oportunidade ou Problema
 
-A principal oportunidade identificada para a Ideia Space é uma forma de estender o engajamento e o aprendizado dos alunos para além das salas de aula tradicionais. Muitas abordagens educacionais enfrentam dificuldades em manter o interesse contínuo dos alunos, especialmente fora do ambiente escolar, onde o contato com os conteúdos se torna limitado e menos atrativo. A proposta busca possibilitar que os alunos pratiquem seus conhecimentos de forma gamificada fora de sala de aula.
+O principal problema identificado na Ideia Space é a falta de um método para avaliar o desempenho dos alunos fora das salas de aula. Atualmente, a empresa não possui uma maneira de medir o progresso dos alunos com métricas baseadas em seu desempenho. Isso dificulta o acompanhamento contínuo e impede que educadores obtenham informações precisas sobre o aprendizado dos estudantes.
 
-A necessidade de uma nova abordagem foi intensificada pelo avanço da tecnologia e pela demanda por métodos educacionais mais atrativos e acessíveis. A Ideia Space percebeu que, ao utilizar elementos de gamificação e temas espaciais que despertam curiosidade, pode aumentar significativamente o engajamento dos alunos, promovendo um aprendizado contínuo. Com essa plataforma, a empresa visualiza uma oportunidade de expandir seu impacto educacional, auxiliando os alunos a se manterem motivados e interessados em aprender.
+A proposta busca resolver essa dificuldade com a implementação de um sistema que permita monitorar e registrar o progresso dos alunos fora do ambiente escolar. Além disso, a gamificação será utilizada como um recurso adicional para manter os alunos mais engajados na plataforma, tornando o aprendizado fora de sala de aula mais dinâmico e atrativo.
 
 !!! note "Nota"
     A figura a seguir apresenta o diagrama de Ishikawa contendo as causas (organizadas pelos 6M’s) e o problema da Ideia Space.
