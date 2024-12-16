@@ -15,6 +15,9 @@ nav:
     - Atividades e Técnicas de ER: engenharia-requisitos/atividades_er.md
     - Backlog: engenharia-requisitos/backlog.md
   - Apresentações: apresentacoes/index.md
+  - Lições aprendidas: 
+    - Unidade 1: licoes/unidade1.md
+    - Unidade 2: licoes/unidade2.md
 
 theme:
   name: material
