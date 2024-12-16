@@ -1,0 +1,5 @@
+## Unidade 1
+
+Nessa unidade, fomos apresentados às abordagens, ciclos de vida e como cada atividade de requisitos se encaixa nos processos envolvidos em um projeto de software, assim como também tivemos que decidir quanto a metodologia que correspondesse melhor com as perspectivas do nosso próprio projeto, atendendo as necessidades de um cliente real. 
+
+Quanto as dificuldades encontradas, a adaptação necessária para conduzir um projeto de software com base na disciplina de requisitos, as dinâmicas de equipe que envolveram as apresentações e entregas e a determinação das tarefas de cada membro foram as que mais impactaram ao decorrer da unidade. A respeito disso, o que deve ser melhorado é flexibilizar algumas tarefas da equipe, sendo uma boa abordagem a ser seguida um rodízio em certas atividades no decorrer do projeto, de forma a atender os horários que cada membro possui para trabalhar no projeto assim como as limitações envolvidas em suas dificuldades pessoais, sejam elas de capacitação ou de qualquer outra natureza.

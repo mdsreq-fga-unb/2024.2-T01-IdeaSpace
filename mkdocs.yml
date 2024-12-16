@@ -12,10 +12,15 @@ nav:
       - Cronograma e entregas: produto/cronograma-entregas.md
       - Interação entre equipe e cliente: produto/interacao.md
   - Engenharia de Requisitos:
-    - Atividades e Técnicas de ER: engenharia-requisitos/atividades_er.md
-    - Backlog: engenharia-requisitos/backlog.md
-    - Lista de requisitos: engenharia-requisitos/lista-requisitos.md
+      - Atividades e Técnicas de ER: engenharia-requisitos/atividades_er.md
+      - Backlog: engenharia-requisitos/backlog.md
+      - DoR e DoD: engenharia-requisitos/Dor_dod.md
+      - Lista de requisitos: engenharia-requisitos/lista-requisitos.md
   - Apresentações: apresentacoes/index.md
+  - Lições aprendidas: 
+      - Unidade 1: licoes/unidade1.md
+      - Unidade 2: licoes/unidade2.md
+
 
 theme:
   name: material
