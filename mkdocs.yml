@@ -13,9 +13,9 @@ nav:
       - Interação entre equipe e cliente: produto/interacao.md
   - Engenharia de Requisitos:
       - Atividades e Técnicas de ER: engenharia-requisitos/atividades_er.md
-      - Backlog: engenharia-requisitos/backlog.md
-      - DoR e DoD: engenharia-requisitos/Dor_dod.md
       - Lista de requisitos: engenharia-requisitos/lista-requisitos.md
+      - DoR e DoD: engenharia-requisitos/Dor_dod.md
+      - Backlog: engenharia-requisitos/backlog.md
   - Apresentações: apresentacoes/index.md
   - Lições aprendidas: 
       - Unidade 1: licoes/unidade1.md
