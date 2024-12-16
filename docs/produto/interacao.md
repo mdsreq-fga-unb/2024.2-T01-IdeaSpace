@@ -2,13 +2,13 @@
 
 ## Composição da Equipe
 
-| Papel                  | Descrição                                                                                                                             | Responsável     | Participantes   |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------- | --------------- |
-| Gerente do Projeto     | Assegura a comunicação eficaz entre o cliente e a equipe, monitora prazos e gerencia as entregas para manter o projeto no cronograma. | Edilson Ribeiro |                 |
-| Desenvolvedor Frontend | Cuida do design e da implementação das funcionalidades no front-end, garantindo uma experiência de usuário intuitiva e atraente.      | Matheus Brant   | Igor Silva      |
-| Desenvolvedor Backend  | Realiza a integração com o banco de dados e APIs, garantindo que os processos internos e fluxos de dados funcionem corretamente.      | Caio Felipe     |                 |
-| Analista QA            | Conduz testes de funcionalidade, desempenho e usabilidade para assegurar que o produto atenda aos padrões exigidos.                   | Igor Silva      |                 |
-| Analista de Requisitos | Estabelece os requisitos funcionais e não funcionais e assegura sua implementação conforme planejado.                                 | Felipe Matheus  | Edilson Ribeiro |
+| Papel                  | Descrição                                                                                                                             | Responsável     | Participantes                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------- |
+| Gerente do Projeto     | Assegura a comunicação eficaz entre o cliente e a equipe, monitora prazos e gerencia as entregas para manter o projeto no cronograma. | Edilson Ribeiro | Caio Felipe                                                                |
+| Desenvolvedor Frontend | Cuida do design e da implementação das funcionalidades no front-end, garantindo uma experiência de usuário intuitiva e atraente.      | Edilson Ribeiro | Igor Silva                                                                 |
+| Desenvolvedor Backend  | Realiza a integração com o banco de dados e APIs, garantindo que os processos internos e fluxos de dados funcionem corretamente.      | Caio Felipe     | Matheus Brant                                                              |
+| Analista QA            | Conduz testes de funcionalidade, desempenho e usabilidade para assegurar que o produto atenda aos padrões exigidos.                   | Igor Silva      | Sebastian Hector                                                           |
+| Analista de Requisitos | Estabelece os requisitos funcionais e não funcionais e assegura sua implementação conforme planejado.                                 | Felipe Matheus  | Caio Felipe, Edilson Ribeiro, Igor Silva, Matheus Brant e Sebastian Hector |
 
 ## Comunicação
 
