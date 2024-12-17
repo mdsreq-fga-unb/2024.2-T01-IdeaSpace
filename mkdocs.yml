@@ -16,7 +16,9 @@ nav:
       - Lista de requisitos: engenharia-requisitos/lista-requisitos.md
       - DoR e DoD: engenharia-requisitos/Dor_dod.md
       - Backlog: engenharia-requisitos/backlog.md
-  - Apresentações: apresentacoes/index.md
+  - Apresentações: 
+      - Unidade 1: apresentacoes/apresentacao1.md
+      - Unidade 2: apresentacoes/apresentacao2.md
   - Lições aprendidas: 
       - Unidade 1: licoes/unidade1.md
       - Unidade 2: licoes/unidade2.md
