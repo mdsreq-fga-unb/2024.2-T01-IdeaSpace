@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:latest
+    env_file:
+      - ../api/.env
+    container_name: db
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  backend:
+    restart: unless-stopped
+    volumes:
+      - ../api:/app/api
+    env_file:
+      - ../api/.env
+    ports:
+      - 8000:8000 
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+
+  frontend:
+      restart: unless-stopped
+      command: npm run dev
+      volumes:
+        - ../frontend:/app/frontend
+        - /app/frontend/node_modules
+      env_file:
+        - ../frontend/.env
+      ports:
+        - 3000:3000
+      build:
+        context: ../
+        dockerfile: ./docker/Dockerfile.web
+
+volumes:
+  db-data:
