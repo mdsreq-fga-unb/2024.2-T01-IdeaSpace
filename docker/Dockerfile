@@ -5,13 +5,13 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY ../api/requirements.txt /app/requirements.txt
+COPY ../backend/requirements.txt /app/requirements.txt
 
 RUN pip install --upgrade pip && \
     pip install -r /app/requirements.txt
 
-COPY ../api /app/api
+COPY ../backend /app/backend
 
 RUN apk add --no-cache bash
 
-CMD ["python", "/app/api/src/main.py"]
+CMD ["fastapi", "dev", "/app/backend/src/main.py", "--reload", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]

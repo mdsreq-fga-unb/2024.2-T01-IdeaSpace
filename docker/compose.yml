@@ -2,24 +2,26 @@ services:
   db:
     image: postgres:latest
     env_file:
-      - ../api/.env
+      - ../backend/.env
     container_name: db
     ports:
       - 5432:5432
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data/
 
   backend:
     restart: unless-stopped
     volumes:
-      - ../api:/app/api
+      - ../backend:/app/backend
     env_file:
-      - ../api/.env
+      - ../backend/.env
     ports:
       - 8000:8000 
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
+    depends_on:
+      - db
 
   frontend:
       restart: unless-stopped
