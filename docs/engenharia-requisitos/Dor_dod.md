@@ -20,5 +20,4 @@ O DoD define os critérios que precisam ser cumpridos para que uma funcionalidad
 - **Teste manual:** Todos os testes manuais realizados pela a equipe de desenvolvimento foram concluídos sem nenhum erro encontrado.
 - **Entrega um incremento do produto:** A funcionalidade desenvolvida agrega valor ao produto, resultando em um incremento utilizável.
 - **Contempla os critérios de aceitação estabelecidos:** Todos os critérios de aceitação definidos foram cumpridos, garantindo que o comportamento esperado do requisito foi atingido.
-- **Funcionalidade validada pelo Product Owner (PO):** O PO revisou e aceitou a entrega, confirmando que atende aos requisitos de negócio.
 - **Está aderente aos padrões de codificação?** O código deve seguir os padrões de codificação estabelecidos pela equipe, garantindo qualidade, consistência e facilidade de manutenção.
