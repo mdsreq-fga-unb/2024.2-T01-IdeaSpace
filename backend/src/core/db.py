@@ -3,8 +3,7 @@ from sqlmodel import Session, create_engine, select
 from src import crud
 from src.core.config import settings
 
-from src.models.user import User, UserCreate, Permission
-from src.constants import PERMISSIONS
+from src.models.user import User, UserCreate
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
@@ -36,24 +35,3 @@ def create_first_superuser(session: Session) -> None:
             is_superuser=True,
         )
         user = crud.create_user(session=session, user_create=user_in)
-
-
-def update_permissions(session: Session) -> None:
-    permissions_db = session.exec(select(Permission)).all()
-    permissions_names = [permission["name"] for permission in PERMISSIONS]
-
-    for permission in permissions_db:
-        if permission.name not in permissions_names:
-            session.delete(permission)
-
-    for permission in PERMISSIONS:
-        perm = session.exec(
-            select(Permission).where(Permission.name == permission["name"])
-        ).first()
-        if not perm:
-            perm = Permission(
-                name=permission["name"], description=permission["description"]
-            )
-            session.add(perm)
-    session.commit()
-
