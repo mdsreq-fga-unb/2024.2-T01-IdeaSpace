@@ -2,7 +2,7 @@ from sqlmodel import Session, select
 
 from src.core.security import get_password_hash, verify_password
 
-from src.models.user import User, UserCreate, Permission, UserUpdate
+from src.models.user import User, UserCreate, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -44,9 +44,3 @@ def authenticate(*, session: Session, username: str, password: str) -> User | No
     if not verify_password(password, db_user.hashed_password):
         return None
     return db_user
-
-
-def get_permission_by_name(*, session: Session, name: str) -> Permission | None:
-    statement = select(Permission).where(Permission.name == name)
-    permission = session.exec(statement).first()
-    return permission
