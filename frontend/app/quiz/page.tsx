@@ -32,11 +32,11 @@ const page = () => {
   return (
     <div className='flex min-h-screen items-center justify-center bg-gradient-to-r from-slate-800 to-gray-950'>
         <div className='m-5 w-full max-w-xl rounded-3xl bg-white p-5 shadow-lg md:m-10 nd:p-10'>
-            <QuizQuestion 
+            {!showResult && <QuizQuestion 
             question = {questions[currentQuestion]}
             questionNumber = {currentQuestion + 1}
             onAnswer = {handleAnswer}
-            />
+            />}
             {showResult && <Result answers = {answers} restartTest = {restartTest}/>}
         </div>
     </div>
