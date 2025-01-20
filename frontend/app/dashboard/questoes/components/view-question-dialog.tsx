@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { CheckCircle2 } from 'lucide-react';
 
 interface ViewQuestionDialogProps {
   question: {
@@ -13,6 +14,7 @@ interface ViewQuestionDialogProps {
     tema: string;
     dificuldade: 'Fácil' | 'Médio' | 'Difícil';
     alternativas: string[];
+    respostaCorreta: number;
   };
 }
 
@@ -60,9 +62,12 @@ export function ViewQuestionDialog({ question }: ViewQuestionDialogProps) {
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Alternativas</h4>
             <div className="space-y-3 border rounded-md p-4">
               {question.alternativas.map((alternativa, index) => (
-                <div key={index} className="flex gap-2">
-                  <span className="font-medium">{String.fromCharCode(65 + index)})</span>
-                  <p>{alternativa}</p>
+                <div key={index} className="flex gap-2 items-center">
+                  <span className="font-medium min-w-[24px]">{String.fromCharCode(65 + index)})</span>
+                  <p className="flex-grow">{alternativa}</p>
+                  {index === question.respostaCorreta && (
+                    <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  )}
                 </div>
               ))}
             </div>

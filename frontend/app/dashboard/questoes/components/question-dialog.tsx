@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Minus } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Plus, Minus, CheckCircle2 } from 'lucide-react';
 
 interface QuestionDialogProps {
   mode: 'create' | 'edit';
@@ -17,6 +18,7 @@ interface QuestionDialogProps {
     tema: string;
     dificuldade: 'Fácil' | 'Médio' | 'Difícil';
     alternativas: string[];
+    respostaCorreta: number;
   };
   trigger?: React.ReactNode;
 }
@@ -28,12 +30,16 @@ export function QuestionDialog({ mode, question, trigger }: QuestionDialogProps)
     tema: question?.tema || '',
     dificuldade: question?.dificuldade || '',
     alternativas: question?.alternativas || ['', '', '', ''],
+    respostaCorreta: question?.respostaCorreta?.toString() || '0',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
-    console.log('Form submitted:', formData);
+    console.log('Form submitted:', {
+      ...formData,
+      respostaCorreta: parseInt(formData.respostaCorreta),
+    });
     setOpen(false);
   };
 
@@ -55,7 +61,11 @@ export function QuestionDialog({ mode, question, trigger }: QuestionDialogProps)
   const removeAlternative = (index: number) => {
     if (formData.alternativas.length > 2) {
       const newAlternatives = formData.alternativas.filter((_, i) => i !== index);
-      setFormData({ ...formData, alternativas: newAlternatives });
+      setFormData({
+        ...formData,
+        alternativas: newAlternatives,
+        respostaCorreta: index === parseInt(formData.respostaCorreta) ? '0' : formData.respostaCorreta,
+      });
     }
   };
 
@@ -76,7 +86,7 @@ export function QuestionDialog({ mode, question, trigger }: QuestionDialogProps)
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="titulo">Título da Questão</Label>
+            <Label htmlFor="titulo">Pergunta</Label>
             <Input
               id="titulo"
               value={formData.titulo}
@@ -122,29 +132,53 @@ export function QuestionDialog({ mode, question, trigger }: QuestionDialogProps)
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            {formData.alternativas.map((alternativa, index) => (
-              <div key={index} className="flex gap-2">
-                <div className="flex-grow">
-                  <Textarea
-                    value={alternativa}
-                    onChange={(e) => handleAlternativeChange(index, e.target.value)}
-                    placeholder={`Alternativa ${String.fromCharCode(65 + index)}`}
-                    required
-                  />
-                </div>
-                {formData.alternativas.length > 2 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => removeAlternative(index)}
-                    className="self-start"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                )}
+            <div className="bg-muted/50 p-4 rounded-lg border">
+              <div className="flex items-center gap-2 mb-4">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <p className="text-sm font-medium">
+                  Selecione o círculo ao lado da alternativa que será a resposta correta
+                </p>
               </div>
-            ))}
+              <RadioGroup
+                value={formData.respostaCorreta}
+                onValueChange={(value) => setFormData({ ...formData, respostaCorreta: value })}
+                className="space-y-4"
+              >
+                {formData.alternativas.map((alternativa, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem 
+                        value={index.toString()} 
+                        id={`alternativa-${index}`} 
+                        className="mt-3"
+                      />
+                      {index.toString() === formData.respostaCorreta && (
+                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-3" />
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <Textarea
+                        value={alternativa}
+                        onChange={(e) => handleAlternativeChange(index, e.target.value)}
+                        placeholder={`Alternativa ${String.fromCharCode(65 + index)}`}
+                        required
+                      />
+                    </div>
+                    {formData.alternativas.length > 2 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeAlternative(index)}
+                        className="self-start"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
           </div>
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { PencilIcon, Trash2, BookPlus, Search } from 'lucide-react';
+import { PencilIcon, Trash2, BookPlus, Search, CheckCircle2 } from 'lucide-react';
 import { QuestionDialog } from './components/question-dialog';
 import { ViewQuestionDialog } from './components/view-question-dialog';
 import {
@@ -28,6 +28,7 @@ interface Questao {
   tema: string;
   dificuldade: Dificuldade;
   alternativas: string[];
+  respostaCorreta: number;
 }
 
 const dificuldadeColors: Record<Dificuldade, string> = {
@@ -55,6 +56,7 @@ export default function QuestoesPage() {
         'A Terra é o terceiro planeta do Sistema Solar',
         'Marte é conhecido como planeta vermelho',
       ],
+      respostaCorreta: 0,
     },
     {
       id: 2,
@@ -67,6 +69,7 @@ export default function QuestoesPage() {
         'Nem a luz consegue escapar',
         'Podem ser resultado da morte de estrelas',
       ],
+      respostaCorreta: 2,
     },
     {
       id: 3,
@@ -79,6 +82,7 @@ export default function QuestoesPage() {
         'Yuri Gagarin foi o primeiro homem no espaço',
         'A ISS é a maior estrutura humana no espaço',
       ],
+      respostaCorreta: 1,
     },
   ];
 
@@ -160,9 +164,15 @@ export default function QuestoesPage() {
                 <p className="text-sm text-muted-foreground">Tema: {questao.tema}</p>
                 <div className="space-y-1">
                   {questao.alternativas.map((alt, index) => (
-                    <p key={index} className="text-sm">
-                      {String.fromCharCode(65 + index)}) {alt}
-                    </p>
+                    <div key={index} className="flex items-center gap-2">
+                      <span className="text-sm">
+                        {String.fromCharCode(65 + index)})
+                      </span>
+                      <p className="text-sm flex-grow">{alt}</p>
+                      {index === questao.respostaCorreta && (
+                        <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      )}
+                    </div>
                   ))}
                 </div>
                 <div className="flex gap-2 mt-4">
