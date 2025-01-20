@@ -23,7 +23,6 @@ export default function AlunosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<number | null>(null);
 
@@ -31,37 +30,33 @@ export default function AlunosPage() {
     { 
       id: 1, 
       nome: 'Ana Silva', 
-      email: 'ana.silva@email.com', 
+      username: 'anasilva', 
       ano: '1º Ano', 
       turma: 'Turma A',
-      escola: 'Escola Municipal João Paulo',
-      localizacao: 'São Paulo, SP'
+      escola: 'Escola Municipal João Paulo'
     },
     { 
       id: 2, 
       nome: 'Bruno Santos', 
-      email: 'bruno.santos@email.com', 
+      username: 'brunosantos', 
       ano: '2º Ano', 
       turma: 'Turma B',
-      escola: 'Escola Estadual Maria Silva',
-      localizacao: 'Rio de Janeiro, RJ'
+      escola: 'Escola Estadual Maria Silva'
     },
     { 
       id: 3, 
       nome: 'Carla Oliveira', 
-      email: 'carla.oliveira@email.com', 
+      username: 'carlaoliveira', 
       ano: '3º Ano', 
       turma: 'Turma C',
-      escola: 'Colégio Pedro II',
-      localizacao: 'Belo Horizonte, MG'
+      escola: 'Colégio Pedro II'
     },
   ];
 
   const filteredAlunos = alunos.filter(aluno => 
     aluno.nome.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (!selectedYear || aluno.ano === selectedYear) &&
-    (!selectedSchool || aluno.escola === selectedSchool) &&
-    (!selectedLocation || aluno.localizacao === selectedLocation)
+    (!selectedSchool || aluno.escola === selectedSchool)
   );
 
   const handleDelete = (id: number) => {
@@ -120,16 +115,6 @@ export default function AlunosPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-          <SelectTrigger className="sm:max-w-xs">
-            <SelectValue placeholder="Filtrar por localização" />
-          </SelectTrigger>
-          <SelectContent>
-            {[...new Set(alunos.map(a => a.localizacao))].map(location => (
-              <SelectItem key={location} value={location}>{location}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -140,11 +125,10 @@ export default function AlunosPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{aluno.email}</p>
+                <p className="text-sm text-muted-foreground">Usuário: {aluno.username}</p>
                 <p className="text-sm">Ano: {aluno.ano}</p>
                 <p className="text-sm">Turma: {aluno.turma}</p>
                 <p className="text-sm">Escola: {aluno.escola}</p>
-                <p className="text-sm text-muted-foreground">{aluno.localizacao}</p>
                 <div className="flex gap-2 mt-4">
                   <ViewStudentDialog student={aluno} />
                   <StudentDialog

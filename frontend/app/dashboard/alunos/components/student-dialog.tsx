@@ -12,11 +12,11 @@ interface StudentDialogProps {
   student?: {
     id: number;
     nome: string;
-    email: string;
+    username: string;
     ano: string;
     turma: string;
     escola: string;
-    localizacao: string;
+    senha?: string;
   };
   trigger?: React.ReactNode;
 }
@@ -25,11 +25,11 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     nome: student?.nome || '',
-    email: student?.email || '',
+    username: student?.username || '',
     ano: student?.ano || '',
     turma: student?.turma || '',
     escola: student?.escola || '',
-    localizacao: student?.localizacao || '',
+    senha: student?.senha || '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -56,7 +56,7 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nome">Nome</Label>
+            <Label htmlFor="nome">Nome Completo</Label>
             <Input
               id="nome"
               value={formData.nome}
@@ -65,13 +65,22 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Nome de Usuário</Label>
             <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              id="username"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="senha">Senha</Label>
+            <Input
+              id="senha"
+              type="password"
+              value={formData.senha}
+              onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+              required={mode === 'create'}
             />
           </div>
           <div className="space-y-2">
@@ -80,15 +89,6 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
               id="escola"
               value={formData.escola}
               onChange={(e) => setFormData({ ...formData, escola: e.target.value })}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="localizacao">Localização</Label>
-            <Input
-              id="localizacao"
-              value={formData.localizacao}
-              onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
               required
             />
           </div>

@@ -36,8 +36,8 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
-                type="email"
-                placeholder="Email"
+                type="text"
+                placeholder="Nome de usuário"
                 required
                 disabled={loading}
               />

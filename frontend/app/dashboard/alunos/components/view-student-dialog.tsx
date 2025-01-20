@@ -9,11 +9,10 @@ interface ViewStudentDialogProps {
   student: {
     id: number;
     nome: string;
-    email: string;
+    username: string;
     ano: string;
     turma: string;
     escola: string;
-    localizacao: string;
   };
 }
 
@@ -37,8 +36,8 @@ export function ViewStudentDialog({ student }: ViewStudentDialogProps) {
             <p className="text-base">{student.nome}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
-            <p className="text-base">{student.email}</p>
+            <h4 className="text-sm font-medium text-muted-foreground">Nome de Usuário</h4>
+            <p className="text-base">{student.username}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium text-muted-foreground">Ano</h4>
@@ -51,10 +50,6 @@ export function ViewStudentDialog({ student }: ViewStudentDialogProps) {
           <div>
             <h4 className="text-sm font-medium text-muted-foreground">Escola</h4>
             <p className="text-base">{student.escola}</p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground">Localização</h4>
-            <p className="text-base">{student.localizacao}</p>
           </div>
         </div>
       </DialogContent>
