@@ -1,12 +1,35 @@
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, SQLModel
 from typing import Optional
+from pydantic import field_validator
+from enum import Enum
+
+
+class Role(str, Enum):
+    TEACHER = "teacher" 
+    STUDENT = "student"
+    ADMIN = "admin"
 
 
 class UserBase(SQLModel):
-    username: str = Field(max_length=32, unique=True)
+    username: str = Field(min_length=3, max_length=32, unique=True)
     full_name: Optional[str] = Field(max_length=255, default=None)
     is_active: bool = True
-    is_superuser: bool = False
+    role: Role = Field(default=Role.STUDENT)
+
+    @field_validator("username", mode="before")
+    @classmethod
+    def validate_username(cls, value: str) -> str:
+        value = value.strip().lower()
+
+        if not value.isascii():
+            raise ValueError("Username must have only normal characters.")
+
+        has_spaces = any(c.isspace() for c in value)
+
+        if has_spaces:
+            raise ValueError("Username must not have spaces.")
+
+        return value
 
 
 class User(UserBase, table=True):

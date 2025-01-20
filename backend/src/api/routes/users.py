@@ -61,7 +61,7 @@ def read_user_me(current_user: CurrentUser):
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UserPublic,
 )
-def update_user(*, session: SessionDep, user_id: int, user_in: UserUpdate) -> Any:
+def update_user(*, session: SessionDep, user_id: int, user_in: UserUpdate, current_user: CurrentUser) -> Any:
     db_user = session.get(User, user_id)
 
     if not db_user:
@@ -74,10 +74,15 @@ def update_user(*, session: SessionDep, user_id: int, user_in: UserUpdate) -> An
             session=session, username=user_in.username
         )
 
-        if existing_user and existing_user.id != user_id:
+        if existing_user and existing_user.id != db_user.id:
             raise HTTPException(
                 status_code=400, detail="A user already exists with this username"
             )
+
+    if current_user.id == user_id and user_in.role not in [None, current_user.role]:
+        raise HTTPException(
+            status_code=400, detail="You cannot change your own role."
+        )
 
     db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
     return db_user
