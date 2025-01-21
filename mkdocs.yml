@@ -19,6 +19,7 @@ nav:
   - Estudos de caso:
     - PBB TechFix: 
       - Miro: estudos-caso/pbb_techfix_miro.md
+      - Critérios de aceitação e BDD: estudos-caso/pbb_techfix_bdd.md
   - Apresentações: 
       - Unidade 1: apresentacoes/apresentacao1.md
       - Unidade 2: apresentacoes/apresentacao2.md
