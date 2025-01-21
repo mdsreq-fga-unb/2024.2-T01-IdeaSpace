@@ -2,7 +2,7 @@
 
 O processo de construir e organizar o backlog escolhido foi o **PBB**.
 
-<iframe width="768" height="432" src="https://miro.com/app/embed/uXjVL6aX70g=/?pres=1&frameId=3458764610749937648&embedId=342470256869" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
+<iframe width="768" height="432" src="https://miro.com/app/embed/uXjVLr4IdcE=/?pres=1&frameId=3458764613944563944&embedId=140333087009" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
 
 ## Priorização de requisitos MoSCoW
 
