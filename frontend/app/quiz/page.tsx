@@ -1,7 +1,7 @@
 'use client';
 
 import QuizQuestion from './quizQuestion'
-import Result from './result'
+import Result from './Result'
 import questions from './questions'
 import React, { useState } from 'react'
 

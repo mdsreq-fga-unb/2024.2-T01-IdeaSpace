@@ -42,7 +42,6 @@ export function MainNav() {
   const [open, setOpen] = useState(false);
 
   const handleLogout = () => {
-    // Aqui você pode adicionar a lógica de logout
     router.push('/login');
   };
 
