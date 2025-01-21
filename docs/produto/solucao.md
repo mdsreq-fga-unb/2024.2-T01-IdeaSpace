@@ -17,10 +17,11 @@ A solução será desenvolvida em torno das seguintes características:
 
 ## Tecnologias a Serem Utilizadas
 
-- **React**: Utilizado no frontend para criar uma interface de usuário responsiva e interativa, permitindo que alunos e educadores acessem as funcionalidades da plataforma de forma dinâmica.
-- **FastAPI**: Framework backend para desenvolvimento de APIs seguras e escaláveis, gerenciando dados dos alunos, autenticação e funcionalidades da plataforma.
-- **Docker**: Ferramenta de conteinerização que isola os serviços da aplicação, assegurando portabilidade e consistência entre os ambientes de desenvolvimento e produção.
-- **Supabase**: Banco de dados como serviço que fornece um armazenamento flexível e seguro de informações sobre o progresso e atividades dos alunos, facilitando a análise de dados e o crescimento da plataforma.
+- [Docker](https://www.docker.com/): Ferramenta de conteinerização que permite isolar os serviços da aplicação, garantindo portabilidade e consistência entre os ambientes de desenvolvimento e produção.  
+- [PostgreSQL](https://www.postgresql.org/): Sistema avançado de gerenciamento de banco de dados relacional, conhecido por sua robustez e extensibilidade.  
+- [FastAPI](https://fastapi.tiangolo.com/): Framework backend em Python projetado para desenvolver APIs modernas, seguras e escaláveis. Facilita o gerenciamento de dados dos alunos, autenticação e outras funcionalidades da plataforma.  
+- [SQLAlchemy](https://www.sqlalchemy.org/): Biblioteca de mapeamento objeto-relacional (ORM) que assegura uma conexão eficiente e segura com o banco de dados, simplificando operações com dados.  
+- [Next.js](https://nextjs.org/): Framework frontend baseado em React que oferece renderização híbrida (estática e server-side), proporcionando alta performance e ótima experiência de desenvolvimento.
 
 ---
 
