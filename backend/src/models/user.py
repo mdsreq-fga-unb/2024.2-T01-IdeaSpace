@@ -15,7 +15,7 @@ class UserBase(SQLModel):
     full_name: Optional[str] = Field(max_length=255, default=None)
     is_active: bool = True
     role: Role = Field(default=Role.STUDENT)
-
+    
     @field_validator("username", mode="before")
     @classmethod
     def validate_username(cls, value: str) -> str:
@@ -52,10 +52,10 @@ class Token(SQLModel):
     access_token: str
     token_type: str = "bearer"
 
-
 # Contents of JWT token
 class TokenPayload(SQLModel):
     sub: str | None = None
+
 
 class UsersPublic(SQLModel):
     data: list[UserPublic]
