@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PencilIcon, Trash2, Users, Search } from 'lucide-react';
+import { PencilIcon, Trash2, Users, Search, Plus, Building, MapPin } from 'lucide-react';
 import { ClassDialog } from './components/class-dialog';
 import { ViewClassDialog } from './components/view-class-dialog';
+import { SchoolDialog } from '../admin/components/school-dialog';
+import { LocationDialog } from '../admin/components/location-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,15 +57,38 @@ export default function TurmasPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Turmas</h1>
-        <ClassDialog
-          mode="create"
-          trigger={
-            <Button className="bg-pink-600 hover:bg-pink-700">
-              <Users className="mr-2 h-4 w-4" />
-              Nova Turma
-            </Button>
-          }
-        />
+        <div className="flex gap-2">
+          <LocationDialog
+            mode="create"
+            trigger={
+              <Button variant="outline" className="gap-2">
+                <MapPin className="h-4 w-4" />
+                Gerenciar Localizações
+              </Button>
+            }
+          />
+          <SchoolDialog
+            mode="create"
+            trigger={
+              <Button variant="outline" className="gap-2">
+                <Building className="h-4 w-4" />
+                Gerenciar Escolas
+              </Button>
+            }
+          />
+          <ClassDialog
+            mode="create"
+            trigger={
+              <Button className="bg-pink-600 hover:bg-pink-700">
+                <div className="relative flex items-center mr-2">
+                  <Users className="h-4 w-4" />
+                  <Plus className="h-3 w-3 absolute -right-1.5 -top-1.5" />
+                </div>
+                Nova Turma
+              </Button>
+            }
+          />
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">

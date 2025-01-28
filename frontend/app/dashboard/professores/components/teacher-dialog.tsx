@@ -5,21 +5,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
 
-interface StudentDialogProps {
+interface TeacherDialogProps {
   mode: 'create' | 'edit';
-  student?: {
+  teacher?: {
     id: number;
     nome: string;
     username: string;
-    ano: string;
-    turma: string;
-    escola: string;
-    senha?: string;
+    disciplinas: string[];
+    turmas: string[];
   };
   trigger?: React.ReactNode;
 }
@@ -31,14 +28,25 @@ const availableClasses = [
   { id: 3, nome: 'Turma C', escola: 'Colégio Pedro II' },
 ];
 
-export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
+const subjects = [
+  'Matemática',
+  'Português',
+  'História',
+  'Geografia',
+  'Ciências',
+  'Física',
+  'Química',
+  'Biologia',
+];
+
+export function TeacherDialog({ mode, teacher, trigger }: TeacherDialogProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    nome: student?.nome || '',
-    username: student?.username || '',
-    ano: student?.ano || '',
-    senha: student?.senha || '',
-    turmas: student?.turma ? [student.turma] : [],
+    nome: teacher?.nome || '',
+    username: teacher?.username || '',
+    senha: '',
+    disciplinas: teacher?.disciplinas || [],
+    turmas: teacher?.turmas || [],
   });
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -49,7 +57,6 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
     console.log('Form submitted:', formData);
     setOpen(false);
   };
@@ -63,19 +70,28 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
     }));
   };
 
+  const toggleSubject = (subject: string) => {
+    setFormData(prev => ({
+      ...prev,
+      disciplinas: prev.disciplinas.includes(subject)
+        ? prev.disciplinas.filter(s => s !== subject)
+        : [...prev.disciplinas, subject]
+    }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
           <Button className="bg-pink-600 hover:bg-pink-700">
-            {mode === 'create' ? 'Novo Aluno' : 'Editar Aluno'}
+            {mode === 'create' ? 'Novo Professor' : 'Editar Professor'}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Adicionar Novo Aluno' : 'Editar Aluno'}
+            {mode === 'create' ? 'Adicionar Novo Professor' : 'Editar Professor'}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -110,26 +126,31 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
                 required={mode === 'create'}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="ano">Ano</Label>
-              <Select
-                value={formData.ano}
-                onValueChange={(value) => setFormData({ ...formData, ano: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1º Ano">1º Ano</SelectItem>
-                  <SelectItem value="2º Ano">2º Ano</SelectItem>
-                  <SelectItem value="3º Ano">3º Ano</SelectItem>
-                </SelectContent>
-              </Select>
+          </div>
+
+          <div className="space-y-4">
+            <Label>Disciplinas</Label>
+            <div className="grid grid-cols-2 gap-4">
+              {subjects.map((subject) => (
+                <div key={subject} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`subject-${subject}`}
+                    checked={formData.disciplinas.includes(subject)}
+                    onCheckedChange={() => toggleSubject(subject)}
+                  />
+                  <label
+                    htmlFor={`subject-${subject}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {subject}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="space-y-4">
-            <Label>Turma</Label>
+            <Label>Turmas</Label>
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input

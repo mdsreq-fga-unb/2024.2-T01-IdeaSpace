@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ClassDialogProps {
   mode: 'create' | 'edit';
@@ -21,13 +22,25 @@ interface ClassDialogProps {
   trigger?: React.ReactNode;
 }
 
-// Simulated student data - replace with actual data from your backend
+// Mock data - replace with actual data from your backend
 const availableStudents = [
   { id: 1, nome: 'Ana Silva', email: 'ana.silva@email.com', ano: '1º Ano' },
   { id: 2, nome: 'Bruno Santos', email: 'bruno.santos@email.com', ano: '2º Ano' },
   { id: 3, nome: 'Carla Oliveira', email: 'carla.oliveira@email.com', ano: '3º Ano' },
   { id: 4, nome: 'Daniel Lima', email: 'daniel.lima@email.com', ano: '1º Ano' },
   { id: 5, nome: 'Elena Costa', email: 'elena.costa@email.com', ano: '2º Ano' },
+];
+
+const schools = [
+  { id: 1, nome: 'Escola Municipal João Paulo', localizacao: 'São Paulo, SP' },
+  { id: 2, nome: 'Escola Estadual Maria Silva', localizacao: 'Rio de Janeiro, RJ' },
+  { id: 3, nome: 'Colégio Pedro II', localizacao: 'Belo Horizonte, MG' },
+];
+
+const locations = [
+  { id: 1, cidade: 'São Paulo', estado: 'SP' },
+  { id: 2, cidade: 'Rio de Janeiro', estado: 'RJ' },
+  { id: 3, cidade: 'Belo Horizonte', estado: 'MG' },
 ];
 
 export function ClassDialog({ mode, class: classData, trigger }: ClassDialogProps) {
@@ -64,6 +77,11 @@ export function ClassDialog({ mode, class: classData, trigger }: ClassDialogProp
     );
   };
 
+  // Filter schools based on selected location
+  const filteredSchools = schools.filter(school => 
+    !formData.localizacao || school.localizacao === formData.localizacao
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -91,22 +109,41 @@ export function ClassDialog({ mode, class: classData, trigger }: ClassDialogProp
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="escola">Escola</Label>
-              <Input
-                id="escola"
-                value={formData.escola}
-                onChange={(e) => setFormData({ ...formData, escola: e.target.value })}
-                required
-              />
+              <Label htmlFor="localizacao">Localização</Label>
+              <Select
+                value={formData.localizacao}
+                onValueChange={(value) => setFormData({ ...formData, localizacao: value, escola: '' })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a localização" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map(location => (
+                    <SelectItem key={location.id} value={`${location.cidade}, ${location.estado}`}>
+                      {location.cidade}, {location.estado}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="localizacao">Localização</Label>
-              <Input
-                id="localizacao"
-                value={formData.localizacao}
-                onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
-                required
-              />
+              <Label htmlFor="escola">Escola</Label>
+              <Select
+                value={formData.escola}
+                onValueChange={(value) => setFormData({ ...formData, escola: value })}
+                disabled={!formData.localizacao}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={formData.localizacao ? "Selecione a escola" : "Selecione primeiro a localização"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredSchools.map(school => (
+                    <SelectItem key={school.id} value={school.nome}>
+                      {school.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

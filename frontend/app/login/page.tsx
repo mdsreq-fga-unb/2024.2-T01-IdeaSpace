@@ -1,23 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Rocket } from 'lucide-react';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulating login - replace with actual authentication
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 1000);
+    try {
+      await login(username, password);
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +43,8 @@ export default function LoginPage() {
               <Input
                 type="text"
                 placeholder="Nome de usuário"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={loading}
               />
@@ -46,6 +53,8 @@ export default function LoginPage() {
               <Input
                 type="password"
                 placeholder="Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
               />
@@ -57,6 +66,12 @@ export default function LoginPage() {
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
+            <div className="text-sm text-center text-muted-foreground">
+              <p>Para testar diferentes perfis, use:</p>
+              <p>aluno123</p>
+              <p>prof123</p>
+              <p>admin123</p>
+            </div>
           </form>
         </CardContent>
       </Card>
