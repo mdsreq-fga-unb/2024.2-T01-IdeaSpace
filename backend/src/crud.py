@@ -1,8 +1,9 @@
 from sqlmodel import Session, select
 
 from src.core.security import get_password_hash, verify_password
-
+from src.utils import get_slug
 from src.models.user import User, UserCreate, UserUpdate
+from src.models.country import CountryBase, Country, CityBase, City, SchoolBase, School, ClassroomBase, Classroom
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -44,3 +45,135 @@ def authenticate(*, session: Session, username: str, password: str) -> User | No
     if not verify_password(password, db_user.hashed_password):
         return None
     return db_user
+
+
+def create_country(*, session: Session, country_in: CountryBase) -> Country:
+    country = Country.model_validate(
+        country_in, update={"slug_name": get_slug(country_in.name)}
+    )
+    session.add(country)
+    session.commit()
+    session.refresh(country)
+    return country
+
+
+def get_country_by_id(*, session: Session, country_id: int) -> Country | None:
+    country = session.get(Country, country_id)
+    return country
+
+
+def get_countries(*, session: Session, skip: int = 0, limit: int = 100) -> list[Country]:
+    statement = select(Country).offset(skip).limit(limit)
+    countries = session.exec(statement).all()
+    return countries
+
+
+def delete_country(*, session: Session, country: Country) -> Country:
+    session.delete(country)
+    session.commit()
+    return country
+
+
+def get_country_by_slug(*, session: Session, slug_name: str) -> Country | None:
+    statement = select(Country).where(Country.slug_name == slug_name)
+    country = session.exec(statement).first()
+    return country
+
+
+def create_city(*, session: Session, city_in: CityBase) -> City:
+    city = City.model_validate(
+        city_in, update={"slug_name": get_slug(city_in.name)}
+    )
+    session.add(city)
+    session.commit()
+    session.refresh(city)
+    return city
+
+
+def get_city_by_id(*, session: Session, city_id: int) -> City | None:
+    city = session.get(City, city_id)
+    return city
+
+
+def get_cities(*, session: Session, skip: int = 0, limit: int = 100) -> list[City]:
+    statement = select(City).offset(skip).limit(limit)
+    cities = session.exec(statement).all()
+    return cities
+
+
+def delete_city(*, session: Session, city: City) -> City:
+    session.delete(city)
+    session.commit()
+    return city
+
+
+def get_city_by_slug_and_country(*, session: Session, slug_name: str, country_id: int) -> City | None:
+    statement = select(City).where(City.slug_name == slug_name, City.country_id == country_id)
+    city = session.exec(statement).first()
+    return city
+
+
+def create_school(*, session: Session, school_in: SchoolBase) -> School:
+    school = School.model_validate(
+        school_in, update={"slug_name": get_slug(school_in.name)}
+    )
+    session.add(school)
+    session.commit()
+    session.refresh(school)
+    return school
+
+
+def get_school_by_id(*, session: Session, school_id: int) -> School | None:
+    school = session.get(School, school_id)
+    return school
+
+
+def get_school_by_slug_and_city(*, session: Session, slug_name: str, city_id: int) -> School | None:
+    statement = select(School).where(School.slug_name == slug_name, School.city_id == city_id)
+    school = session.exec(statement).first()
+    return school
+
+
+def get_schools(*, session: Session, skip: int = 0, limit: int = 100) -> list[School]:
+    statement = select(School).offset(skip).limit(limit)
+    schools = session.exec(statement).all()
+    return schools
+
+
+def delete_school(*, session: Session, school: School) -> School:
+    session.delete(school)
+    session.commit()
+    return school
+
+
+def create_classroom(*, session: Session, classroom_in: ClassroomBase) -> Classroom:
+    classroom = Classroom.model_validate(
+        classroom_in, update={"slug_name": get_slug(classroom_in.name)}
+    )
+    session.add(classroom)
+    session.commit()
+    session.refresh(classroom)
+    return classroom
+
+
+def get_classroom_by_id(*, session: Session, classroom_id: int) -> Classroom | None:
+    classroom = session.get(Classroom, classroom_id)
+    return classroom
+
+
+def get_classrooms(*, session: Session, skip: int = 0, limit: int = 100) -> list[Classroom]:
+    statement = select(Classroom).offset(skip).limit(limit)
+    classrooms = session.exec(statement).all()
+    return classrooms
+
+
+def get_classroom_by_slug_and_school(*, session: Session, slug_name: str, school_id: int) -> Classroom | None:
+    statement = select(Classroom).where(Classroom.slug_name == slug_name, Classroom.school_id == school_id)
+    classroom = session.exec(statement).first()
+    return classroom
+
+
+def get_classrooms_by_school(*, session: Session, school_id: int) -> list[Classroom]:
+    statement = select(Classroom).where(Classroom.school_id == school_id)
+    classrooms = session.exec(statement).all()
+    return classrooms
