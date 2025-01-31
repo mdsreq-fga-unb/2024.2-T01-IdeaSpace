@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PencilIcon, Trash2, UserPlus, Search } from 'lucide-react';
 import { TeacherDialog } from './components/teacher-dialog';
 import { ViewTeacherDialog } from './components/view-teacher-dialog';
@@ -19,54 +18,73 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { fetchUsers, updateUser } from '@/services/api';
+
+interface Teacher {
+  id: number;
+  username: string;
+  full_name: string | null;
+  role: string;
+  is_active: boolean;
+}
 
 export default function ProfessoresPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDisciplina, setSelectedDisciplina] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<number | null>(null);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const { toast } = useToast();
 
-  const professores = [
-    {
-      id: 1,
-      nome: 'Maria Silva',
-      username: 'mariasilva',
-      disciplinas: ['Matemática', 'Física'],
-      turmas: ['Turma A', 'Turma B'],
-    },
-    {
-      id: 2,
-      nome: 'João Santos',
-      username: 'joaosantos',
-      disciplinas: ['Português', 'História'],
-      turmas: ['Turma C'],
-    },
-    {
-      id: 3,
-      nome: 'Ana Oliveira',
-      username: 'anaoliveira',
-      disciplinas: ['Química', 'Biologia'],
-      turmas: ['Turma A', 'Turma B', 'Turma C'],
-    },
-  ];
+  useEffect(() => {
+    loadTeachers();
+  }, []);
 
-  const disciplinas = [...new Set(professores.flatMap(p => p.disciplinas))];
-
-  const filteredProfessores = professores.filter(professor => 
-    professor.nome.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (!selectedDisciplina || professor.disciplinas.includes(selectedDisciplina))
-  );
+  const loadTeachers = async () => {
+    try {
+      const response = await fetchUsers();
+      setTeachers(response.data.filter((user: Teacher) => user.role === 'teacher'));
+    } catch (error) {
+      console.error('Error loading teachers:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os professores',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleDelete = (id: number) => {
     setSelectedTeacher(id);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log('Deleting teacher:', selectedTeacher);
+  const confirmDelete = async () => {
+    if (!selectedTeacher) return;
+
+    try {
+      await updateUser(selectedTeacher, { is_active: false });
+      toast({
+        title: 'Sucesso',
+        description: 'Professor desativado com sucesso',
+      });
+      loadTeachers();
+    } catch (error) {
+      console.error('Error deactivating teacher:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao desativar professor',
+        variant: 'destructive',
+      });
+    }
     setDeleteDialogOpen(false);
     setSelectedTeacher(null);
   };
+
+  const filteredTeachers = teachers.filter(teacher => 
+    teacher.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (teacher.full_name && teacher.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6">
@@ -74,6 +92,7 @@ export default function ProfessoresPage() {
         <h1 className="text-3xl font-bold">Professores</h1>
         <TeacherDialog
           mode="create"
+          onSuccess={loadTeachers}
           trigger={
             <Button className="bg-pink-600 hover:bg-pink-700">
               <UserPlus className="mr-2 h-4 w-4" />
@@ -93,42 +112,29 @@ export default function ProfessoresPage() {
             className="pl-8"
           />
         </div>
-        <Select value={selectedDisciplina} onValueChange={setSelectedDisciplina}>
-          <SelectTrigger className="sm:max-w-xs">
-            <SelectValue placeholder="Filtrar por disciplina" />
-          </SelectTrigger>
-          <SelectContent>
-            {disciplinas.map(disciplina => (
-              <SelectItem key={disciplina} value={disciplina}>
-                {disciplina}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProfessores.map((professor) => (
-          <Card key={professor.id} className="overflow-hidden">
+        {filteredTeachers.map((teacher) => (
+          <Card key={teacher.id} className="overflow-hidden">
             <CardHeader className="p-4">
-              <CardTitle className="text-lg font-semibold">{professor.nome}</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                {teacher.full_name || teacher.username}
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{professor.username}</p>
-                <div className="flex flex-wrap gap-1">
-                  {professor.disciplinas.map((disciplina) => (
-                    <Badge key={disciplina} variant="secondary" className="text-xs">
-                      {disciplina}
-                    </Badge>
-                  ))}
+                <p className="text-sm text-muted-foreground">Usuário: {teacher.username}</p>
+                <div className="flex gap-2">
+                  <Badge variant={teacher.is_active ? 'default' : 'secondary'}>
+                    {teacher.is_active ? 'Ativo' : 'Inativo'}
+                  </Badge>
                 </div>
-                <p className="text-sm">Turmas: {professor.turmas.length}</p>
-                <div className="flex gap-2 mt-4">
-                  <ViewTeacherDialog teacher={professor} />
+                <div className="flex items-center justify-end gap-2 mt-4">
                   <TeacherDialog
                     mode="edit"
-                    teacher={professor}
+                    teacher={teacher}
+                    onSuccess={loadTeachers}
                     trigger={
                       <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
                         <PencilIcon className="h-4 w-4" />
@@ -139,10 +145,11 @@ export default function ProfessoresPage() {
                     size="icon"
                     variant="outline"
                     className="text-red-500 hover:text-red-600"
-                    onClick={() => handleDelete(professor.id)}
+                    onClick={() => handleDelete(teacher.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
+                  <ViewTeacherDialog teacher={teacher} />
                 </div>
               </div>
             </CardContent>
@@ -153,9 +160,9 @@ export default function ProfessoresPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar desativação</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este professor? Esta ação não pode ser desfeita.
+              Tem certeza que deseja desativar este professor? Esta ação pode ser revertida posteriormente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -164,7 +171,7 @@ export default function ProfessoresPage() {
               className="bg-red-600 hover:bg-red-700"
               onClick={confirmDelete}
             >
-              Excluir
+              Desativar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

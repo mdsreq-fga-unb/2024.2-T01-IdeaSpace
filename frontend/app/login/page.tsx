@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Rocket } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -20,6 +22,11 @@ export default function LoginPage() {
       await login(username, password);
     } catch (error) {
       console.error('Login failed:', error);
+      toast({
+        title: 'Erro ao fazer login',
+        description: 'Usuário ou senha inválidos',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -66,12 +73,6 @@ export default function LoginPage() {
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
-            <div className="text-sm text-center text-muted-foreground">
-              <p>Para testar diferentes perfis, use:</p>
-              <p>aluno123</p>
-              <p>prof123</p>
-              <p>admin123</p>
-            </div>
           </form>
         </CardContent>
       </Card>

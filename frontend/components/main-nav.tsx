@@ -26,11 +26,14 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
+import { mapBackendRole } from '@/lib/types/auth';
 
 export function MainNav() {
   const pathname = usePathname();
   const { user, logout, hasPermission } = useAuth();
   const [open, setOpen] = useState(false);
+
+  const mappedRole = user ? mapBackendRole(user.role) : null;
 
   const routes = [
     {
@@ -107,7 +110,7 @@ export function MainNav() {
     },
   ].filter(route => 
     hasPermission(route.permission) && 
-    (!route.roles || route.roles.includes(user?.role || ''))
+    (!route.roles || (mappedRole && route.roles.includes(mappedRole)))
   );
 
   return (
@@ -155,7 +158,7 @@ export function MainNav() {
               })}
               <div className="pt-4 mt-4 border-t">
                 <p className="text-sm text-muted-foreground mb-2">
-                  Logado como {user?.username} ({user?.role})
+                  Logado como {user?.username} ({mappedRole})
                 </p>
                 <button
                   onClick={logout}
@@ -194,9 +197,9 @@ export function MainNav() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <p className="text-sm text-muted-foreground hidden lg:block">
-            {user?.username} ({user?.role})
+            {user?.username} ({mappedRole})
           </p>
-          {user?.role === 'administrador' && (
+          {mappedRole === 'administrador' && (
             <Link href="/dashboard/admin">
               <Button
                 variant="ghost"

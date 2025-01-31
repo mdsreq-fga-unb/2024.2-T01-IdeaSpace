@@ -2,56 +2,69 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { User, UserRole, rolePermissions } from '@/lib/types/auth';
+import { loginUser, getCurrentUser, UserResponse } from '@/services/auth';
+import { rolePermissions, mapBackendRole } from '@/lib/types/auth';
 
 interface AuthContextType {
-  user: User | null;
+  user: UserResponse | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   hasPermission: (feature: string) => boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check if user has access to current route
-    if (user) {
-      const userPermissions = rolePermissions[user.role];
-      const isAllowedRoute = userPermissions.allowedRoutes.some(route => 
-        pathname.startsWith(route)
-      );
-
-      if (!isAllowedRoute && pathname !== '/login') {
-        router.push('/dashboard');
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const userData = await getCurrentUser(token);
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        localStorage.removeItem('token');
+      } finally {
+        setIsLoading(false);
       }
-    } else if (pathname !== '/login') {
-      router.push('/login');
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user && pathname !== '/login') {
+        router.push('/login');
+      } else if (user) {
+        const mappedRole = mapBackendRole(user.role);
+        const userPermissions = rolePermissions[mappedRole];
+        const isAllowedRoute = userPermissions.allowedRoutes.some(route => 
+          pathname.startsWith(route)
+        );
+
+        if (!isAllowedRoute && pathname !== '/login') {
+          router.push('/dashboard');
+        }
+      }
     }
-  }, [user, pathname, router]);
+  }, [user, pathname, router, isLoading]);
 
   const login = async (username: string, password: string) => {
     try {
-      // Mock login - replace with actual authentication
-      let role: UserRole = 'aluno';
-      if (username.includes('admin')) {
-        role = 'administrador';
-      } else if (username.includes('prof')) {
-        role = 'professor';
-      }
-
-      const mockUser: User = {
-        id: '1',
-        name: 'Nome do Usuário',
-        username,
-        role,
-      };
-
-      setUser(mockUser);
+      const { access_token } = await loginUser(username, password);
+      localStorage.setItem('token', access_token);
+      
+      const userData = await getCurrentUser(access_token);
+      setUser(userData);
       router.push('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
@@ -60,17 +73,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
     setUser(null);
     router.push('/login');
   };
 
   const hasPermission = (feature: string): boolean => {
     if (!user) return false;
-    return rolePermissions[user.role].features.includes(feature);
+    const mappedRole = mapBackendRole(user.role);
+    return rolePermissions[mappedRole].features.includes(feature);
   };
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasPermission }}>
+    <AuthContext.Provider value={{ user, login, logout, hasPermission, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

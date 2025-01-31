@@ -1,10 +1,11 @@
-export type UserRole = 'aluno' | 'professor' | 'administrador';
+export type UserRole = 'student' | 'teacher' | 'admin';
 
 export interface User {
-  id: string;
-  name: string;
+  id: number;
   username: string;
+  full_name: string | null;
   role: UserRole;
+  is_active: boolean;
 }
 
 export const rolePermissions = {
@@ -37,22 +38,36 @@ export const rolePermissions = {
   administrador: {
     allowedRoutes: [
       '/dashboard',
+      '/dashboard/admin',
       '/dashboard/alunos',
+      '/dashboard/professores',
       '/dashboard/turmas',
       '/dashboard/questoes',
       '/dashboard/questionarios',
-      '/dashboard/analise',
-      '/dashboard/admin'
+      '/dashboard/analytics'
     ],
     features: [
       'view_own_profile',
       'manage_students',
+      'manage_teachers',
       'manage_classes',
       'create_questions',
       'manage_quizzes',
       'view_all_performance',
-      'manage_teachers',
       'manage_system'
     ]
   }
 };
+
+export function mapBackendRole(role: UserRole): 'aluno' | 'professor' | 'administrador' {
+  switch (role) {
+    case 'student':
+      return 'aluno';
+    case 'teacher':
+      return 'professor';
+    case 'admin':
+      return 'administrador';
+    default:
+      return 'aluno';
+  }
+}
