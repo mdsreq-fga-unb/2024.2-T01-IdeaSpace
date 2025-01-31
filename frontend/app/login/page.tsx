@@ -6,6 +6,35 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Rocket } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
+const login_success = () => {
+  toast.success('Login realizado com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
+
+const login_error = () => {
+  toast.error('Erro no login', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -18,8 +47,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(username, password);
+      login_success();
     } catch (error) {
       console.error('Login failed:', error);
+      login_error();
     } finally {
       setLoading(false);
     }
@@ -75,6 +106,19 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 }
