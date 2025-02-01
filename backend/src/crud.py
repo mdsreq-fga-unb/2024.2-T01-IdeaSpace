@@ -2,8 +2,8 @@ from sqlmodel import Session, select
 
 from src.core.security import get_password_hash, verify_password
 from src.utils import get_slug
-from src.models.user import User, UserCreate, UserUpdate
-from src.models.country import CountryBase, Country, CityBase, City, SchoolBase, School, ClassroomBase, Classroom
+from src.models.user import User, UserCreate, UserUpdate, Teacher, Classroom, Student
+from src.models.country import CountryBase, Country, CityBase, City, SchoolBase, School, ClassroomBase
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -177,3 +177,31 @@ def get_classrooms_by_school(*, session: Session, school_id: int) -> list[Classr
     statement = select(Classroom).where(Classroom.school_id == school_id)
     classrooms = session.exec(statement).all()
     return classrooms
+
+
+def get_teachers(*, session: Session, skip: int = 0, limit: int = 100) -> list[Teacher]:
+    statement = select(Teacher).offset(skip).limit(limit)
+    teachers = session.exec(statement).all()
+    return teachers
+
+
+def create_teacher(*, session: Session, user_id: int) -> Teacher:
+    teacher = Teacher(user_id=user_id)
+    session.add(teacher)
+    session.commit()
+    session.refresh(teacher)
+    return teacher
+
+   
+def create_student(*, session: Session, user_id: int, classroom_id: int) -> Student:
+    student = Student(user_id=user_id, classroom_id=classroom_id)
+    session.add(student)
+    session.commit()
+    session.refresh(student)
+    return student
+
+
+def get_students(*, session: Session, skip: int = 0, limit: int = 100) -> list[Student]:
+    statement = select(Student).offset(skip).limit(limit)
+    students = session.exec(statement).all()
+    return students 

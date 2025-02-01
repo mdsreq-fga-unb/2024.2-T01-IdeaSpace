@@ -47,12 +47,3 @@ class ClassroomBase(SQLModel):
     school_id: int = Field(foreign_key="school.id")
 
 
-class Classroom(ClassroomBase, table=True):
-    id: int = Field(default=None, primary_key=True)
-    slug_name: str | None = Field(default=None, max_length=256, min_length=3)
-    school: School = Relationship(back_populates="classrooms")
-
-    __table_args__ = (
-        UniqueConstraint("slug_name", "school_id", name="classroom_unique_slug_school_constraint"),
-   )
-
