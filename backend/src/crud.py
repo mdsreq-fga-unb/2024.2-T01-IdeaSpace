@@ -205,3 +205,27 @@ def get_students(*, session: Session, skip: int = 0, limit: int = 100) -> list[S
     statement = select(Student).offset(skip).limit(limit)
     students = session.exec(statement).all()
     return students 
+
+
+def get_classrooms(*, session: Session, skip: int = 0, limit: int = 100) -> list[Classroom]:
+    statement = select(Classroom).offset(skip).limit(limit)
+    classrooms = session.exec(statement).all()
+    return classrooms
+
+
+def get_student_by_user_id(*, session: Session, user_id: int) -> Student | None:
+    statement = select(Student).where(Student.user_id == user_id)
+    student = session.exec(statement).first()
+    return student
+
+
+def get_teacher_by_user_id(*, session: Session, user_id: int) -> Teacher | None:
+    statement = select(Teacher).where(Teacher.user_id == user_id)
+    teacher = session.exec(statement).first()
+    return teacher
+
+
+def delete_classroom(*, session: Session, classroom: Classroom) -> Classroom:
+    session.delete(classroom)
+    session.commit()
+    return classroom

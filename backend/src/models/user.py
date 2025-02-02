@@ -56,7 +56,7 @@ class Classroom(ClassroomBase, table=True):
 
 class Student(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", primary_key=True) 
-    classroom_id: int = Field(foreign_key="classroom.id")
+    classroom_id: int | None = Field(default=None, foreign_key="classroom.id")
     user: User = Relationship(back_populates="student")
     classroom: Classroom = Relationship(back_populates="students")
     

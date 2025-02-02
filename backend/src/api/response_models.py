@@ -39,8 +39,19 @@ class StudentResponse(BaseModel):
 class TeacherResponseNoUser(BaseModel):
     classrooms: list[ClassroomResponse]
 
+
+class TeacherResponseNoClassrooms(BaseModel):
+    user_id: int
+    user: UserPublic
+
+
 class StudentResponseNoUser(BaseModel):
     classroom: ClassroomResponse
+
+
+class StudentResponseNoClassroom(BaseModel):
+    user_id: int
+    user: UserPublic
 
 class UserResponse(BaseModel):
     id: int
@@ -50,3 +61,8 @@ class UserResponse(BaseModel):
     is_superuser: bool
     teacher: TeacherResponseNoUser | None
     student: StudentResponseNoUser | None
+
+
+class ClassWithUsersResponse(ClassroomResponse):
+    teachers: list[TeacherResponseNoClassrooms]
+    students: list[StudentResponseNoClassroom]
