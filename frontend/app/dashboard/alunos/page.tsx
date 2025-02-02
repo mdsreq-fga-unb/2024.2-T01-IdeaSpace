@@ -18,6 +18,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
+const delete_success = () => {
+  toast.success('Usuário removido com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
 
 export default function AlunosPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,12 +81,26 @@ export default function AlunosPage() {
 
   const confirmDelete = () => {
     console.log('Deleting student:', selectedStudent);
+    delete_success();
     setDeleteDialogOpen(false);
     setSelectedStudent(null);
   };
 
   return (
     <div className="space-y-6">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable={false}
+        pauseOnHover={false}
+        theme="light"
+        transition={Bounce}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Alunos</h1>
         <StudentDialog

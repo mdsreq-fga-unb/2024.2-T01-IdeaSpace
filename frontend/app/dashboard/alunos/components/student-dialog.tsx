@@ -9,6 +9,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
+const create_success = () => {
+  toast.success('Usuário criado com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
+
+const edit_success = () => {
+  toast.success('Usuário editado com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
 
 interface StudentDialogProps {
   mode: 'create' | 'edit';
@@ -51,6 +80,7 @@ export function StudentDialog({ mode, student, trigger }: StudentDialogProps) {
     e.preventDefault();
     // Handle form submission
     console.log('Form submitted:', formData);
+    mode === 'create' ? create_success() : edit_success()
     setOpen(false);
   };
 
