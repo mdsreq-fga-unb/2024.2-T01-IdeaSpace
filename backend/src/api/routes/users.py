@@ -59,7 +59,14 @@ def create_teacher(*, session: SessionDep, user_id: int) -> TeacherResponse:
         raise HTTPException(
             status_code=400, detail="User with this id does not exist in the system"
         )
+    
+    existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=user_id)
 
+    if existing_teacher:
+        raise HTTPException(
+            status_code=400, detail="Teacher already exists for this user"
+        )
+    
     teacher = crud.create_teacher(session=session, user_id=user_id)
     return teacher
 
@@ -137,6 +144,13 @@ def create_student(*, session: SessionDep, user_id: int, classroom_id: int) -> S
     if not user:
         raise HTTPException(
             status_code=400, detail="User with this id does not exist in the system"
+        )
+    
+    existing_student = crud.get_student_by_user_id(session=session, user_id=user_id)
+    
+    if existing_student:
+        raise HTTPException(
+            status_code=400, detail="Student already exists for this user"
         )
     
     classroom = session.get(Classroom, classroom_id)
