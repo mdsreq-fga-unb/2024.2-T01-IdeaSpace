@@ -4,14 +4,64 @@ export interface User {
   id: number;
   username: string;
   full_name: string | null;
-  role: UserRole;
   is_active: boolean;
+  is_superuser: boolean;
+  teacher: {
+    classrooms: Array<{
+      id: number;
+      name: string;
+      school_id: number;
+      slug_name: string;
+      school: {
+        id: number;
+        name: string;
+        city_id: number;
+        slug_name: string;
+        city: {
+          id: number;
+          name: string;
+          country_id: number;
+          slug_name: string;
+          country: {
+            id: number;
+            name: string;
+            slug_name: string;
+          };
+        };
+      };
+    }>;
+  } | null;
+  student: {
+    classroom: {
+      id: number;
+      name: string;
+      school_id: number;
+      slug_name: string;
+      school: {
+        id: number;
+        name: string;
+        city_id: number;
+        slug_name: string;
+        city: {
+          id: number;
+          name: string;
+          country_id: number;
+          slug_name: string;
+          country: {
+            id: number;
+            name: string;
+            slug_name: string;
+          };
+        };
+      };
+    };
+  } | null;
 }
 
 export const rolePermissions = {
   aluno: {
     allowedRoutes: [
-      '/dashboard',
+      '/dashboard/home/alunos',
       '/quiz',
       '/dashboard/desempenho'
     ],
@@ -23,7 +73,7 @@ export const rolePermissions = {
   },
   professor: {
     allowedRoutes: [
-      '/dashboard',
+      '/dashboard/home/professores',
       '/dashboard/turmas',
       '/dashboard/questionarios',
       '/dashboard/analise'
@@ -59,15 +109,15 @@ export const rolePermissions = {
   }
 };
 
-export function mapBackendRole(role: UserRole): 'aluno' | 'professor' | 'administrador' {
-  switch (role) {
-    case 'student':
-      return 'aluno';
-    case 'teacher':
-      return 'professor';
-    case 'admin':
-      return 'administrador';
-    default:
-      return 'aluno';
+export function getUserRole(user: User): 'aluno' | 'professor' | 'administrador' {
+  if (user.is_superuser) {
+    return 'administrador';
   }
+  if (user.teacher) {
+    return 'professor';
+  }
+  if (user.student) {
+    return 'aluno';
+  }
+  return 'aluno'; 
 }

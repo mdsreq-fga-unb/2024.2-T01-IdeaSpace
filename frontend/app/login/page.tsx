@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Rocket } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from '@/hooks/use-toast';
+import Loading from '@/app/loading';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -20,6 +21,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(username, password);
+      // Show loading screen for at least 1.0 seconds after successful login
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       console.error('Login failed:', error);
       toast({
@@ -27,10 +30,13 @@ export default function LoginPage() {
         description: 'Usuário ou senha inválidos',
         variant: 'destructive',
       });
-    } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4">

@@ -128,21 +128,43 @@ export function LocationDialog({ mode, trigger }: LocationDialogProps) {
     try {
       if (selectedItem.type === 'country') {
         await deleteCountry(selectedItem.id);
+        toast({
+          title: 'Sucesso',
+          description: 'País excluído com sucesso',
+        });
       } else {
         await deleteCity(selectedItem.id);
+        toast({
+          title: 'Sucesso',
+          description: 'Cidade excluída com sucesso',
+        });
       }
-      toast({
-        title: 'Sucesso',
-        description: `${selectedItem.type === 'country' ? 'País' : 'Cidade'} excluído(a) com sucesso`,
-      });
       loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting location:', error);
-      toast({
-        title: 'Erro',
-        description: `Erro ao excluir ${selectedItem.type === 'country' ? 'país' : 'cidade'}`,
-        variant: 'destructive',
-      });
+      
+      // Handle specific error messages from the backend
+      const errorMessage = error.message || error.toString();
+      
+      if (errorMessage.includes('has cities associated')) {
+        toast({
+          title: 'Erro ao excluir país',
+          description: 'Não é possível excluir o país pois existem cidades associadas a ele. Exclua as cidades primeiro.',
+          variant: 'destructive',
+        });
+      } else if (errorMessage.includes('has schools associated')) {
+        toast({
+          title: 'Erro ao excluir cidade',
+          description: 'Não é possível excluir a cidade pois existem escolas associadas a ela. Exclua as escolas primeiro.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Erro',
+          description: `Erro ao excluir ${selectedItem.type === 'country' ? 'país' : 'cidade'}`,
+          variant: 'destructive',
+        });
+      }
     }
     setDeleteDialogOpen(false);
     setSelectedItem(null);

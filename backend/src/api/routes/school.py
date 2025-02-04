@@ -59,5 +59,9 @@ def delete_school(school_id: int, session: SessionDep):
     school = crud.get_school_by_id(session=session, school_id=school_id)
     if school is None:
         raise HTTPException(status_code=404, detail="School not found")
-    crud.delete_school(session=session, school_id=school_id)
-    return school
+    
+    # Load the city relationship before deletion
+    _ = school.city
+    
+    deleted_school = crud.delete_school(session=session, school=school)
+    return deleted_school

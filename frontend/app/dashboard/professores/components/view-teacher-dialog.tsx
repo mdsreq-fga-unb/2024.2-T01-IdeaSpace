@@ -4,15 +4,10 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ViewTeacherDialogProps {
-  teacher: {
-    id: number;
-    username: string;
-    full_name: string | null;
-    is_active: boolean;
-  };
+  teacher: any;
 }
 
 export function ViewTeacherDialog({ teacher }: ViewTeacherDialogProps) {
@@ -25,24 +20,41 @@ export function ViewTeacherDialog({ teacher }: ViewTeacherDialogProps) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Detalhes do Professor</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground">Nome Completo</h4>
-            <p className="text-base">{teacher.full_name || '-'}</p>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">Nome</h4>
+              <p className="text-base">{teacher.user.full_name || teacher.user.username}</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">Nome de Usuário</h4>
+              <p className="text-base">{teacher.user.username}</p>
+            </div>
           </div>
+
           <div>
-            <h4 className="text-sm font-medium text-muted-foreground">Nome de Usuário</h4>
-            <p className="text-base">Usuário: {teacher.username}</p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
-            <Badge variant={teacher.is_active ? 'default' : 'secondary'} className="mt-1">
-              {teacher.is_active ? 'Ativo' : 'Inativo'}
-            </Badge>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Turmas</h4>
+            <ScrollArea className="h-[200px] border rounded-md p-4">
+              <div className="space-y-4">
+                {teacher.classrooms?.map((classroom: any) => (
+                  <div key={classroom.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent">
+                    <div>
+                      <p className="font-medium">{classroom.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {classroom.school.name} - {classroom.school.city.name}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {(!teacher.classrooms || teacher.classrooms.length === 0) && (
+                  <p className="text-sm text-muted-foreground">Nenhuma turma atribuída</p>
+                )}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       </DialogContent>

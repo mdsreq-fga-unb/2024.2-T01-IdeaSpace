@@ -26,18 +26,25 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { mapBackendRole } from '@/lib/types/auth';
+import { getUserRole } from '@/lib/types/auth';
 
 export function MainNav() {
   const pathname = usePathname();
   const { user, logout, hasPermission } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const mappedRole = user ? mapBackendRole(user.role) : null;
+  const userRole = user ? getUserRole(user) : null;
 
-  const routes = [
+  const getHomeRoute = () => {
+    if (userRole === 'aluno') return '/dashboard/home/alunos';
+    if (userRole === 'professor') return '/dashboard/home/professores';
+    if (userRole === 'administrador') return '/dashboard/home/admin';
+    return '/dashboard';
+  };
+
+   const routes = [
     {
-      href: '/dashboard',
+      href: getHomeRoute(),
       label: 'Geral',
       icon: LayoutDashboard,
       permission: 'view_own_profile',
@@ -110,7 +117,7 @@ export function MainNav() {
     },
   ].filter(route => 
     hasPermission(route.permission) && 
-    (!route.roles || (mappedRole && route.roles.includes(mappedRole)))
+    (!route.roles || (userRole && route.roles.includes(userRole)))
   );
 
   return (
@@ -158,7 +165,7 @@ export function MainNav() {
               })}
               <div className="pt-4 mt-4 border-t">
                 <p className="text-sm text-muted-foreground mb-2">
-                  Logado como {user?.username} ({mappedRole})
+                  Usuário: {user?.username} ({userRole})
                 </p>
                 <button
                   onClick={logout}
@@ -197,9 +204,9 @@ export function MainNav() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <p className="text-sm text-muted-foreground hidden lg:block">
-            {user?.username} ({mappedRole})
+            Usuário: {user?.username} ({userRole})
           </p>
-          {mappedRole === 'administrador' && (
+          {user?.is_superuser && (
             <Link href="/dashboard/admin">
               <Button
                 variant="ghost"

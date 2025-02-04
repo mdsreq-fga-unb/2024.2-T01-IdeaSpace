@@ -17,23 +17,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { fetchUsers, updateUser } from '@/services/api';
-
-interface Teacher {
-  id: number;
-  username: string;
-  full_name: string | null;
-  role: string;
-  is_active: boolean;
-}
+import { fetchTeachers, deleteTeacher } from '@/services/api';
 
 export default function ProfessoresPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<number | null>(null);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,8 +34,9 @@ export default function ProfessoresPage() {
 
   const loadTeachers = async () => {
     try {
-      const response = await fetchUsers();
-      setTeachers(response.data.filter((user: Teacher) => user.role === 'teacher'));
+      setLoading(true);
+      const data = await fetchTeachers();
+      setTeachers(data);
     } catch (error) {
       console.error('Error loading teachers:', error);
       toast({
@@ -51,11 +44,13 @@ export default function ProfessoresPage() {
         description: 'Não foi possível carregar os professores',
         variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDelete = (id: number) => {
-    setSelectedTeacher(id);
+  const handleDelete = (userId: number) => {
+    setSelectedTeacher(userId);
     setDeleteDialogOpen(true);
   };
 
@@ -63,14 +58,14 @@ export default function ProfessoresPage() {
     if (!selectedTeacher) return;
 
     try {
-      await updateUser(selectedTeacher, { is_active: false });
+      await deleteTeacher(selectedTeacher);
       toast({
         title: 'Sucesso',
         description: 'Professor desativado com sucesso',
       });
       loadTeachers();
     } catch (error) {
-      console.error('Error deactivating teacher:', error);
+      console.error('Error deleting teacher:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao desativar professor',
@@ -82,8 +77,8 @@ export default function ProfessoresPage() {
   };
 
   const filteredTeachers = teachers.filter(teacher => 
-    teacher.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (teacher.full_name && teacher.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
+    (teacher.user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     teacher.user.username.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -114,48 +109,52 @@ export default function ProfessoresPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredTeachers.map((teacher) => (
-          <Card key={teacher.id} className="overflow-hidden">
-            <CardHeader className="p-4">
-              <CardTitle className="text-lg font-semibold">
-                {teacher.full_name || teacher.username}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Usuário: {teacher.username}</p>
-                <div className="flex gap-2">
-                  <Badge variant={teacher.is_active ? 'default' : 'secondary'}>
-                    {teacher.is_active ? 'Ativo' : 'Inativo'}
-                  </Badge>
+      {loading ? (
+        <div className="text-center py-8">
+          <p>Carregando...</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredTeachers.map((teacher) => (
+            <Card key={teacher.user_id} className="overflow-hidden">
+              <CardHeader className="p-4">
+                <CardTitle className="text-lg font-semibold">
+                  {teacher.user.full_name || teacher.user.username}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">{teacher.user.username}</p>
+                  <p className="text-sm">
+                    Turmas: {teacher.classrooms?.length || 0}
+                  </p>
+                  <div className="flex gap-2 mt-4">
+                    <ViewTeacherDialog teacher={teacher} />
+                    <TeacherDialog
+                      mode="edit"
+                      teacher={teacher}
+                      onSuccess={loadTeachers}
+                      trigger={
+                        <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
+                          <PencilIcon className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => handleDelete(teacher.user_id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center justify-end gap-2 mt-4">
-                  <TeacherDialog
-                    mode="edit"
-                    teacher={teacher}
-                    onSuccess={loadTeachers}
-                    trigger={
-                      <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
-                        <PencilIcon className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="text-red-500 hover:text-red-600"
-                    onClick={() => handleDelete(teacher.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <ViewTeacherDialog teacher={teacher} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

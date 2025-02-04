@@ -69,9 +69,17 @@ def get_countries(*, session: Session, skip: int = 0, limit: int = 100) -> list[
 
 
 def delete_country(*, session: Session, country: Country) -> Country:
+    # Store country data before deletion
+    country_copy = Country(
+        id=country.id,
+        name=country.name,
+        slug_name=country.slug_name
+    )
+    
     session.delete(country)
     session.commit()
-    return country
+    
+    return country_copy
 
 
 def get_country_by_slug(*, session: Session, slug_name: str) -> Country | None:
@@ -102,9 +110,19 @@ def get_cities(*, session: Session, skip: int = 0, limit: int = 100) -> list[Cit
 
 
 def delete_city(*, session: Session, city: City) -> City:
+    # Store city data before deletion
+    city_copy = City(
+        id=city.id,
+        name=city.name,
+        country_id=city.country_id,
+        slug_name=city.slug_name,
+        country=city.country
+    )
+    
     session.delete(city)
     session.commit()
-    return city
+    
+    return city_copy
 
 
 def get_city_by_slug_and_country(*, session: Session, slug_name: str, country_id: int) -> City | None:
@@ -141,9 +159,20 @@ def get_schools(*, session: Session, skip: int = 0, limit: int = 100) -> list[Sc
 
 
 def delete_school(*, session: Session, school: School) -> School:
+    # Store school data before deletion
+    school_copy = School(
+        id=school.id,
+        name=school.name,
+        city_id=school.city_id,
+        slug_name=school.slug_name,
+        city=school.city
+    )
+    
+    # Delete the school
     session.delete(school)
     session.commit()
-    return school
+    
+    return school_copy
 
 
 def create_classroom(*, session: Session, classroom_in: ClassroomBase) -> Classroom:
@@ -192,7 +221,12 @@ def create_teacher(*, session: Session, user_id: int) -> Teacher:
     session.refresh(teacher)
     return teacher
 
-   
+
+def get_teacher_by_user_id(*, session: Session, user_id: int) -> Teacher | None:
+    teacher = session.get(Teacher, user_id)
+    return teacher
+
+
 def create_student(*, session: Session, user_id: int, classroom_id: int) -> Student:
     student = Student(user_id=user_id, classroom_id=classroom_id)
     session.add(student)
@@ -201,31 +235,12 @@ def create_student(*, session: Session, user_id: int, classroom_id: int) -> Stud
     return student
 
 
-def get_students(*, session: Session, skip: int = 0, limit: int = 100) -> list[Student]:
-    statement = select(Student).offset(skip).limit(limit)
-    students = session.exec(statement).all()
-    return students 
-
-
-def get_classrooms(*, session: Session, skip: int = 0, limit: int = 100) -> list[Classroom]:
-    statement = select(Classroom).offset(skip).limit(limit)
-    classrooms = session.exec(statement).all()
-    return classrooms
-
-
 def get_student_by_user_id(*, session: Session, user_id: int) -> Student | None:
-    statement = select(Student).where(Student.user_id == user_id)
-    student = session.exec(statement).first()
+    student = session.get(Student, user_id)
     return student
 
 
-def get_teacher_by_user_id(*, session: Session, user_id: int) -> Teacher | None:
-    statement = select(Teacher).where(Teacher.user_id == user_id)
-    teacher = session.exec(statement).first()
-    return teacher
-
-
-def delete_classroom(*, session: Session, classroom: Classroom) -> Classroom:
-    session.delete(classroom)
-    session.commit()
-    return classroom
+def get_students(*, session: Session, skip: int = 0, limit: int = 100) -> list[Student]:
+    statement = select(Student).offset(skip).limit(limit)
+    students = session.exec(statement).all()
+    return students

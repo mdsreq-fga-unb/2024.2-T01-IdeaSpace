@@ -10,7 +10,57 @@ export interface UserResponse {
   username: string;
   full_name: string | null;
   is_active: boolean;
-  role: 'student' | 'teacher' | 'admin';
+  is_superuser: boolean;
+  teacher: {
+    classrooms: Array<{
+      id: number;
+      name: string;
+      school_id: number;
+      slug_name: string;
+      school: {
+        id: number;
+        name: string;
+        city_id: number;
+        slug_name: string;
+        city: {
+          id: number;
+          name: string;
+          country_id: number;
+          slug_name: string;
+          country: {
+            id: number;
+            name: string;
+            slug_name: string;
+          };
+        };
+      };
+    }>;
+  } | null;
+  student: {
+    classroom: {
+      id: number;
+      name: string;
+      school_id: number;
+      slug_name: string;
+      school: {
+        id: number;
+        name: string;
+        city_id: number;
+        slug_name: string;
+        city: {
+          id: number;
+          name: string;
+          country_id: number;
+          slug_name: string;
+          country: {
+            id: number;
+            name: string;
+            slug_name: string;
+          };
+        };
+      };
+    };
+  } | null;
 }
 
 export async function loginUser(username: string, password: string): Promise<LoginResponse> {

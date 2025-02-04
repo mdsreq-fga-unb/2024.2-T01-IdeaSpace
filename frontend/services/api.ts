@@ -31,7 +31,10 @@ export async function createUser(data: {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) throw new Error("Erro ao criar usuário");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar usuário");
+  }
   return response.json();
 }
 
@@ -49,7 +52,10 @@ export async function updateUser(userId: number, data: {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) throw new Error("Erro ao atualizar usuário");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao atualizar usuário");
+  }
   return response.json();
 }
 
@@ -70,7 +76,10 @@ export async function createCity(name: string, country_id: number) {
     body: JSON.stringify({ name, country_id }),
   });
 
-  if (!response.ok) throw new Error("Erro ao criar cidade");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar cidade");
+  }
   return response.json();
 }
 
@@ -81,7 +90,10 @@ export async function deleteCity(cityId: number) {
     headers: getAuthHeaders(),
   });
 
-  if (!response.ok) throw new Error("Erro ao excluir cidade");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao excluir cidade");
+  }
   return response.json();
 }
 
@@ -102,7 +114,10 @@ export async function createCountry(name: string) {
     body: JSON.stringify({ name }),
   });
 
-  if (!response.ok) throw new Error("Erro ao criar país");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar país");
+  }
   return response.json();
 }
 
@@ -113,7 +128,10 @@ export async function deleteCountry(countryId: number) {
     headers: getAuthHeaders(),
   });
 
-  if (!response.ok) throw new Error("Erro ao excluir país");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao excluir país");
+  }
   return response.json();
 }
 
@@ -134,7 +152,10 @@ export async function createSchool(name: string, city_id: number) {
     body: JSON.stringify({ name, city_id }),
   });
 
-  if (!response.ok) throw new Error("Erro ao criar escola");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar escola");
+  }
   return response.json();
 }
 
@@ -145,6 +166,122 @@ export async function deleteSchool(schoolId: number) {
     headers: getAuthHeaders(),
   });
 
-  if (!response.ok) throw new Error("Erro ao excluir escola");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao excluir escola");
+  }
   return response.json();
+}
+
+// Buscar todas as turmas
+export async function fetchClassrooms() {
+  const response = await fetch(`${API_URL}/classrooms/`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error("Erro ao buscar turmas");
+  return response.json();
+}
+
+// Teacher-specific functions
+export async function fetchTeachers() {
+  const response = await fetch(`${API_URL}/users/teachers`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error("Erro ao buscar professores");
+  return response.json();
+}
+
+export async function createTeacher(data: {
+  username: string;
+  password: string;
+  full_name?: string;
+  classrooms?: number[];
+}) {
+  // First create the user
+  const userResponse = await createUser({
+    username: data.username,
+    full_name: data.full_name,
+    is_active: true,
+    is_superuser: false,
+    password: data.password,
+  });
+
+  // Then create the teacher profile
+  const teacherResponse = await fetch(`${API_URL}/users/teachers?user_id=${userResponse.id}`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ user_id: userResponse.id }),
+  });
+
+  if (!teacherResponse.ok) {
+    const errorData = await teacherResponse.json();
+    throw new Error(errorData.detail || "Erro ao criar perfil do professor");
+  }
+
+  // If classrooms were provided, add them to the teacher
+  if (data.classrooms && data.classrooms.length > 0) {
+    for (const classroomId of data.classrooms) {
+      await fetch(`${API_URL}/classrooms/${classroomId}/add_teacher`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ user_id: userResponse.id }),
+      });
+    }
+  }
+
+  return teacherResponse.json();
+}
+
+export async function updateTeacher(userId: number, data: {
+  username?: string;
+  password?: string;
+  full_name?: string;
+  classrooms?: number[];
+}) {
+  // Update user data
+  const userResponse = await updateUser(userId, {
+    username: data.username,
+    password: data.password,
+    full_name: data.full_name,
+  });
+
+  if (!userResponse) {
+    throw new Error("Erro ao atualizar dados do professor");
+  }
+
+  // Update classroom assignments if provided
+  if (data.classrooms) {
+    // First remove teacher from all classrooms
+    const currentTeacher = await fetch(`${API_URL}/users/teachers/${userId}`, {
+      headers: getAuthHeaders(),
+    }).then(res => res.json());
+
+    for (const classroom of currentTeacher.classrooms || []) {
+      await fetch(`${API_URL}/classrooms/${classroom.id}/remove_teacher`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ user_id: userId }),
+      });
+    }
+
+    // Then add teacher to selected classrooms
+    for (const classroomId of data.classrooms) {
+      await fetch(`${API_URL}/classrooms/${classroomId}/add_teacher`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ user_id: userId }),
+      });
+    }
+  }
+
+  return userResponse;
+}
+
+export async function deleteTeacher(userId: number) {
+  // This will cascade delete the teacher profile
+  const response = await updateUser(userId, { is_active: false });
+  if (!response) {
+    throw new Error("Erro ao desativar professor");
+  }
+  return response;
 }
