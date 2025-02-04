@@ -221,10 +221,9 @@ export async function createTeacher(data: {
   // If classrooms were provided, add them to the teacher
   if (data.classrooms && data.classrooms.length > 0) {
     for (const classroomId of data.classrooms) {
-      await fetch(`${API_URL}/classrooms/${classroomId}/add_teacher`, {
+      await fetch(`${API_URL}/classrooms/${classroomId}/add_teacher?user_id=${userResponse.id}`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ user_id: userResponse.id }),
       });
     }
   }
