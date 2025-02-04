@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from src.models.country import Country
 from src.models.user import User, UserPublic
+from src.models.question import CategoryBase
+from datetime import datetime
 
 class CityResponse(BaseModel):
     id: int
@@ -66,3 +68,25 @@ class UserResponse(BaseModel):
 class ClassWithUsersResponse(ClassroomResponse):
     teachers: list[TeacherResponseNoClassrooms]
     students: list[StudentResponseNoClassroom]
+
+
+class OptionResponse(BaseModel):
+    id: int
+    text: str
+
+
+class OptionWithAnswerResponse(OptionResponse):
+    is_answer: bool
+
+
+class QuestionResponse(BaseModel):
+    id: int
+    text: str
+    category_id: int
+    category: CategoryBase
+    created_at: datetime
+    updated_at: datetime    
+
+
+class QuestionWithOptionsAnswer(QuestionResponse):
+    options: list[OptionWithAnswerResponse]

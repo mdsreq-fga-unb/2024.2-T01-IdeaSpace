@@ -4,6 +4,7 @@ from src.core.security import get_password_hash, verify_password
 from src.utils import get_slug
 from src.models.user import User, UserCreate, UserUpdate, Teacher, Classroom, Student
 from src.models.country import CountryBase, Country, CityBase, City, SchoolBase, School, ClassroomBase
+from src.models.question import Category, Question
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -243,4 +244,46 @@ def get_student_by_user_id(*, session: Session, user_id: int) -> Student | None:
 def get_students(*, session: Session, skip: int = 0, limit: int = 100) -> list[Student]:
     statement = select(Student).offset(skip).limit(limit)
     students = session.exec(statement).all()
-    return students
+    return students 
+
+
+def get_classrooms(*, session: Session, skip: int = 0, limit: int = 100) -> list[Classroom]:
+    statement = select(Classroom).offset(skip).limit(limit)
+    classrooms = session.exec(statement).all()
+    return classrooms
+
+
+def get_student_by_user_id(*, session: Session, user_id: int) -> Student | None:
+    statement = select(Student).where(Student.user_id == user_id)
+    student = session.exec(statement).first()
+    return student
+
+
+def get_teacher_by_user_id(*, session: Session, user_id: int) -> Teacher | None:
+    statement = select(Teacher).where(Teacher.user_id == user_id)
+    teacher = session.exec(statement).first()
+    return teacher
+
+
+def delete_classroom(*, session: Session, classroom: Classroom) -> Classroom:
+    session.delete(classroom)
+    session.commit()
+    return classroom
+
+
+def get_category_by_slug(*, session: Session, slug_name: str) -> Category | None:
+    statement = select(Category).where(Category.slug_name == slug_name)
+    category = session.exec(statement).first()
+    return category
+
+
+def get_categories(*, session: Session, skip: int = 0, limit: int = 100) -> list[Category]:
+    statement = select(Category).offset(skip).limit(limit)
+    categories = session.exec(statement).all()
+    return categories 
+
+
+def get_questions(*, session: Session, skip: int = 0, limit: int = 100) -> list[Question]:
+    statement = select(Question).offset(skip).limit(limit)
+    questions = session.exec(statement).all()
+    return questions
