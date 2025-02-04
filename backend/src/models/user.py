@@ -28,8 +28,8 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     hashed_password: str
-    teacher: "Teacher" = Relationship(back_populates="user")
-    student: "Student" = Relationship(back_populates="user")
+    teacher: "Teacher" = Relationship(back_populates="user", cascade_delete=True)
+    student: "Student" = Relationship(back_populates="user", cascade_delete=True)
 
 
 class ClassroomTeacher(SQLModel, table=True):

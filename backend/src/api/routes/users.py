@@ -177,3 +177,27 @@ def read_students(*, session: SessionDep, skip: int = 0, limit: int = 100) -> An
     students = crud.get_students(session=session, skip=skip, limit=limit)
     return students
 
+
+@router.delete(
+    "/{user_id}",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
+)
+def delete_user(*, session: SessionDep, user_id: int, current_user: CurrentUser) -> Any:
+    """
+    Delete a user
+    """
+    db_user = session.get(User, user_id)
+
+    if not db_user:
+        raise HTTPException(
+            status_code=400, detail="User with this id does not exist in the system"
+        )
+    
+    if current_user.id == user_id:
+        raise HTTPException(
+            status_code=400, detail="You cannot delete your own account."
+        )
+
+    db_user = crud.delete_user(session=session, user_id=user_id)
+    return db_user

@@ -287,3 +287,10 @@ def get_questions(*, session: Session, skip: int = 0, limit: int = 100) -> list[
     statement = select(Question).offset(skip).limit(limit)
     questions = session.exec(statement).all()
     return questions
+
+
+def delete_user(*, session: Session, user_id: int) -> User:
+    user = session.get(User, user_id)
+    session.delete(user)
+    session.commit()
+    return user
