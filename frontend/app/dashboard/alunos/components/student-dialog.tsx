@@ -12,7 +12,7 @@ import { Search } from 'lucide-react';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 
 const create_success = () => {
-  toast.success('Usuário criado com sucesso', {
+  toast.success('Aluno criado com sucesso', {
     position: "top-right",
     autoClose: 5000,
     hideProgressBar: false,
@@ -26,7 +26,7 @@ const create_success = () => {
 };
 
 const edit_success = () => {
-  toast.success('Usuário editado com sucesso', {
+  toast.success('Aluno editado com sucesso', {
     position: "top-right",
     autoClose: 5000,
     hideProgressBar: false,

@@ -21,7 +21,7 @@ import {
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 
 const delete_success = () => {
-  toast.success('Usuário removido com sucesso', {
+  toast.success('Aluno removido com sucesso', {
     position: "top-right",
     autoClose: 5000,
     hideProgressBar: false,

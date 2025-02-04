@@ -8,6 +8,35 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
+const create_success = () => {
+  toast.success('Professor criado com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
+
+const edit_success = () => {
+  toast.success('Professor editado com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
 
 interface TeacherDialogProps {
   mode: 'create' | 'edit';
@@ -58,6 +87,7 @@ export function TeacherDialog({ mode, teacher, trigger }: TeacherDialogProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
+    mode === 'create' ? create_success() : edit_success()
     setOpen(false);
   };
 

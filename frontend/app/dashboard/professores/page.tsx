@@ -19,6 +19,21 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
+const delete_success = () => {
+  toast.success('Professor removido com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
 
 export default function ProfessoresPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,12 +79,26 @@ export default function ProfessoresPage() {
 
   const confirmDelete = () => {
     console.log('Deleting teacher:', selectedTeacher);
+    delete_success();
     setDeleteDialogOpen(false);
     setSelectedTeacher(null);
   };
 
   return (
     <div className="space-y-6">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable={false}
+        pauseOnHover={false}
+        theme="light"
+        transition={Bounce}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Professores</h1>
         <TeacherDialog

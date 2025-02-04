@@ -9,6 +9,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Plus, Minus, CheckCircle2 } from 'lucide-react';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
+const create_success = () => {
+  toast.success('Questão criada com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
+
+const edit_success = () => {
+  toast.success('Questão editada com sucesso', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: false,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    });
+};
 
 interface QuestionDialogProps {
   mode: 'create' | 'edit';
@@ -40,6 +69,7 @@ export function QuestionDialog({ mode, question, trigger }: QuestionDialogProps)
       ...formData,
       respostaCorreta: parseInt(formData.respostaCorreta),
     });
+    mode === 'create' ? create_success() : edit_success()
     setOpen(false);
   };
 
