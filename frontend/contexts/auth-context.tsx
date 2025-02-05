@@ -30,10 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const startTime = Date.now();
       try {
         // Em desenvolvimento, limpe o token (exemplo com Docker)
-        if (process.env.NODE_ENV === 'development') {
+        /*if (process.env.NODE_ENV === 'development') {
           localStorage.removeItem('token');
         }
-
+        */
         const token = localStorage.getItem('token');
         if (token) {
           const userData = await getCurrentUser(token);

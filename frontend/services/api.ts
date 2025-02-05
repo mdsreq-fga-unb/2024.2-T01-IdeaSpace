@@ -59,6 +59,21 @@ export async function updateUser(userId: number, data: {
   return response.json();
 }
 
+// Excluir um usuário
+export async function deleteUser(userId: number) {
+  const response = await fetch(`${API_URL}/users/${userId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao excluir usuário");
+  }
+  return response.json();
+}
+
+
 // Buscar todas as cidades
 export async function fetchCities() {
   const response = await fetch(`${API_URL}/cities/`, {
@@ -277,10 +292,10 @@ export async function updateTeacher(userId: number, data: {
 }
 
 export async function deleteTeacher(userId: number) {
-  // This will cascade delete the teacher profile
-  const response = await updateUser(userId, { is_active: false });
+  
+  const response = await deleteUser(userId);
   if (!response) {
-    throw new Error("Erro ao desativar professor");
+    throw new Error("Erro ao deletar professor");
   }
   return response;
 }

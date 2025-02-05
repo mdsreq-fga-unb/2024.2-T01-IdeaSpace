@@ -61,14 +61,14 @@ export default function ProfessoresPage() {
       await deleteTeacher(selectedTeacher);
       toast({
         title: 'Sucesso',
-        description: 'Professor desativado com sucesso',
+        description: 'Professor excluído com sucesso',
       });
       loadTeachers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting teacher:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao desativar professor',
+        description: error.message || 'Erro ao excluir professor',
         variant: 'destructive',
       });
     }
@@ -159,9 +159,9 @@ export default function ProfessoresPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar desativação</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja desativar este professor? Esta ação pode ser revertida posteriormente.
+              Tem certeza que deseja excluir este professor? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -170,7 +170,7 @@ export default function ProfessoresPage() {
               className="bg-red-600 hover:bg-red-700"
               onClick={confirmDelete}
             >
-              Desativar
+              Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
