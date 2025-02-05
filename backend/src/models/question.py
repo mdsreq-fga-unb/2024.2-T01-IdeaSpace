@@ -50,6 +50,14 @@ class Question(QuestionBase, table=True):
 
 class Questionnaire(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
-    name: str | None
     questions: List[Question] = Relationship(back_populates="questionnaires", link_model=QuestionnaireLink)
+    classroom_id: int = Field(foreign_key="classroom.id")
+    duration: int
+    released: bool = False
+    closed: bool = False
 
+
+class QuestionnaireUpdate(SQLModel):
+    duration: int | None = None
+    released: bool | None = None
+    closed: bool | None = None

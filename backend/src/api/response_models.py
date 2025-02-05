@@ -90,3 +90,25 @@ class QuestionResponse(BaseModel):
 
 class QuestionWithOptionsAnswer(QuestionResponse):
     options: list[OptionWithAnswerResponse]
+
+
+class QuestionWithOptions(QuestionResponse):
+    options: list[OptionResponse]
+
+
+class QuestionnaireResponse(BaseModel):
+    id: int
+    questions: list[QuestionWithOptions]
+    classroom_id: int
+    duration: int
+    released: bool
+    closed: bool
+
+
+class QuestionnaireAnswerResponse(BaseModel):
+    id: int
+    questions: list[QuestionWithOptionsAnswer]
+    classroom_id: int
+    duration: int
+    released: bool
+    closed: bool

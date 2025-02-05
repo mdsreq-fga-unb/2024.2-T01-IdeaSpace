@@ -4,7 +4,7 @@ from src.core.security import get_password_hash, verify_password
 from src.utils import get_slug
 from src.models.user import User, UserCreate, UserUpdate, Teacher, Classroom, Student
 from src.models.country import CountryBase, Country, CityBase, City, SchoolBase, School, ClassroomBase
-from src.models.question import Category, Question
+from src.models.question import Category, Question, Questionnaire, QuestionnaireUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -294,3 +294,28 @@ def delete_user(*, session: Session, user_id: int) -> User:
     session.delete(user)
     session.commit()
     return user
+
+
+def get_questions_by_ids(*, session: Session, question_ids: list[int]) -> list[Question]:
+    statement = select(Question).where(Question.id.in_(question_ids))
+    questions = session.exec(statement).all()
+    return questions
+
+
+def get_questionnaires_by_classroom(*, session: Session, classroom_id: int, only_released: bool = False) -> list[Questionnaire]:
+    if only_released:
+        statement = select(Questionnaire).where(Questionnaire.classroom_id == classroom_id, Questionnaire.released == True)
+    else:
+        statement = select(Questionnaire).where(Questionnaire.classroom_id == classroom_id)
+        
+    questionnaires = session.exec(statement).all()
+    return questionnaires
+
+
+def update_questionnaire(*, session: Session, db_questionnaire: Questionnaire, questionnaire_in: QuestionnaireUpdate):
+    questionnaire_data = questionnaire_in.model_dump(exclude_unset=True)
+    db_questionnaire.sqlmodel_update(questionnaire_data)
+    session.add(db_questionnaire)
+    session.commit()
+    session.refresh(db_questionnaire)
+    return db_questionnaire

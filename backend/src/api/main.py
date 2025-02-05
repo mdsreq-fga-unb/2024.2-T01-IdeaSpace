@@ -9,6 +9,7 @@ from src.api.routes import (
     classrooms,
     question,
     category,
+    questionnaire
 )
 from src.core.config import settings
 
@@ -21,6 +22,7 @@ api_router.include_router(school.router)
 api_router.include_router(classrooms.router)
 api_router.include_router(question.router)
 api_router.include_router(category.router)
+api_router.include_router(questionnaire.router)
 
 # if settings.ENVIRONMENT == "local":
 #     api_router.include_router(private.router)
