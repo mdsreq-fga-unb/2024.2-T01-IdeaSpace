@@ -23,7 +23,8 @@ export async function createUser(data: {
   username: string;
   password: string;
   full_name?: string;
-  role: string;
+  is_active?: boolean;
+  is_superuser?: boolean;
 }) {
   const response = await fetch(`${API_URL}/users/`, {
     method: "POST",
@@ -43,7 +44,6 @@ export async function updateUser(userId: number, data: {
   username?: string;
   password?: string;
   full_name?: string;
-  role?: string;
   is_active?: boolean;
 }) {
   const response = await fetch(`${API_URL}/users/${userId}`, {
@@ -72,7 +72,6 @@ export async function deleteUser(userId: number) {
   }
   return response.json();
 }
-
 
 // Buscar todas as cidades
 export async function fetchCities() {
@@ -225,7 +224,6 @@ export async function createTeacher(data: {
   const teacherResponse = await fetch(`${API_URL}/users/teachers?user_id=${userResponse.id}`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ user_id: userResponse.id }),
   });
 
   if (!teacherResponse.ok) {
@@ -292,10 +290,93 @@ export async function updateTeacher(userId: number, data: {
 }
 
 export async function deleteTeacher(userId: number) {
-  
   const response = await deleteUser(userId);
   if (!response) {
     throw new Error("Erro ao deletar professor");
+  }
+  return response;
+}
+
+export async function fetchStudent() {
+  const response = await fetch(`${API_URL}/users/students`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error("Erro ao buscar alunos");
+  return response.json();
+}
+
+export async function createStudent(data: {
+  username: string;
+  password: string;
+  full_name?: string;
+  classrooms?: number[];
+}) {
+  // First create the user
+  const userResponse = await createUser({
+    username: data.username,
+    full_name: data.full_name,
+    is_active: true,
+    is_superuser: false,
+    password: data.password,
+  });
+
+  // Then create the student profile with classroom_id
+  if (!data.classrooms || data.classrooms.length === 0) {
+    throw new Error("É necessário selecionar uma turma");
+  }
+
+  const classroomId = data.classrooms[0]; // Get the first classroom since students can only be in one
+  const studentResponse = await fetch(`${API_URL}/users/students?user_id=${userResponse.id}&classroom_id=${classroomId}`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+  });
+
+  if (!studentResponse.ok) {
+    const errorData = await studentResponse.json();
+    throw new Error(errorData.detail || "Erro ao criar perfil do aluno");
+  }
+
+  return studentResponse.json();
+}
+
+export async function updateStudent(userId: number, data: {
+  username?: string;
+  password?: string;
+  full_name?: string;
+  classrooms?: number[];
+}) {
+  // Update user data
+  const userResponse = await updateUser(userId, {
+    username: data.username,
+    password: data.password,
+    full_name: data.full_name,
+  });
+
+  if (!userResponse) {
+    throw new Error("Erro ao atualizar dados do aluno");
+  }
+
+  // Update classroom assignment if provided
+  if (data.classrooms && data.classrooms.length > 0) {
+    const classroomId = data.classrooms[0]; // Get the first classroom since students can only be in one
+    const response = await fetch(`${API_URL}/classrooms/${classroomId}/add_student?user_id=${userId}`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Erro ao atualizar turma do aluno");
+    }
+  }
+
+  return userResponse;
+}
+
+export async function deleteStudent(userId: number) {
+  const response = await deleteUser(userId);
+  if (!response) {
+    throw new Error("Erro ao deletar aluno");
   }
   return response;
 }
