@@ -380,3 +380,68 @@ export async function deleteStudent(userId: number) {
   }
   return response;
 }
+
+
+// Crear nova questão
+export async function createQuestion(data: {
+  id: number;
+  category_id: number;
+  options: number[];
+  category: number;
+  questionnaires: number[];
+  created_at: Date;
+  updated_at: Date;
+}) {
+  const response = await fetch(`${API_URL}/questions/`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar questao");
+  }
+  return response.json();
+}
+
+// Crear novo questionário
+export async function createQuestionnaire(data: {
+  id: number;
+  questions: number[];
+  classroom_id: number;
+  duration: number;
+  released?: boolean;
+  closed?: boolean;
+}) {
+  const response = await fetch(`${API_URL}/questionnaire/`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar questionário");
+  }
+  return response.json();
+}
+
+// Crear nova opção
+export async function createOption(data: {
+  text: string;
+  is_correct: boolean;
+  question_id: number;
+}) {
+  const response = await fetch(`${API_URL}/questions/`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar opção");
+  }
+  return response.json();
+}
