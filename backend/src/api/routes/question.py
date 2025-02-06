@@ -69,3 +69,24 @@ def read_question(question_id: int, session: SessionDep):
 def read_questions(*, session: SessionDep, skip: int = 0, limit: int = 100):
     questions = crud.get_questions(session=session, skip=skip, limit=limit)
     return questions
+
+
+@router.post(
+    "/{question_id}/options",
+    response_model=OptionBase,
+    status_code=201,
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def create_option(question_id: int, option: OptionBase, session: SessionDep):
+    question = session.get(Question, question_id)
+    
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+
+    new_option = Option(**option.model_dump(), question_id=question_id)
+    
+    session.add(new_option)
+    session.commit()
+    session.refresh(new_option)
+    
+    return new_option
