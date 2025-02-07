@@ -172,8 +172,8 @@ def start_questionnaire(
         existing_info = crud.create_start_questionnaire(session=session, student_starts_questionnaire=start_info)
     
     duration = timedelta(minutes=questionnaire.duration)
-    if existing_info.started_at + duration < datetime.now():
-        raise HTTPException(status_code=400, detail="Questionnaire has already expired")
+    if existing_info.started_at + duration < datetime.now() or existing_info.already_answered:
+        raise HTTPException(status_code=400, detail="Questionnaire has already expired or you have already answered it.")
 
     return {
         "info": existing_info,

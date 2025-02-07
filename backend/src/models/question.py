@@ -73,5 +73,6 @@ class StudentStartsQuestionnaire(SQLModel, table=True):
     student_id: int = Field(foreign_key="student.user_id")
     questionnaire_id: int = Field(foreign_key="questionnaire.id", ondelete="CASCADE")
     started_at: datetime = Field(default=datetime.now())
+    already_answered: bool = False
 
     __table_args__ = (PrimaryKeyConstraint("student_id", "questionnaire_id"),)
