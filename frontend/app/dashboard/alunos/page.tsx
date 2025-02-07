@@ -45,8 +45,14 @@ export default function AlunosPage() {
         fetchStudent(),
         fetchClassrooms()
       ]);
-      setStudents(studentsData);
-      setClassrooms(classroomsData);
+
+      // Ensure we have valid data before updating state
+      if (Array.isArray(studentsData) && Array.isArray(classroomsData)) {
+        setStudents(studentsData);
+        setClassrooms(classroomsData);
+      } else {
+        throw new Error('Invalid data format received from server');
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       toast({
@@ -73,7 +79,7 @@ export default function AlunosPage() {
         title: 'Sucesso',
         description: 'Aluno excluído com sucesso',
       });
-      loadData();
+      await loadData(); // Reload data after successful deletion
     } catch (error: any) {
       console.error('Error deleting student:', error);
       toast({
@@ -190,25 +196,31 @@ export default function AlunosPage() {
   };
 
   const filteredStudents = students.filter(student => {
-    const matchesSearch = (
+    const matchesSearch =
       student.user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    const matchesCountry = !selectedCountry || 
-      student.classroom?.school.city.country.id.toString() === selectedCountry;
-    
-    const matchesCity = !selectedCity || 
-      student.classroom?.school.city.id.toString() === selectedCity;
-    
-    const matchesSchool = !selectedSchool || 
-      student.classroom?.school.id.toString() === selectedSchool;
-    
-    const matchesClassroom = !selectedClassroom || 
-      student.classroom?.id.toString() === selectedClassroom;
-    
+      student.user.username.toLowerCase().includes(searchTerm.toLowerCase());
+  
+    const matchesCountry =
+      !selectedCountry ||
+      (student.classroom?.school?.city?.country?.id &&
+        student.classroom.school.city.country.id.toString() === selectedCountry);
+  
+    const matchesCity =
+      !selectedCity ||
+      (student.classroom?.school?.city?.id &&
+        student.classroom.school.city.id.toString() === selectedCity);
+  
+    const matchesSchool =
+      !selectedSchool ||
+      (student.classroom?.school?.id &&
+        student.classroom.school.id.toString() === selectedSchool);
+  
+    const matchesClassroom =
+      !selectedClassroom ||
+      (student.classroom?.id && student.classroom.id.toString() === selectedClassroom);
+  
     return matchesSearch && matchesCountry && matchesCity && matchesSchool && matchesClassroom;
-  });
+  });  
 
   return (
     <div className="space-y-6">

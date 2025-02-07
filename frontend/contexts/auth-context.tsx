@@ -62,11 +62,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (user) {
         const userRole = getUserRole(user);
         // Define a rota padrão para cada papel
-        let defaultRoute = '/dashboard/alunos';
+        let defaultRoute = '/dashboard/home/alunos';
         if (userRole === 'professor') {
-          defaultRoute = '/dashboard/professores';
+          defaultRoute = '/dashboard/home/professores';
         } else if (userRole === 'administrador') {
-          defaultRoute = '/dashboard/admin';
+          defaultRoute = '/dashboard/home/admin';
         }
         const userPermissions = rolePermissions[userRole];
         const isAllowedRoute = userPermissions.allowedRoutes.some(route =>

@@ -320,16 +320,18 @@ export async function createStudent(data: {
     password: data.password,
   });
 
-  // Then create the student profile with classroom_id
-  if (!data.classrooms || data.classrooms.length === 0) {
-    throw new Error("É necessário selecionar uma turma");
-  }
-
-  const classroomId = data.classrooms[0]; // Get the first classroom since students can only be in one
-  const studentResponse = await fetch(`${API_URL}/users/students?user_id=${userResponse.id}&classroom_id=${classroomId}`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-  });
+  // Then create the student profile with classroom_id if provided
+  const studentResponse = await fetch(
+    `${API_URL}/users/students?user_id=${userResponse.id}${
+      data.classrooms && data.classrooms.length > 0
+        ? `&classroom_id=${data.classrooms[0]}`
+        : ''
+    }`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+    }
+  );
 
   if (!studentResponse.ok) {
     const errorData = await studentResponse.json();
@@ -373,12 +375,111 @@ export async function updateStudent(userId: number, data: {
   return userResponse;
 }
 
+
 export async function deleteStudent(userId: number) {
   const response = await deleteUser(userId);
   if (!response) {
     throw new Error("Erro ao deletar aluno");
   }
   return response;
+}
+
+
+// Create a new classroom
+export async function createClassroom(data: {
+  name: string;
+  school_id: number;
+}) {
+  const response = await fetch(`${API_URL}/classrooms/`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+
+    throw new Error(errorData.detail || "Erro ao criar turma");
+  }
+  return response.json();
+}
+
+
+// Delete a classroom
+export async function deleteClassroom(classroomId: number) {
+  const response = await fetch(`${API_URL}/classrooms/${classroomId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    throw new Error(errorData.detail || "Erro ao excluir turma");
+
+  }
+  return response.json();
+}
+
+
+export async function getClassroomWithUsers(classroomId: number) {
+  const response = await fetch(`${API_URL}/classrooms/${classroomId}/users`, {
+    headers: getAuthHeaders(),
+
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    throw new Error(errorData.detail || "Erro ao buscar detalhes da turma");
+  }
+  return response.json();
+}
+
+export async function addStudentToClassroom(classroomId: number, userId: number) {
+  const response = await fetch(`${API_URL}/classrooms/${classroomId}/add_student?user_id=${userId}`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(JSON.stringify(errorData.detail) || "Erro ao adicionar aluno à turma");
+  }
+  return response.json();
+}
+
+export async function removeStudentFromClassroom(classroomId: number, userId: number) {
+  const response = await fetch(`${API_URL}/users/${userId}/student?classroom=${classroomId}`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao remover aluno da turma");
+  }
+  return response.json();
+}
+
+// Get students by location
+export async function getStudentsByLocation(countryId?: number, cityId?: number, schoolId?: number) {
+  let url = `${API_URL}/users/students?`;
+  if (countryId) url += `country_id=${countryId}&`;
+  if (cityId) url += `city_id=${cityId}&`;
+  if (schoolId) url += `school_id=${schoolId}`;
+
+  const response = await fetch(url, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao buscar alunos");
+  }
+  return response.json();
 }
 
 
@@ -397,14 +498,12 @@ export async function createQuestion(data: {
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
-
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.detail || "Erro ao criar questao");
   }
   return response.json();
 }
-
 // Crear novo questionário
 export async function createQuestionnaire(data: {
   id: number;
@@ -419,14 +518,12 @@ export async function createQuestionnaire(data: {
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
-
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.detail || "Erro ao criar questionário");
   }
   return response.json();
 }
-
 // Crear nova opção
 export async function createOption(data: {
   text: string;
@@ -438,7 +535,6 @@ export async function createOption(data: {
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
-
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.detail || "Erro ao criar opção");

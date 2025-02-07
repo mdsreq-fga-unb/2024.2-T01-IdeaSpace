@@ -8,9 +8,18 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { createStudent, updateStudent, fetchClassrooms } from '@/services/api';
+import { createStudent, updateStudent, fetchClassrooms, removeStudentFromClassroom } from '@/services/api';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface StudentDialogProps {
   mode: 'create' | 'edit';
@@ -36,6 +45,10 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
   const [searchTerm, setSearchTerm] = useState('');
   const [classrooms, setClassrooms] = useState<any[]>([]);
   const { toast } = useToast();
+
+  // Alert dialog state
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+  const [classroomToRemove, setClassroomToRemove] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -74,6 +87,11 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
           description: 'Aluno criado com sucesso',
         });
       } else {
+        // If student was removed from classroom, call removeStudentFromClassroom
+        if (student?.classroom && formData.classrooms.length === 0) {
+          await removeStudentFromClassroom(student.classroom.id, student.user_id);
+        }
+
         await updateStudent(student.user_id, {
           username: formData.username,
           password: formData.password || undefined,
@@ -107,6 +125,16 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
     }
   };
 
+  const handleClassroomToggle = (classroomId: number) => {
+    if (mode === 'edit' && student?.classroom?.id === classroomId && formData.classrooms.includes(classroomId)) {
+      // If unchecking the current classroom in edit mode, show confirmation dialog
+      setClassroomToRemove(classroomId);
+      setAlertDialogOpen(true);
+    } else {
+      toggleClassroom(classroomId);
+    }
+  };
+
   const toggleClassroom = (classroomId: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -116,6 +144,14 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
     }));
   };
 
+  const handleRemoveConfirm = () => {
+    if (classroomToRemove !== null) {
+      toggleClassroom(classroomToRemove);
+    }
+    setAlertDialogOpen(false);
+    setClassroomToRemove(null);
+  };
+  
   const filteredClassrooms = classrooms.filter((classroom) =>
     classroom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     classroom.school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -123,122 +159,144 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
   );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="bg-pink-600 hover:bg-pink-700">
-            {mode === 'create' ? 'Novo Aluno' : 'Editar Aluno'}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'create' ? 'Adicionar Novo Aluno' : 'Editar Aluno'}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Nome Completo</Label>
-              <Input
-                id="full_name"
-                value={formData.full_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, full_name: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Nome de Usuário</Label>
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                required
-                disabled={mode === 'edit'}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">
-                {mode === 'create'
-                  ? 'Senha'
-                  : 'Nova Senha (deixe em branco para manter a atual)'}
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required={mode === 'create'}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <Label>Turma</Label>
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar turmas..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-            <ScrollArea className="h-[200px] border rounded-md p-4">
-              <div className="space-y-4">
-                {filteredClassrooms.map((classroom) => (
-                  <div key={classroom.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`classroom-${classroom.id}`}
-                      checked={formData.classrooms.includes(classroom.id)}
-                      onCheckedChange={() => toggleClassroom(classroom.id)}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                      <label
-                        htmlFor={`classroom-${classroom.id}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {classroom.name}
-                      </label>
-                      <p className="text-sm text-muted-foreground">
-                        {classroom.school.name} - {classroom.school.city.name}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button className="bg-pink-600 hover:bg-pink-700">
+              {mode === 'create' ? 'Novo Aluno' : 'Editar Aluno'}
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {mode === 'create' ? 'Adicionar Novo Aluno' : 'Editar Aluno'}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="full_name">Nome Completo</Label>
+                <Input
+                  id="full_name"
+                  value={formData.full_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, full_name: e.target.value })
+                  }
+                  required
+                />
               </div>
-            </ScrollArea>
-            <p className="text-sm text-muted-foreground">
-              {formData.classrooms.length} turma(s) selecionada(s)
-            </p>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Nome de Usuário</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
+                  required
+                  disabled={mode === 'edit'}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">
+                  {mode === 'create'
+                    ? 'Senha'
+                    : 'Nova Senha (deixe em branco para manter a atual)'}
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  required={mode === 'create'}
+                />
+              </div>
+            </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={loading}
+            <div className="space-y-4">
+              <Label>Turma (opcional)</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar turmas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              <ScrollArea className="h-[200px] border rounded-md p-4">
+                <div className="space-y-4">
+                  {filteredClassrooms.map((classroom) => (
+                    <div key={classroom.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`classroom-${classroom.id}`}
+                        checked={formData.classrooms.includes(classroom.id)}
+                        onCheckedChange={() => handleClassroomToggle(classroom.id)}
+                      />
+                      <div className="grid gap-1.5 leading-none">
+                        <label
+                          htmlFor={`classroom-${classroom.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {classroom.name}
+                        </label>
+                        <p className="text-sm text-muted-foreground">
+                          {classroom.school.name} - {classroom.school.city.name}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <p className="text-sm text-muted-foreground">
+                {formData.classrooms.length} turma(s) selecionada(s)
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-pink-600 hover:bg-pink-700"
+                disabled={loading}
+              >
+                {loading ? 'Salvando...' : mode === 'create' ? 'Adicionar' : 'Salvar'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar remoção da turma</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover o aluno desta turma? Esta ação pode ser revertida posteriormente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={handleRemoveConfirm}
             >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              className="bg-pink-600 hover:bg-pink-700"
-              disabled={loading}
-            >
-              {loading ? 'Salvando...' : mode === 'create' ? 'Adicionar' : 'Salvar'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+              Remover da Turma
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
