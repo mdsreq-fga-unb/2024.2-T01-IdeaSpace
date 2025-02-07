@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from src.api.deps import SessionDep, CurrentUser
 from pydantic import BaseModel
-from src.api.response_models import QuestionnaireResponse, QuestionnaireAnswerResponse
+from src.api.response_models import QuestionnaireResponse, QuestionnaireAnswerResponse, StartQuestionnaire
 from src.models.user import Classroom
-from src.models.question import Questionnaire, QuestionnaireUpdate
+from src.models.question import (
+    Questionnaire,
+    QuestionnaireUpdate,
+    StudentStartsQuestionnaireBase,
+)
 import src.crud as crud
+from datetime import datetime, timedelta
 
 
 class QuestionnaireBase(BaseModel):
@@ -96,11 +101,14 @@ def read_questionnaire_answers(questionnaire_id: int, session: SessionDep, curre
     response_model=list[QuestionnaireResponse],
 )
 def read_questionnaires_by_classroom(classroom_id: int, session: SessionDep, current_user: CurrentUser):
-    # Alunos também podem ver os questionários que já foram liberados
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
-    existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
     teacher_permission = existing_teacher and classroom_id in existing_teacher.classrooms
-    student_permission = existing_student and classroom_id == existing_student.classroom_id
+
+    # Alunos também podem ver os questionários que já foram liberados
+    # Mas eles devem ter respondido o questionário para conseguir visualizar
+    # Portanto, essa verificação será feita depois
+    # existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
+    student_permission = False
     
     if not teacher_permission and not student_permission and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="You don't have permission to read questionnaires for this classroom.")
@@ -131,3 +139,43 @@ def update_questionnaire(
     
     questionnaire = crud.update_questionnaire(session=session, db_questionnaire=questionnaire, questionnaire_in=questionnaire_in)
     return questionnaire
+
+
+@router.post(
+    "/{questionnaire_id}/start",
+    response_model=StartQuestionnaire,
+)
+def start_questionnaire(
+    start_info: StudentStartsQuestionnaireBase, session: SessionDep, current_user: CurrentUser 
+):
+    """
+    Estudante inicia e retorna um questionário 
+    """
+    questionnaire = session.get(Questionnaire, start_info.questionnaire_id)
+    if questionnaire is None:
+        raise HTTPException(status_code=404, detail="Questionnaire not found")
+    
+    if not questionnaire.released or questionnaire.closed:
+        raise HTTPException(status_code=400, detail="Questionnaire is not available to start.")
+
+    existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
+    has_permission = existing_student and questionnaire.classroom_id == existing_student.classroom_id
+
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="You don't have permission to start this questionnaire.")
+    
+    existing_info = crud.get_student_starts_questionnaire(
+        session=session, student_id=start_info.student_id, questionnaire_id=start_info.questionnaire_id
+    )
+
+    if existing_info is None:
+        existing_info = crud.create_start_questionnaire(session=session, student_starts_questionnaire=start_info)
+    
+    duration = timedelta(minutes=questionnaire.duration)
+    if existing_info.started_at + duration < datetime.now():
+        raise HTTPException(status_code=400, detail="Questionnaire has already expired")
+
+    return {
+        "info": existing_info,
+        "questionnaire": questionnaire
+    }

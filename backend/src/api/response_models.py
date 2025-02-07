@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from src.models.country import Country
 from src.models.user import User, UserPublic
-from src.models.question import CategoryBase
+from src.models.question import CategoryBase, StudentStartsQuestionnaire
 from datetime import datetime
 
 class CityResponse(BaseModel):
@@ -112,3 +112,8 @@ class QuestionnaireAnswerResponse(BaseModel):
     duration: int
     released: bool
     closed: bool
+
+
+class StartQuestionnaire(BaseModel):
+    info: StudentStartsQuestionnaire
+    questionnaire: QuestionnaireResponse

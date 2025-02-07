@@ -62,3 +62,16 @@ class QuestionnaireUpdate(SQLModel):
     duration: int | None = None
     released: bool | None = None
     closed: bool | None = None
+
+
+class StudentStartsQuestionnaireBase(SQLModel):
+    student_id: int 
+    questionnaire_id: int 
+
+
+class StudentStartsQuestionnaire(SQLModel, table=True):
+    student_id: int = Field(foreign_key="student.user_id")
+    questionnaire_id: int = Field(foreign_key="questionnaire.id", ondelete="CASCADE")
+    started_at: datetime = Field(default=datetime.now())
+
+    __table_args__ = (PrimaryKeyConstraint("student_id", "questionnaire_id"),)

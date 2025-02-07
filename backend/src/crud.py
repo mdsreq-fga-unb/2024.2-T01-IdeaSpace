@@ -4,7 +4,14 @@ from src.core.security import get_password_hash, verify_password
 from src.utils import get_slug
 from src.models.user import User, UserCreate, UserUpdate, Teacher, Classroom, Student
 from src.models.country import CountryBase, Country, CityBase, City, SchoolBase, School, ClassroomBase
-from src.models.question import Category, Question, Questionnaire, QuestionnaireUpdate
+from src.models.question import (
+    Category,
+    Question,
+    Questionnaire,
+    QuestionnaireUpdate,
+    StudentStartsQuestionnaireBase,
+    StudentStartsQuestionnaire,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -327,3 +334,20 @@ def update_student(*, session: Session, student: Student, classroom_id: int | No
     session.commit()
     session.refresh(student)
     return student
+
+
+def create_start_questionnaire(*, session: Session, student_starts_questionnaire: StudentStartsQuestionnaireBase) -> StudentStartsQuestionnaire:
+    student_starts_questionnaire = StudentStartsQuestionnaire(**student_starts_questionnaire.model_dump())
+    session.add(student_starts_questionnaire)
+    session.commit()
+    session.refresh(student_starts_questionnaire)
+    return student_starts_questionnaire
+
+
+def get_student_starts_questionnaire(*, session: Session, student_id: int, questionnaire_id: int) -> StudentStartsQuestionnaire | None:
+    statement = select(StudentStartsQuestionnaire).where(
+        StudentStartsQuestionnaire.student_id == student_id,
+        StudentStartsQuestionnaire.questionnaire_id == questionnaire_id
+    )
+    student_starts_questionnaire = session.exec(statement).first()
+    return student_starts_questionnaire
