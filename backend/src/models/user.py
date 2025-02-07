@@ -47,7 +47,8 @@ class Classroom(ClassroomBase, table=True):
     slug_name: str | None = Field(default=None, max_length=256, min_length=3)
     school: School = Relationship(back_populates="classrooms")
     teachers: list["Teacher"] = Relationship(back_populates="classrooms", link_model=ClassroomTeacher)
-    students: list["Student"] = Relationship(back_populates="classroom")
+    students: list["Student"] = Relationship(back_populates="classroom", cascade_delete=True)
+    questionnaires: list["Questionnaire"] = Relationship(back_populates="classroom", cascade_delete=True)
 
     __table_args__ = (
         UniqueConstraint("slug_name", "school_id", name="classroom_unique_slug_school_constraint"),
@@ -56,7 +57,7 @@ class Classroom(ClassroomBase, table=True):
 
 class Student(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", primary_key=True) 
-    classroom_id: int | None = Field(default=None, foreign_key="classroom.id")
+    classroom_id: int | None = Field(default=None, foreign_key="classroom.id", nullable=True)
     user: User = Relationship(back_populates="student")
     classroom: Classroom = Relationship(back_populates="students")
     

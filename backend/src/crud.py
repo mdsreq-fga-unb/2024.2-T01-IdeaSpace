@@ -265,10 +265,10 @@ def get_teacher_by_user_id(*, session: Session, user_id: int) -> Teacher | None:
     return teacher
 
 
-def delete_classroom(*, session: Session, classroom: Classroom) -> Classroom:
+def delete_classroom(*, session: Session, classroom: Classroom) -> None:
     session.delete(classroom)
     session.commit()
-    return classroom
+    return
 
 
 def get_category_by_slug(*, session: Session, slug_name: str) -> Category | None:
@@ -319,3 +319,11 @@ def update_questionnaire(*, session: Session, db_questionnaire: Questionnaire, q
     session.commit()
     session.refresh(db_questionnaire)
     return db_questionnaire
+
+
+def update_student(*, session: Session, student: Student, classroom_id: int | None) -> Student:
+    student.classroom_id = classroom_id
+    session.add(student)
+    session.commit()
+    session.refresh(student)
+    return student

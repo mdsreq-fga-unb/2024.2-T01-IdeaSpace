@@ -52,6 +52,7 @@ class Questionnaire(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     questions: List[Question] = Relationship(back_populates="questionnaires", link_model=QuestionnaireLink)
     classroom_id: int = Field(foreign_key="classroom.id")
+    classroom: "Classroom" = Relationship(back_populates="questionnaires")
     duration: int
     released: bool = False
     closed: bool = False
