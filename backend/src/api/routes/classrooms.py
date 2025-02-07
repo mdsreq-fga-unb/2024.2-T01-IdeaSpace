@@ -63,6 +63,34 @@ def read_classroom(classroom_id: int, session: SessionDep, current_user: Current
     return classroom
 
 
+@router.patch(
+    "/{classroom_id}",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=ClassroomResponse,
+)
+def update_classroom(classroom_id: int, classroom_name: str, session: SessionDep):
+    """
+    Update a classroom 
+    """
+    classroom = crud.get_classroom_by_id(session=session, classroom_id=classroom_id)
+    if classroom is None:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    classroom_name = classroom_name.strip().capitalize()
+    slug_name = get_slug(classroom_name)
+    existing_classroom = crud.get_classroom_by_slug_and_school(
+        session=session, slug_name=slug_name, school_id=classroom.school_id
+    )
+
+    if existing_classroom and existing_classroom.id != classroom_id:
+        raise HTTPException(status_code=400, detail="Classroom already exists")
+
+    classroom.name = classroom_name
+    classroom.slug_name = slug_name
+    session.commit()
+    return classroom
+
+
 @router.get(
     "/",
     response_model=list[ClassroomResponse],
@@ -85,28 +113,6 @@ def read_classrooms(*, session: SessionDep, current_user: CurrentUser, skip: int
         return [classroom]
 
     return classrooms
-
-
-@router.post(
-    "/{classroom_id}/add_student",
-    response_model=ClassroomResponse,    
-    dependencies=[Depends(get_current_active_superuser)]
-)
-def add_student_to_classroom(classroom_id: int, user_id: int, session: SessionDep):
-    """
-    Add a student to a classroom
-    """
-    classroom = crud.get_classroom_by_id(session=session, classroom_id=classroom_id)
-    if classroom is None:
-        raise HTTPException(status_code=404, detail="Classroom not found")
-
-    student = crud.get_student_by_user_id(session=session, user_id=user_id)
-    if student is None:
-        raise HTTPException(status_code=404, detail="Student not found")
-
-    student.classroom_id = classroom_id
-    session.commit()
-    return classroom
 
 
 @router.post(
@@ -134,7 +140,6 @@ def add_teacher_to_classroom(classroom_id: int, user_id: int, session: SessionDe
 @router.delete(
     "/{classroom_id}",
     dependencies=[Depends(get_current_active_superuser)],
-    response_model=ClassroomResponse,
 )
 def delete_classroom(classroom_id: int, session: SessionDep):
     """
@@ -143,33 +148,8 @@ def delete_classroom(classroom_id: int, session: SessionDep):
     classroom = crud.get_classroom_by_id(session=session, classroom_id=classroom_id)
     if classroom is None:
         raise HTTPException(status_code=404, detail="Classroom not found")
-    classroom = crud.delete_classroom(session=session, classroom=classroom)
-    return classroom
-
-
-@router.post(
-    "/{classroom_id}/remove_student",
-    response_model=ClassroomResponse,
-    dependencies=[Depends(get_current_active_superuser)]
-)
-def remove_student_from_classroom(classroom_id: int, user_id: int, session: SessionDep):
-    """
-    Remove a student from a classroom
-    """
-    classroom = crud.get_classroom_by_id(session=session, classroom_id=classroom_id)
-    if classroom is None:
-        raise HTTPException(status_code=404, detail="Classroom not found")
-
-    student = crud.get_student_by_user_id(session=session, user_id=user_id)
-    if student is None:
-        raise HTTPException(status_code=404, detail="Student not found")
-    
-    if student.classroom_id != classroom_id:
-        raise HTTPException(status_code=404, detail="Student is not in this classroom")
-
-    student.classroom_id = None
-    session.commit()
-    return classroom
+    crud.delete_classroom(session=session, classroom=classroom)
+    return {"message": "Classroom deleted"}
 
 
 @router.post(

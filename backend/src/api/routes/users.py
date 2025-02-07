@@ -178,6 +178,36 @@ def read_students(*, session: SessionDep, skip: int = 0, limit: int = 100) -> An
     return students
 
 
+@router.patch(
+    "/{user_id}/student",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=StudentResponse,
+)
+def update_student(*, session: SessionDep, user_id: int, classroom_id: int | None = None) -> StudentResponse:
+    """
+    Update a student profile
+    """
+    student = crud.get_student_by_user_id(session=session, user_id=user_id)
+
+    if not student:
+        raise HTTPException(
+            status_code=400, detail="Student with this id does not exist in the system"
+        )
+
+    classroom = None
+    if classroom_id is not None:
+        classroom = session.get(Classroom, classroom_id)
+
+        if not classroom:
+            raise HTTPException(
+                status_code=400, detail="Classroom with this id does not exist in the system"
+            )
+
+    student = crud.update_student(session=session, student=student, classroom_id=classroom_id)
+    return student
+
+
+
 @router.delete(
     "/{user_id}",
     dependencies=[Depends(get_current_active_superuser)],

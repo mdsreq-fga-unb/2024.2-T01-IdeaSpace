@@ -34,9 +34,9 @@ class TeacherResponse(BaseModel):
 
 class StudentResponse(BaseModel):
     user_id: int
-    classroom_id: int
+    classroom_id: int | None
     user: UserPublic
-    classroom: ClassroomResponse
+    classroom: ClassroomResponse | None
     
 class TeacherResponseNoUser(BaseModel):
     classrooms: list[ClassroomResponse]
