@@ -72,6 +72,17 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
+    // Validação: se estiver no modo de criação e nenhuma turma foi selecionada, exibe um erro.
+    if (mode === 'create' && formData.classrooms.length === 0) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione uma turma.',
+        variant: 'destructive',
+      });
+      return;
+    }
+  
     setLoading(true);
   
     try {
@@ -87,11 +98,11 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
           description: 'Aluno criado com sucesso',
         });
       } else {
-        // If student was removed from classroom, call removeStudentFromClassroom
+        // Se o aluno foi removido da turma, chama removeStudentFromClassroom
         if (student?.classroom && formData.classrooms.length === 0) {
           await removeStudentFromClassroom(student.classroom.id, student.user_id);
         }
-
+  
         await updateStudent(student.user_id, {
           username: formData.username,
           password: formData.password || undefined,
@@ -124,6 +135,7 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
       setLoading(false);
     }
   };
+  
 
   const handleClassroomToggle = (classroomId: number) => {
     if (mode === 'edit' && student?.classroom?.id === classroomId && formData.classrooms.includes(classroomId)) {
@@ -218,7 +230,7 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
             </div>
 
             <div className="space-y-4">
-              <Label>Turma (opcional)</Label>
+              <Label>Turma</Label>
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input

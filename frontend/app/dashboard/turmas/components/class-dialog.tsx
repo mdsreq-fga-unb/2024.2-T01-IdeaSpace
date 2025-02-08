@@ -1,13 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { createClassroom, fetchCountries, fetchCities, fetchSchools } from '@/services/api';
+import {
+  createClassroom,
+  updateClassroom,
+  fetchCountries,
+  fetchCities,
+  fetchSchools,
+} from '@/services/api';
 
 interface ClassDialogProps {
   mode: 'create' | 'edit';
@@ -19,20 +37,31 @@ interface ClassDialogProps {
 export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: classroom?.name || '',
-    countryId: classroom?.school.city.country.id.toString() || '',
-    cityId: classroom?.school.city.id.toString() || '',
-    schoolId: classroom?.school.id.toString() || '',
-  });
 
+  // Para o modo "create" é necessário armazenar os IDs para seleção, 
+  // enquanto no modo "edit" apenas o nome será alterado
+  const initialFormData =
+    mode === 'create'
+      ? {
+          name: classroom?.name || '',
+          countryId: classroom?.school?.city?.country?.id?.toString() || '',
+          cityId: classroom?.school?.city?.id?.toString() || '',
+          schoolId: classroom?.school?.id?.toString() || '',
+        }
+      : {
+          name: classroom?.name || '',
+        };
+
+  const [formData, setFormData] = useState(initialFormData);
+
+  // Estados utilizados apenas no modo "create"
   const [countries, setCountries] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
   const [schools, setSchools] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (open) {
+    if (open && mode === 'create') {
       loadCountries();
       if (formData.countryId) {
         loadCities(parseInt(formData.countryId));
@@ -41,7 +70,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
         loadSchools(parseInt(formData.cityId));
       }
     }
-  }, [open, formData.countryId, formData.cityId]);
+  }, [open, formData.countryId, formData.cityId, mode]);
 
   const loadCountries = async () => {
     try {
@@ -100,7 +129,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
           return;
         }
 
-        const newClassroom = await createClassroom({
+        await createClassroom({
           name: formData.name,
           school_id: parseInt(formData.schoolId),
         });
@@ -108,6 +137,22 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
         toast({
           title: 'Sucesso',
           description: 'Turma criada com sucesso',
+        });
+      } else if (mode === 'edit') {
+        if (!classroom || !classroom.id) {
+          toast({
+            title: 'Erro',
+            description: 'Turma não encontrada',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        // Atualiza a turma apenas com o novo nome
+        await updateClassroom(classroom.id, formData.name);
+        toast({
+          title: 'Sucesso',
+          description: 'Turma atualizada com sucesso',
         });
       }
 
@@ -144,80 +189,135 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4">
+            {/* Campo de nome, sempre editável */}
             <div className="space-y-2">
               <Label htmlFor="name">Nome da Turma</Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="country">País</Label>
-              <Select
-                value={formData.countryId}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, countryId: value, cityId: '', schoolId: '' });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um país" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country.id} value={country.id.toString()}>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {mode === 'create' && (
+              <>
+                {/* Campos de localização para criação (editáveis) */}
+                <div className="space-y-2">
+                  <Label htmlFor="country">País</Label>
+                  <Select
+                    value={formData.countryId}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        countryId: value,
+                        cityId: '',
+                        schoolId: '',
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um país" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.id} value={country.id.toString()}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="city">Cidade</Label>
-              <Select
-                value={formData.cityId}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, cityId: value, schoolId: '' });
-                }}
-                disabled={!formData.countryId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={formData.countryId ? "Selecione uma cidade" : "Selecione um país primeiro"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city.id} value={city.id.toString()}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">Cidade</Label>
+                  <Select
+                    value={formData.cityId}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, cityId: value, schoolId: '' })
+                    }
+                    disabled={!formData.countryId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          formData.countryId
+                            ? 'Selecione uma cidade'
+                            : 'Selecione um país primeiro'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cities.map((city) => (
+                        <SelectItem key={city.id} value={city.id.toString()}>
+                          {city.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="school">Escola</Label>
-              <Select
-                value={formData.schoolId}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, schoolId: value });
-                }}
-                disabled={!formData.cityId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={formData.cityId ? "Selecione uma escola" : "Selecione uma cidade primeiro"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {schools.map((school) => (
-                    <SelectItem key={school.id} value={school.id.toString()}>
-                      {school.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="school">Escola</Label>
+                  <Select
+                    value={formData.schoolId}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, schoolId: value })
+                    }
+                    disabled={!formData.cityId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          formData.cityId
+                            ? 'Selecione uma escola'
+                            : 'Selecione uma cidade primeiro'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {schools.map((school) => (
+                        <SelectItem key={school.id} value={school.id.toString()}>
+                          {school.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            {mode === 'edit' && (
+              <>
+                {/* Campos de localização para edição (visíveis, mas não editáveis) */}
+                <div className="space-y-2">
+                  <Label htmlFor="country">País</Label>
+                  <Input
+                    id="country"
+                    value={classroom?.school?.city?.country?.name || ''}
+                    disabled
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">Cidade</Label>
+                  <Input
+                    id="city"
+                    value={classroom?.school?.city?.name || ''}
+                    disabled
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="school">Escola</Label>
+                  <Input
+                    id="school"
+                    value={classroom?.school?.name || ''}
+                    disabled
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
@@ -234,7 +334,11 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
               className="bg-pink-600 hover:bg-pink-700"
               disabled={loading}
             >
-              {loading ? 'Salvando...' : mode === 'create' ? 'Adicionar' : 'Salvar'}
+              {loading
+                ? 'Salvando...'
+                : mode === 'create'
+                ? 'Adicionar'
+                : 'Salvar'}
             </Button>
           </div>
         </form>

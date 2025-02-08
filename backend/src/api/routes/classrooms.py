@@ -200,3 +200,22 @@ def read_classroom_with_users(classroom_id: int, session: SessionDep, current_us
             raise HTTPException(status_code=403, detail="You don't have access to this classroom")
     
     return classroom
+
+@router.post(
+    "/{classroom_id}/add_student",
+    response_model=ClassroomResponse,    
+    dependencies=[Depends(get_current_active_superuser)]
+)
+def add_student_to_classroom(classroom_id: int, user_id: int, session: SessionDep):
+    """
+    Add a student to a classroom
+    """
+    classroom = crud.get_classroom_by_id(session=session, classroom_id=classroom_id)
+    if classroom is None:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    student = crud.get_student_by_user_id(session=session, user_id=user_id)
+    if student is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+    student.classroom_id = classroom_id
+    session.commit()
+    return classroom

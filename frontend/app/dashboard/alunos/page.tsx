@@ -336,12 +336,12 @@ export default function AlunosPage() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">{student.user.username}</p>
+                  <p className="text-sm text-muted-foreground">Usuário: {student.user.username}</p>
                   <p className="text-sm">
                     Turma: {student.classroom?.name || 'Sem turma'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {student.classroom?.school.name || 'Sem escola'}
+                    Escola: {student.classroom?.school.name || 'Sem escola'}
                   </p>
                   <div className="flex gap-2 mt-4">
                     <ViewStudentDialog student={student} />

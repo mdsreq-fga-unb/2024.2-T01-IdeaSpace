@@ -119,12 +119,12 @@ export default function ProfessoresPage() {
             <Card key={teacher.user_id} className="overflow-hidden">
               <CardHeader className="p-4">
                 <CardTitle className="text-lg font-semibold">
-                  {teacher.user.full_name || teacher.user.username}
+                   {teacher.user.full_name || teacher.user.username}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">{teacher.user.username}</p>
+                  <p className="text-sm text-muted-foreground">Usuário: {teacher.user.username}</p>
                   <p className="text-sm">
                     Turmas: {teacher.classrooms?.length || 0}
                   </p>

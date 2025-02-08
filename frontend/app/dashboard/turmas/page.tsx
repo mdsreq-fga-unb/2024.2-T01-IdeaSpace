@@ -287,34 +287,37 @@ export default function TurmasPage() {
                 <CardTitle className="text-lg font-semibold">{classroom.name}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <p className="text-sm">{classroom.school.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {classroom.school.city.name} - {classroom.school.city.country.name}
-                  </p>
-                  <div className="flex gap-2 mt-4">
-                    <ViewClassDialog classroom={classroom} />
-                    <ClassDialog
-                      mode="edit"
-                      classroom={classroom}
-                      onSuccess={loadClassrooms}
-                      trigger={
-                        <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
-                          <PencilIcon className="h-4 w-4" />
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        Escola: {classroom.school.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Localização: {classroom.school.city.name} - {classroom.school.city.country.name}
+                      </p>
+                      <div className="flex gap-2 mt-4">
+                        <ViewClassDialog classroom={classroom} />
+                        <ClassDialog
+                          mode="edit"
+                          classroom={classroom}
+                          onSuccess={loadClassrooms}
+                          trigger={
+                            <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
+                              <PencilIcon className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => handleDelete(classroom.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      }
-                    />
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="text-red-500 hover:text-red-600"
-                      onClick={() => handleDelete(classroom.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
+                      </div>
+                    </div>
+                </CardContent>
+
             </Card>
           ))}
         </div>
@@ -325,7 +328,7 @@ export default function TurmasPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir esta turma? Esta ação não pode ser desfeita.
+            Tem certeza de que deseja excluir esta turma? Essa ação é irreversível e removerá permanentemente todos os alunos vinculados a ela.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

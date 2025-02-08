@@ -15,11 +15,27 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createTeacher, updateTeacher, fetchClassrooms } from '@/services/api';
+import {
+  createTeacher,
+  updateTeacher,
+  fetchClassrooms,
+  removeTeacherFromClassroom,
+  addTeacherToClassroom,
+} from '@/services/api';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface TeacherDialogProps {
   mode: 'create' | 'edit';
-  teacher?: any;
+  teacher?: any; // ajuste o tipo conforme sua necessidade
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 }
@@ -47,11 +63,16 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     username: teacher?.user.username || '',
     full_name: teacher?.user.full_name || '',
     password: '',
+    // Armazena os IDs das turmas originalmente atribuídas
     classrooms: teacher?.classrooms?.map((c: any) => c.id) || [],
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const { toast } = useToast();
+
+  // Estados para o AlertDialog de confirmação de remoção
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+  const [classroomToRemove, setClassroomToRemove] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -76,10 +97,9 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       if (mode === 'create') {
-        // Criar novo professor
         await createTeacher({
           username: formData.username,
           password: formData.password,
@@ -91,26 +111,46 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
           description: 'Professor criado com sucesso',
         });
       } else {
-        // Atualizar professor existente
+        // Atualiza os dados básicos do professor
         await updateTeacher(teacher.user_id, {
           username: formData.username,
-          password: formData.password || undefined, // Só envia a senha se foi preenchida
+          password: formData.password || undefined,
           full_name: formData.full_name,
-          classrooms: formData.classrooms,
         });
+        
+        // --- Atualiza as turmas associadas ---
+        // Obter os IDs das turmas originalmente atribuídas
+        const initialClassrooms: number[] = teacher.classrooms.map((c: any) => c.id);
+        // Turmas atualmente selecionadas
+        const newClassrooms: number[] = formData.classrooms;
+        
+        // Turmas removidas: que estavam originalmente, mas não estão mais selecionadas
+        const removedClassrooms = initialClassrooms.filter(id => !newClassrooms.includes(id));
+        // Turmas adicionadas: que não estavam originalmente e agora foram selecionadas
+        const addedClassrooms = newClassrooms.filter(id => !initialClassrooms.includes(id));
+        
+        await Promise.all(
+          removedClassrooms.map((classroomId) =>
+            removeTeacherFromClassroom(classroomId, teacher.user_id)
+          )
+        );
+        await Promise.all(
+          addedClassrooms.map((classroomId) =>
+            addTeacherToClassroom(classroomId, teacher.user_id)
+          )
+        );
+        // -----------------------------------------------------
+        
         toast({
           title: 'Sucesso',
           description: 'Professor atualizado com sucesso',
         });
       }
-  
+
       setOpen(false);
-      if (onSuccess) {
-        onSuccess();
-      }
+      if (onSuccess) onSuccess();
     } catch (error: any) {
       console.error('Error submitting form:', error);
-  
       let errorMessage = 'Erro ao processar a requisição.';
       if (error.message) {
         errorMessage = error.message;
@@ -124,7 +164,22 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
       setLoading(false);
     }
   };
-  
+
+  // Ao clicar no checkbox, se o professor já possuía a turma originalmente e está tentando desmarcá-la, exibe confirmação.
+  const handleClassroomToggle = (classroomId: number) => {
+    if (
+      mode === 'edit' &&
+      teacher?.classrooms?.some((c: any) => c.id === classroomId) &&
+      formData.classrooms.includes(classroomId)
+    ) {
+      setClassroomToRemove(classroomId);
+      setAlertDialogOpen(true);
+    } else {
+      toggleClassroom(classroomId);
+    }
+  };
+
+  // Função para adicionar ou remover a turma do state
   const toggleClassroom = (classroomId: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -133,130 +188,161 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
         : [...prev.classrooms, classroomId],
     }));
   };
-  
+
+  // Confirma a remoção da turma (acionada no AlertDialog)
+  const handleRemoveConfirm = () => {
+    if (classroomToRemove !== null) {
+      toggleClassroom(classroomToRemove);
+    }
+    setAlertDialogOpen(false);
+    setClassroomToRemove(null);
+  };
+
   const filteredClassrooms = classrooms.filter((classroom) =>
     classroom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     classroom.school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     classroom.school.city.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="bg-pink-600 hover:bg-pink-700">
-            {mode === 'create' ? 'Novo Professor' : 'Editar Professor'}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'create' ? 'Adicionar Novo Professor' : 'Editar Professor'}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Nome Completo</Label>
-              <Input
-                id="full_name"
-                value={formData.full_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, full_name: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Nome de Usuário</Label>
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                required
-                disabled={mode === 'edit'}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">
-                {mode === 'create'
-                  ? 'Senha'
-                  : 'Nova Senha (deixe em branco para manter a atual)'}
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required={mode === 'create'}
-              />
-            </div>
-          </div>
-  
-          <div className="space-y-4">
-            <Label>Turmas</Label>
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar turmas..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-            <ScrollArea className="h-[200px] border rounded-md p-4">
-              <div className="space-y-4">
-                {filteredClassrooms.map((classroom) => (
-                  <div key={classroom.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`classroom-${classroom.id}`}
-                      checked={formData.classrooms.includes(classroom.id)}
-                      onCheckedChange={() => toggleClassroom(classroom.id)}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                      <label
-                        htmlFor={`classroom-${classroom.id}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {classroom.name}
-                      </label>
-                      <p className="text-sm text-muted-foreground">
-                        {classroom.school.name} - {classroom.school.city.name}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button className="bg-pink-600 hover:bg-pink-700">
+              {mode === 'create' ? 'Novo Professor' : 'Editar Professor'}
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {mode === 'create' ? 'Adicionar Novo Professor' : 'Editar Professor'}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="full_name">Nome Completo</Label>
+                <Input
+                  id="full_name"
+                  value={formData.full_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, full_name: e.target.value })
+                  }
+                  required
+                />
               </div>
-            </ScrollArea>
-            <p className="text-sm text-muted-foreground">
-              {formData.classrooms.length} turma(s) selecionada(s)
-            </p>
-          </div>
-  
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={loading}
+              <div className="space-y-2">
+                <Label htmlFor="username">Nome de Usuário</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
+                  required
+                  disabled={mode === 'edit'}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">
+                  {mode === 'create'
+                    ? 'Senha'
+                    : 'Nova Senha (deixe em branco para manter a atual)'}
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  required={mode === 'create'}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Label>Turmas</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar turmas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              <ScrollArea className="h-[200px] border rounded-md p-4">
+                <div className="space-y-4">
+                  {filteredClassrooms.map((classroom) => (
+                    <div key={classroom.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`classroom-${classroom.id}`}
+                        checked={formData.classrooms.includes(classroom.id)}
+                        onCheckedChange={() => handleClassroomToggle(classroom.id)}
+                      />
+                      <div className="grid gap-1.5 leading-none">
+                        <label
+                          htmlFor={`classroom-${classroom.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {classroom.name}
+                        </label>
+                        <p className="text-sm text-muted-foreground">
+                          {classroom.school.name} - {classroom.school.city.name}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <p className="text-sm text-muted-foreground">
+                {formData.classrooms.length} turma(s) selecionada(s)
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-pink-600 hover:bg-pink-700"
+                disabled={loading}
+              >
+                {loading ? 'Salvando...' : mode === 'create' ? 'Adicionar' : 'Salvar'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar remoção da turma</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover o professor desta turma?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={handleRemoveConfirm}
             >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              className="bg-pink-600 hover:bg-pink-700"
-              disabled={loading}
-            >
-              {loading ? 'Salvando...' : mode === 'create' ? 'Adicionar' : 'Salvar'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+              Remover da Turma
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
