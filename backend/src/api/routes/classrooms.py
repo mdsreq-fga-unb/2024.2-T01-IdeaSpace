@@ -152,7 +152,7 @@ def delete_classroom(classroom_id: int, session: SessionDep):
     return {"message": "Classroom deleted"}
 
 
-@router.post(
+@router.delete(
     "/{classroom_id}/remove_teacher",
     response_model=ClassroomResponse,
     dependencies=[Depends(get_current_active_superuser)],
