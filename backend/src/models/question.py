@@ -10,7 +10,7 @@ class CategoryBase(SQLModel):
 class Category(CategoryBase, table=True):
     id: int = Field(default=None, primary_key=True)
     slug_name: str
-    questions: List["Question"] = Relationship(back_populates="category")
+    questions: List["Question"] = Relationship(back_populates="category", cascade_delete=True)
 
 
 class OptionBase(SQLModel):
@@ -23,9 +23,14 @@ class QuestionBase(SQLModel):
     category_id: int
 
 
+class QuestionBaseOptional(SQLModel):
+    text: str | None = None
+    category_id: int | None = None
+
+
 class Option(OptionBase, table=True):
     id: int = Field(default=None, primary_key=True) 
-    question_id: int = Field(foreign_key="question.id")
+    question_id: int = Field(foreign_key="question.id", ondelete="CASCADE")
     question: "Question" = Relationship(back_populates="options")
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
@@ -41,7 +46,7 @@ class QuestionnaireLink(SQLModel, table=True):
 class Question(QuestionBase, table=True):
     id: int = Field(default=None, primary_key=True)
     category_id: int = Field(foreign_key="category.id")
-    options: List[Option] = Relationship(back_populates="question")
+    options: List[Option] = Relationship(back_populates="question", cascade_delete=True)
     category: Category = Relationship(back_populates="questions")
     questionnaires: List["Questionnaire"] = Relationship(back_populates="questions", link_model=QuestionnaireLink)
     created_at: datetime = Field(default=datetime.now())
