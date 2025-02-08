@@ -9,8 +9,8 @@ from src.models.question import (
     Question,
     Questionnaire,
     QuestionnaireUpdate,
-    StudentStartsQuestionnaireBase,
     StudentStartsQuestionnaire,
+    StudentAnswerOption,
 )
 
 
@@ -336,8 +336,11 @@ def update_student(*, session: Session, student: Student, classroom_id: int | No
     return student
 
 
-def create_start_questionnaire(*, session: Session, student_starts_questionnaire: StudentStartsQuestionnaireBase) -> StudentStartsQuestionnaire:
-    student_starts_questionnaire = StudentStartsQuestionnaire(**student_starts_questionnaire.model_dump())
+def create_start_questionnaire(*, session: Session, student_id: int, questionnaire_id: int) -> StudentStartsQuestionnaire:
+    student_starts_questionnaire = StudentStartsQuestionnaire(
+        student_id=student_id,
+        questionnaire_id=questionnaire_id,
+    )
     session.add(student_starts_questionnaire)
     session.commit()
     session.refresh(student_starts_questionnaire)
@@ -351,3 +354,40 @@ def get_student_starts_questionnaire(*, session: Session, student_id: int, quest
     )
     student_starts_questionnaire = session.exec(statement).first()
     return student_starts_questionnaire
+
+
+def get_student_answers(*, session: Session, student_id: int, questionnaire_id: int) -> list[StudentAnswerOption]:
+    statement = select(StudentAnswerOption).where(
+        StudentAnswerOption.student_id == student_id,
+        StudentAnswerOption.questionnaire_id == questionnaire_id
+    )
+    student_answers = session.exec(statement).all()
+    return student_answers
+
+
+def add_student_answer(*, session: Session, student_id: int, option_id: int, question_id: int, questionnaire_id: int) -> StudentAnswerOption:
+    student_answer = StudentAnswerOption(
+        student_id=student_id,
+        option_id=option_id,
+        question_id=question_id,
+        questionnaire_id=questionnaire_id
+    )  
+    session.add(student_answer)
+    session.commit()
+    session.refresh(student_answer)
+    return student_answer
+
+
+def get_questions_by_ids(*, session: Session, question_ids: list[int]) -> list[Question]:
+    statement = select(Question).where(Question.id.in_(question_ids))
+    questions = session.exec(statement).all()
+    return questions
+
+
+def get_all_users_answered_questionnaire(*, session: Session, questionnaire_id: int) -> list[StudentStartsQuestionnaire]:
+    statement = select(StudentStartsQuestionnaire).where(
+        StudentStartsQuestionnaire.questionnaire_id == questionnaire_id,
+        StudentStartsQuestionnaire.already_answered == True
+    )
+    students = session.exec(statement).all()
+    return students

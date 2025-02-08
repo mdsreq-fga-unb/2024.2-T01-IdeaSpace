@@ -8,14 +8,26 @@ from src.models.question import (
     QuestionnaireUpdate,
     StudentStartsQuestionnaireBase,
 )
+from src.models.question import Option
 import src.crud as crud
 from datetime import datetime, timedelta
+from src.utils import get_student_result
 
 
 class QuestionnaireBase(BaseModel):
     classroom_id: int
     duration: int
     question_ids: list[int]
+
+
+class AnswerOptionBase(BaseModel):
+    question_id: int
+    option_id: int
+
+
+class AnswerQuestionnaireBase(BaseModel):
+    questionnaire_id: int
+    answers: list[AnswerOptionBase]
     
 
 router = APIRouter(prefix="/questionnaire", tags=["questionnaire"])
@@ -165,11 +177,11 @@ def start_questionnaire(
         raise HTTPException(status_code=403, detail="You don't have permission to start this questionnaire.")
     
     existing_info = crud.get_student_starts_questionnaire(
-        session=session, student_id=start_info.student_id, questionnaire_id=start_info.questionnaire_id
+        session=session, student_id=current_user.id, questionnaire_id=start_info.questionnaire_id
     )
 
     if existing_info is None:
-        existing_info = crud.create_start_questionnaire(session=session, student_starts_questionnaire=start_info)
+        existing_info = crud.create_start_questionnaire(session=session, student_id=current_user.id, questionnaire_id=start_info.questionnaire_id)
     
     duration = timedelta(minutes=questionnaire.duration)
     if existing_info.started_at + duration < datetime.now() or existing_info.already_answered:
@@ -179,3 +191,117 @@ def start_questionnaire(
         "info": existing_info,
         "questionnaire": questionnaire
     }
+
+
+@router.post(
+    "/{questionnaire_id}/answer",
+)
+def answer_questionnaire(
+    answer_info: AnswerQuestionnaireBase, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Estudante responde as questões do questionário
+    """
+    questionnaire = session.get(Questionnaire, answer_info.questionnaire_id)
+    if questionnaire is None:
+        raise HTTPException(status_code=404, detail="Questionnaire not found")
+    
+    existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
+    has_permission = existing_student and questionnaire.classroom_id == existing_student.classroom_id
+
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="You don't have permission to answer this questionnaire.")
+    
+    existing_info = crud.get_student_starts_questionnaire(
+        session=session, student_id=current_user.id, questionnaire_id=answer_info.questionnaire_id
+    )
+
+    if existing_info is None:
+        raise HTTPException(status_code=400, detail="You have not started this questionnaire yet.")
+    
+    duration = timedelta(minutes=questionnaire.duration)
+    if existing_info.started_at + duration < datetime.now() or existing_info.already_answered:
+        raise HTTPException(status_code=400, detail="Questionnaire has already expired or you have already answered it.")
+    
+    # Verificar se as respostas são válidas
+    questions = crud.get_questions_by_ids(session=session, question_ids=[answer.question_id for answer in answer_info.answers])
+    if len(questions) != len(answer_info.answers):
+        raise HTTPException(status_code=400, detail="Some questions were not found or are duplicated.")
+    
+    for answer in answer_info.answers:
+        option = session.get(Option, answer.option_id)
+        if option is None or option.question_id != answer.question_id:
+            raise HTTPException(status_code=400, detail="Some options were not found or does not belong to the question.")
+    
+    # Verificar se as respostas já foram respondidas
+    existing_answers = crud.get_student_answers(
+        session=session, student_id=current_user.id, questionnaire_id=answer_info.questionnaire_id
+    )
+    if existing_answers:
+        raise HTTPException(status_code=400, detail="You have already answered this questionnaire.")
+    
+    # Salvar as respostas
+    for answer in answer_info.answers:
+        crud.add_student_answer(
+            session=session,
+            student_id=current_user.id,
+            option_id=answer.option_id,
+            question_id=answer.question_id,
+            questionnaire_id=answer_info.questionnaire_id
+        )
+    
+    existing_info.already_answered = True
+    session.commit()
+    return {"message": "Answers saved successfully."}
+
+
+@router.get(
+    "/{questionnaire_id}/results",
+)
+def read_questionnaire_answers_by_student(
+    questionnaire_id: int, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Estudante vê suas respostas do questionário, após o questionário ter sido respondido
+    O estudante também vê as respostas corretas
+    """
+    existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
+    if not existing_student:
+        raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
+    
+    student_answered = crud.get_student_starts_questionnaire(
+        session=session, student_id=current_user.id, questionnaire_id=questionnaire_id
+    )
+
+    if student_answered is None or not student_answered.already_answered:
+        raise HTTPException(status_code=400, detail="You have not answered this questionnaire yet.")
+    
+    result = get_student_result(questionnaire_id=questionnaire_id, student_id=current_user.id, session=session)
+    return result
+
+
+@router.get(
+    "/{questionnaire_id}/results/all",
+)
+def read_questionnaire_answers_all_students(
+    questionnaire_id: int, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Professor ou superusuário vê as respostas de todos os estudantes
+    """
+    questionnaire = session.get(Questionnaire, questionnaire_id)
+    if questionnaire is None:
+        raise HTTPException(status_code=404, detail="Questionnaire not found")
+    
+    existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
+    has_permission = current_user.is_superuser or (existing_teacher and questionnaire.classroom_id in existing_teacher.classrooms)
+    
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
+    
+    student_answers = crud.get_all_users_answered_questionnaire(session=session, questionnaire_id=questionnaire_id)
+    result = {}
+    for student_answer in student_answers:
+        result[student_answer.student_id] = get_student_result(questionnaire_id=questionnaire_id, student_id=student_answer.student_id, session=session)
+    
+    return result

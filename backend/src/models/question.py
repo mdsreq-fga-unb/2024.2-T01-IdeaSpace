@@ -65,7 +65,6 @@ class QuestionnaireUpdate(SQLModel):
 
 
 class StudentStartsQuestionnaireBase(SQLModel):
-    student_id: int 
     questionnaire_id: int 
 
 
@@ -76,3 +75,12 @@ class StudentStartsQuestionnaire(SQLModel, table=True):
     already_answered: bool = False
 
     __table_args__ = (PrimaryKeyConstraint("student_id", "questionnaire_id"),)
+
+
+class StudentAnswerOption(SQLModel, table=True):
+    student_id: int = Field(foreign_key="student.user_id", ondelete="CASCADE")
+    option_id: int = Field(foreign_key="option.id", ondelete="CASCADE")
+    question_id: int | None = Field(foreign_key="question.id", default=None, ondelete="CASCADE")
+    questionnaire_id: int = Field(foreign_key="questionnaire.id", ondelete="CASCADE")
+
+    __table_args__ = (PrimaryKeyConstraint("student_id", "question_id", "questionnaire_id"),)
