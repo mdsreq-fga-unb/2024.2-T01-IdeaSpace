@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src.api.deps import get_current_active_superuser, SessionDep, CurrentUser
-from src.models.question import Question, Option, QuestionBase, OptionBase, Category
+from src.api.deps import get_current_active_superuser, SessionDep
+from src.models.question import Question, Option, QuestionBase, OptionBase, Category, QuestionBaseOptional
 from pydantic import BaseModel
 from src.api.response_models import QuestionWithOptionsAnswer, QuestionResponse
 import src.crud as crud
@@ -90,3 +90,64 @@ def create_option(question_id: int, option: OptionBase, session: SessionDep):
     session.refresh(new_option)
     
     return new_option
+
+
+@router.delete(
+    "/{question_id}",
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def delete_question(question_id: int, session: SessionDep):
+    question = session.get(Question, question_id)
+    
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    session.delete(question)
+    session.commit()
+    return question
+
+
+@router.patch(
+    "/{question_id}",
+    response_model=QuestionWithOptionsAnswer,
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def update_question(question_id: int, question: QuestionBaseOptional, session: SessionDep):
+    question_db = session.get(Question, question_id)
+    
+    if not question_db:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    if question.category_id is not None:
+        category = session.get(Category, question.category_id)
+        
+        if not category:
+            raise HTTPException(status_code=404, detail="Category not found")
+        
+        question_db.category_id = question.category_id
+    
+    if question.text:
+        question_db.text = question.text 
+    
+    session.commit()
+    session.refresh(question_db)
+    return question_db
+
+
+@router.patch(
+    "/options/{option_id}",
+    response_model=OptionBase,
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def update_option(
+    option_id: int, option_text: str, session: SessionDep
+):
+    option_db = session.get(Option, option_id)
+    
+    if not option_db:
+        raise HTTPException(status_code=404, detail="Option not found")
+
+    option_db.text = option_text
+    session.commit()
+    session.refresh(option_db)
+    return option_db
