@@ -1,6 +1,13 @@
 from sqlmodel import SQLModel, Field, Relationship, PrimaryKeyConstraint
 from typing import List
 from datetime import datetime
+from enum import Enum
+
+
+class DifficultyLevel(str, Enum):
+    FACIL = "FACIL",
+    MEDIO = "MEDIO",
+    DIFICIL = "DIFICIL"
 
 
 class CategoryBase(SQLModel):
@@ -21,7 +28,7 @@ class OptionBase(SQLModel):
 class QuestionBase(SQLModel):
     text: str
     category_id: int
-
+    difficulty: DifficultyLevel
 
 class QuestionBaseOptional(SQLModel):
     text: str | None = None

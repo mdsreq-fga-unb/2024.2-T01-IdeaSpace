@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from src.models.country import Country
 from src.models.user import User, UserPublic
-from src.models.question import CategoryBase, StudentStartsQuestionnaire
+from src.models.question import CategoryBase, StudentStartsQuestionnaire, DifficultyLevel
 from datetime import datetime
 
 class CityResponse(BaseModel):
@@ -83,6 +83,7 @@ class QuestionResponse(BaseModel):
     id: int
     text: str
     category_id: int
+    difficulty: DifficultyLevel
     category: CategoryBase
     created_at: datetime
     updated_at: datetime    
