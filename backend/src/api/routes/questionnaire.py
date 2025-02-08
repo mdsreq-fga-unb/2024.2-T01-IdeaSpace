@@ -305,3 +305,32 @@ def read_questionnaire_answers_all_students(
         result[student_answer.student_id] = get_student_result(questionnaire_id=questionnaire_id, student_id=student_answer.student_id, session=session)
     
     return result
+
+
+@router.get(
+    "/{questionnaire_id}/results/student/{student_id}",
+)
+def read_questionnaire_answers_by_student_id(
+    questionnaire_id: int, student_id: int, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Professor ou superusuário vê as respostas de um estudante específico
+    """
+    questionnaire = session.get(Questionnaire, questionnaire_id)
+    if questionnaire is None:
+        raise HTTPException(status_code=404, detail="Questionnaire not found")
+    
+    existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
+    has_permission = current_user.is_superuser or (existing_teacher and questionnaire.classroom_id in existing_teacher.classrooms)
+    
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
+    
+    student_answer = crud.get_student_starts_questionnaire(
+        session=session, student_id=student_id, questionnaire_id=questionnaire_id
+    )
+    if student_answer is None or not student_answer.already_answered:
+        raise HTTPException(status_code=400, detail="Student has not answered this questionnaire yet.")
+    
+    result = get_student_result(questionnaire_id=questionnaire_id, student_id=student_id, session=session)
+    return result
