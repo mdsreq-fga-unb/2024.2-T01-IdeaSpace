@@ -4,23 +4,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Clock, Users, ArrowRight, ArrowLeft, Eye, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Clock, Users, ArrowRight, ArrowLeft, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { MainNav } from '@/components/main-nav';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { fetchQuestionnaires } from '@/services/questionnaire';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function QuizListingPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -141,39 +131,8 @@ export default function QuizListingPage() {
                                 <span>{questionnaire.questions.length} questões</span>
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button variant="outline" className="w-full gap-2">
-                                    <Eye className="h-4 w-4" />
-                                    Visualizar
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-3xl">
-                                  <DialogHeader>
-                                    <DialogTitle>Questionário #{questionnaire.id}</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div className="grid gap-4">
-                                      <div>
-                                        <h4 className="text-sm font-medium text-muted-foreground">Duração</h4>
-                                        <p className="text-base">{questionnaire.duration} minutos</p>
-                                      </div>
-                                      <div>
-                                        <h4 className="text-sm font-medium text-muted-foreground">Total de Questões</h4>
-                                        <p className="text-base">{questionnaire.questions.length} questões</p>
-                                      </div>
-                                    </div>
-                                    <div className="border-t pt-4">
-                                      <p className="text-sm text-muted-foreground">
-                                        Ao iniciar o questionário, você terá {questionnaire.duration} minutos para responder todas as questões.
-                                        Certifique-se de ter um ambiente tranquilo e boa conexão com a internet.
-                                      </p>
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                              <Link href={`/quiz/${questionnaire.id}`} className="flex-1">
+                            <div className="flex">
+                              <Link href={`/quiz/${questionnaire.id}`} className="w-full">
                                 <Button className="w-full gap-2 bg-pink-600 hover:bg-pink-700">
                                   <ArrowRight className="h-4 w-4" />
                                   Iniciar
@@ -213,7 +172,7 @@ export default function QuizListingPage() {
                                 <span>{questionnaire.questions.length} questões</span>
                               </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex justify-center">
                               <Link href={`/quiz/${questionnaire.id}/results`} className="w-full">
                                 <Button variant="outline" className="w-full gap-2">
                                   <Eye className="h-4 w-4" />
