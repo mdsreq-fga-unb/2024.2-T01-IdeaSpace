@@ -12,7 +12,7 @@ export async function fetchQuestionnaires(classroomId: number) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to fetch questionnaires');
+    throw new Error(errorData.detail || 'Falha ao obter questionários');
   }
 
   return response.json();
@@ -25,7 +25,7 @@ export async function getQuestionnaire(id: number) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to fetch questionnaire');
+    throw new Error(errorData.detail || 'Falha ao obter questionários');
   }
 
   return response.json();
@@ -44,7 +44,7 @@ export async function createQuestionnaire(data: {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to create questionnaire');
+    throw new Error(errorData.detail || 'Falha ao criar o questionário');
   }
 
   return response.json();
@@ -60,8 +60,20 @@ export async function updateQuestionnaire(id: number, data: QuestionnaireUpdate)
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to update questionnaire');
+    throw new Error(errorData.detail || 'Falha ao atualizar o questionário');
   }
 
   return response.json();
+}
+
+export async function deleteQuestionnaire(id: number) {
+  const response = await fetch(`${API_URL}/questionnaire/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Falha ao excluir o questionário');
+  }
 }

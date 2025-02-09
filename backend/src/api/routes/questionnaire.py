@@ -351,3 +351,30 @@ def read_questionnaire_answers_by_student_id(
     
     result = get_student_result(questionnaire_id=questionnaire_id, student_id=student_id, session=session)
     return result
+
+
+@router.delete(
+    "/{questionnaire_id}",
+    status_code=204,
+)
+def delete_questionnaire(
+    questionnaire_id: int, session: SessionDep, current_user: CurrentUser
+):
+    """
+    Deleta um questionário se o usuário for um superusuário ou um professor autorizado.
+    """
+    questionnaire = session.get(Questionnaire, questionnaire_id)
+    if questionnaire is None:
+        raise HTTPException(status_code=404, detail="Questionnaire not found")
+    
+    existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
+    has_permission = current_user.is_superuser or (
+        existing_teacher and questionnaire.classroom_id in [classroom.id for classroom in existing_teacher.classrooms]
+    )
+
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="You don't have permission to delete this questionnaire.")
+    
+    session.delete(questionnaire)
+    session.commit()
+    return {"message": "Questionnaire deleted successfully."}
