@@ -161,13 +161,13 @@ def create_question():
                 for _ in range(3):
                     option_in = OptionBase(
                         text=fake.sentence(),
-                        is_correct=False
+                        is_answer=False
                     )
                     crud.create_option(session=session, option=option_in, question_id=question.id)
                 
                 option_in = OptionBase(
                     text=fake.sentence(),
-                    is_correct=True
+                    is_answer=True
                 )
                 crud.create_option(session=session, option=option_in, question_id=question.id)
                 amount -= 1
