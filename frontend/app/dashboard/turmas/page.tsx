@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { fetchClassrooms, deleteClassroom, fetchCountries, fetchCities, fetchSchools } from '@/services/api';
+import { fetchClassrooms, deleteClassroom } from '@/services/classrooms';
 
 export default function TurmasPage() {
   const [searchTerm, setSearchTerm] = useState('');

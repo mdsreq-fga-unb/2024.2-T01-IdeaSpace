@@ -15,13 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  createTeacher,
-  updateTeacher,
-  fetchClassrooms,
-  removeTeacherFromClassroom,
-  addTeacherToClassroom,
-} from '@/services/api';
+import { createTeacher, updateTeacher } from '@/services/teachers';
+import { fetchClassrooms, removeTeacherFromClassroom, addTeacherToClassroom } from '@/services/classrooms';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,31 +49,62 @@ interface Classroom {
 export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  // Estado inicial para o formulário
+  const initialFormData = mode === 'create'
+    ? {
+        username: '',
+        full_name: '',
+        password: '',
+        classrooms: [] as number[],
+      }
+    : {
+        username: teacher?.user.username || '',
+        full_name: teacher?.user.full_name || '',
+        password: '',
+        classrooms: teacher?.classrooms?.map((c: any) => c.id) || [],
+      };
+
   const [formData, setFormData] = useState<{
     username: string;
     full_name: string;
     password: string;
     classrooms: number[];
-  }>({
-    username: teacher?.user.username || '',
-    full_name: teacher?.user.full_name || '',
-    password: '',
-    // Armazena os IDs das turmas originalmente atribuídas
-    classrooms: teacher?.classrooms?.map((c: any) => c.id) || [],
-  });
+  }>(initialFormData);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const { toast } = useToast();
 
-  // Estados para o AlertDialog de confirmação de remoção
+  // Estados para o AlertDialog de confirmação de remoção de turma
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [classroomToRemove, setClassroomToRemove] = useState<number | null>(null);
 
+  // Carrega as turmas sempre que o diálogo é aberto
   useEffect(() => {
     if (open) {
       loadClassrooms();
     }
   }, [open]);
+
+  // Atualiza o estado do formulário se o mode ou o teacher mudarem
+  useEffect(() => {
+    if (mode === 'create') {
+      setFormData({
+        username: '',
+        full_name: '',
+        password: '',
+        classrooms: [],
+      });
+    } else {
+      setFormData({
+        username: teacher?.user.username || '',
+        full_name: teacher?.user.full_name || '',
+        password: '',
+        classrooms: teacher?.classrooms?.map((c: any) => c.id) || [],
+      });
+    }
+  }, [mode, teacher]);
 
   const loadClassrooms = async () => {
     try {
@@ -117,18 +143,13 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
           password: formData.password || undefined,
           full_name: formData.full_name,
         });
-        
-        // --- Atualiza as turmas associadas ---
-        // Obter os IDs das turmas originalmente atribuídas
+
+        // Atualiza as turmas associadas
         const initialClassrooms: number[] = teacher.classrooms.map((c: any) => c.id);
-        // Turmas atualmente selecionadas
         const newClassrooms: number[] = formData.classrooms;
-        
-        // Turmas removidas: que estavam originalmente, mas não estão mais selecionadas
         const removedClassrooms = initialClassrooms.filter(id => !newClassrooms.includes(id));
-        // Turmas adicionadas: que não estavam originalmente e agora foram selecionadas
         const addedClassrooms = newClassrooms.filter(id => !initialClassrooms.includes(id));
-        
+
         await Promise.all(
           removedClassrooms.map((classroomId) =>
             removeTeacherFromClassroom(classroomId, teacher.user_id)
@@ -139,8 +160,7 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
             addTeacherToClassroom(classroomId, teacher.user_id)
           )
         );
-        // -----------------------------------------------------
-        
+
         toast({
           title: 'Sucesso',
           description: 'Professor atualizado com sucesso',
@@ -165,7 +185,7 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     }
   };
 
-  // Ao clicar no checkbox, se o professor já possuía a turma originalmente e está tentando desmarcá-la, exibe confirmação.
+  // Se estiver em modo edit e o professor já possuía a turma, exibe confirmação ao desmarcar
   const handleClassroomToggle = (classroomId: number) => {
     if (
       mode === 'edit' &&
@@ -179,7 +199,6 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     }
   };
 
-  // Função para adicionar ou remover a turma do state
   const toggleClassroom = (classroomId: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -189,7 +208,6 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     }));
   };
 
-  // Confirma a remoção da turma (acionada no AlertDialog)
   const handleRemoveConfirm = () => {
     if (classroomToRemove !== null) {
       toggleClassroom(classroomToRemove);
@@ -204,9 +222,22 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     classroom.school.city.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Reseta os dados do formulário ao abrir o diálogo em modo create
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen && mode === 'create') {
+      setFormData({
+        username: '',
+        full_name: '',
+        password: '',
+        classrooms: [],
+      });
+    }
+  };
+
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
           {trigger || (
             <Button className="bg-pink-600 hover:bg-pink-700">

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getClassroomWithUsers } from '@/services/api';
+import { getClassroomWithUsers } from '@/services/classrooms';
 import { useToast } from '@/hooks/use-toast';
 
 interface ViewClassDialogProps {

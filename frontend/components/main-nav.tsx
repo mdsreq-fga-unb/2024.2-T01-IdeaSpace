@@ -39,7 +39,7 @@ export function MainNav() {
     if (userRole === 'aluno') return '/dashboard/home/alunos';
     if (userRole === 'professor') return '/dashboard/home/professores';
     if (userRole === 'administrador') return '/dashboard/home/admin';
-    return '/dashboard';
+    return '/dashboard/home';
   };
 
    const routes = [
@@ -122,7 +122,7 @@ export function MainNav() {
 
   return (
     <div className="flex-1 flex items-center">
-      <Link href="/dashboard" className="flex items-center gap-2 mr-6">
+      <Link href={getHomeRoute()} className="flex items-center gap-2 mr-6">
         <div className="w-8 h-8 bg-pink-600 rounded-lg flex items-center justify-center">
           <Rocket className="w-5 h-5 text-white" />
         </div>

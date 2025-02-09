@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createStudent, updateStudent, fetchClassrooms, removeStudentFromClassroom } from '@/services/api';
+import { createStudent, updateStudent } from '@/services/students';
+import { fetchClassrooms, removeStudentFromClassroom } from '@/services/classrooms';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,30 +38,61 @@ interface StudentDialogProps {
 export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
   const [formData, setFormData] = useState<{
     username: string;
     full_name: string;
     password: string;
     classrooms: number[];
-  }>({
-    username: student?.user.username || '',
-    full_name: student?.user.full_name || '',
-    password: '',
-    classrooms: student?.classroom ? [student.classroom.id] : [],
+  }>(() => {
+    return mode === 'create'
+      ? {
+          username: '',
+          full_name: '',
+          password: '',
+          classrooms: [],
+        }
+      : {
+          username: student?.user.username || '',
+          full_name: student?.user.full_name || '',
+          password: '',
+          classrooms: student?.classroom ? [student.classroom.id] : [],
+        };
   });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [classrooms, setClassrooms] = useState<any[]>([]);
-  const { toast } = useToast();
 
-  // Alert dialog state
+  // Estado para o AlertDialog de confirmação de remoção de turma
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [classroomToRemove, setClassroomToRemove] = useState<number | null>(null);
 
+  // Carrega as turmas sempre que o diálogo é aberto
   useEffect(() => {
     if (open) {
       loadClassrooms();
     }
   }, [open]);
+
+  // Atualiza o estado caso o mode ou o student mudem (útil no caso de reaberturas do diálogo)
+  useEffect(() => {
+    if (mode === 'create') {
+      setFormData({
+        username: '',
+        full_name: '',
+        password: '',
+        classrooms: [],
+      });
+    } else {
+      setFormData({
+        username: student?.user.username || '',
+        full_name: student?.user.full_name || '',
+        password: '',
+        classrooms: student?.classroom ? [student.classroom.id] : [],
+      });
+    }
+  }, [mode, student]);
 
   const loadClassrooms = async () => {
     try {
@@ -72,8 +110,7 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    // Validação: se estiver no modo de criação e nenhuma turma foi selecionada, exibe um erro.
+
     if (mode === 'create' && formData.classrooms.length === 0) {
       toast({
         title: 'Erro',
@@ -82,9 +119,9 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
       });
       return;
     }
-  
+
     setLoading(true);
-  
+
     try {
       if (mode === 'create') {
         await createStudent({
@@ -98,11 +135,10 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
           description: 'Aluno criado com sucesso',
         });
       } else {
-        // Se o aluno foi removido da turma, chama removeStudentFromClassroom
         if (student?.classroom && formData.classrooms.length === 0) {
           await removeStudentFromClassroom(student.classroom.id, student.user_id);
         }
-  
+
         await updateStudent(student.user_id, {
           username: formData.username,
           password: formData.password || undefined,
@@ -114,14 +150,13 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
           description: 'Aluno atualizado com sucesso',
         });
       }
-  
+
       setOpen(false);
       if (onSuccess) {
         onSuccess();
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
-  
       let errorMessage = 'Erro ao processar a requisição.';
       if (error.message) {
         errorMessage = error.message;
@@ -135,11 +170,13 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
       setLoading(false);
     }
   };
-  
 
   const handleClassroomToggle = (classroomId: number) => {
-    if (mode === 'edit' && student?.classroom?.id === classroomId && formData.classrooms.includes(classroomId)) {
-      // If unchecking the current classroom in edit mode, show confirmation dialog
+    if (
+      mode === 'edit' &&
+      student?.classroom?.id === classroomId &&
+      formData.classrooms.includes(classroomId)
+    ) {
       setClassroomToRemove(classroomId);
       setAlertDialogOpen(true);
     } else {
@@ -152,7 +189,7 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
       ...prev,
       classrooms: prev.classrooms.includes(classroomId)
         ? prev.classrooms.filter((id) => id !== classroomId)
-        : [classroomId], // Only allow one classroom
+        : [classroomId],
     }));
   };
 
@@ -163,16 +200,29 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
     setAlertDialogOpen(false);
     setClassroomToRemove(null);
   };
-  
+
   const filteredClassrooms = classrooms.filter((classroom) =>
     classroom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     classroom.school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     classroom.school.city.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Função para resetar os dados quando o diálogo for aberto em modo create
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen && mode === 'create') {
+      setFormData({
+        username: '',
+        full_name: '',
+        password: '',
+        classrooms: [],
+      });
+    }
+  };
+
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
           {trigger || (
             <Button className="bg-pink-600 hover:bg-pink-700">

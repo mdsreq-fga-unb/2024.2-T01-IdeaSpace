@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, School, GraduationCap, BookOpen } from 'lucide-react';
-import { fetchStatistics } from '@/services/api';
+import { fetchStatistics } from '@/services/statistcs';
 import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardAdminPage() {

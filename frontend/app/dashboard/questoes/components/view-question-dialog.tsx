@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2 } from 'lucide-react';
-import { getQuestion } from '@/services/api';
+import { getQuestion } from '@/services/questions';
 
 const difficultyColors = {
   easy: 'bg-green-500',

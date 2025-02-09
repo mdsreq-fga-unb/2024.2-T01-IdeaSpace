@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { fetchTeachers, deleteTeacher } from '@/services/api';
+import { fetchTeachers, deleteTeacher } from '@/services/teachers';
 
 export default function ProfessoresPage() {
   const [searchTerm, setSearchTerm] = useState('');

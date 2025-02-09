@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createCategory, deleteCategory, fetchCategories, Category } from '@/services/api';
+import { createCategory, deleteCategory, fetchCategories, Category } from '@/services/categories';
 import {
   AlertDialog,
   AlertDialogAction,

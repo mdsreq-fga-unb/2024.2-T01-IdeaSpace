@@ -19,13 +19,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import {
-  createClassroom,
-  updateClassroom,
-  fetchCountries,
-  fetchCities,
-  fetchSchools,
-} from '@/services/api';
+import { createClassroom, updateClassroom } from '@/services/classrooms';
+import { fetchCountries } from '@/services/countries';
+import { fetchCities } from '@/services/cities';
+import { fetchSchools } from '@/services/schools';
 
 interface ClassDialogProps {
   mode: 'create' | 'edit';
@@ -34,32 +31,52 @@ interface ClassDialogProps {
   onSuccess?: () => void;
 }
 
+interface ClassFormData {
+  name: string;
+  countryId: string;
+  cityId: string;
+  schoolId: string;
+}
+
 export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  // Para o modo "create" é necessário armazenar os IDs para seleção, 
-  // enquanto no modo "edit" apenas o nome será alterado
-  const initialFormData =
-    mode === 'create'
-      ? {
-          name: classroom?.name || '',
-          countryId: classroom?.school?.city?.country?.id?.toString() || '',
-          cityId: classroom?.school?.city?.id?.toString() || '',
-          schoolId: classroom?.school?.id?.toString() || '',
-        }
-      : {
-          name: classroom?.name || '',
-        };
+  // Estados iniciais para cada modo
+  const initialFormDataCreate: ClassFormData = {
+    name: '',
+    countryId: '',
+    cityId: '',
+    schoolId: '',
+  };
 
-  const [formData, setFormData] = useState(initialFormData);
+  const initialFormDataEdit: ClassFormData = {
+    name: classroom?.name || '',
+    countryId: '',
+    cityId: '',
+    schoolId: '',
+  };
 
-  // Estados utilizados apenas no modo "create"
+  const [formData, setFormData] = useState<ClassFormData>(
+    mode === 'create' ? initialFormDataCreate : initialFormDataEdit
+  );
+
+  // Estados para os dados de localização (usados apenas no modo create)
   const [countries, setCountries] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
   const [schools, setSchools] = useState<any[]>([]);
-  const { toast } = useToast();
 
+  // Atualiza o estado do formulário sempre que o mode ou o classroom mudarem
+  useEffect(() => {
+    if (mode === 'create') {
+      setFormData(initialFormDataCreate);
+    } else {
+      setFormData(initialFormDataEdit);
+    }
+  }, [mode, classroom]);
+
+  // Quando o diálogo for aberto em modo "create", carrega os dados de localização
   useEffect(() => {
     if (open && mode === 'create') {
       loadCountries();
@@ -126,6 +143,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
             description: 'Selecione uma escola',
             variant: 'destructive',
           });
+          setLoading(false);
           return;
         }
 
@@ -145,6 +163,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
             description: 'Turma não encontrada',
             variant: 'destructive',
           });
+          setLoading(false);
           return;
         }
 
@@ -172,8 +191,16 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
     }
   };
 
+  // Reseta os dados do formulário ao abrir o diálogo em modo "create"
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen && mode === 'create') {
+      setFormData(initialFormDataCreate);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button className="bg-pink-600 hover:bg-pink-700">
@@ -189,7 +216,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4">
-            {/* Campo de nome, sempre editável */}
+            {/* Campo de nome */}
             <div className="space-y-2">
               <Label htmlFor="name">Nome da Turma</Label>
               <Input
@@ -204,7 +231,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
 
             {mode === 'create' && (
               <>
-                {/* Campos de localização para criação (editáveis) */}
+                {/* Campos de localização (apenas para modo create) */}
                 <div className="space-y-2">
                   <Label htmlFor="country">País</Label>
                   <Select
@@ -291,7 +318,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
 
             {mode === 'edit' && (
               <>
-                {/* Campos de localização para edição (visíveis, mas não editáveis) */}
+                {/* Campos de localização para edição (somente leitura) */}
                 <div className="space-y-2">
                   <Label htmlFor="country">País</Label>
                   <Input
@@ -334,11 +361,7 @@ export function ClassDialog({ mode, classroom, trigger, onSuccess }: ClassDialog
               className="bg-pink-600 hover:bg-pink-700"
               disabled={loading}
             >
-              {loading
-                ? 'Salvando...'
-                : mode === 'create'
-                ? 'Adicionar'
-                : 'Salvar'}
+              {loading ? 'Salvando...' : mode === 'create' ? 'Adicionar' : 'Salvar'}
             </Button>
           </div>
         </form>

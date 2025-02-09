@@ -19,7 +19,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { fetchStudent, deleteStudent, fetchClassrooms } from '@/services/api';
+import { fetchStudent, deleteStudent } from '@/services/students';
+import { fetchClassrooms } from '@/services/classrooms';
 
 export default function AlunosPage() {
   const [searchTerm, setSearchTerm] = useState('');

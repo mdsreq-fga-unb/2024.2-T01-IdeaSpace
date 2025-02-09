@@ -2,13 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Mock data - replace with actual data from your backend
-const adminUsers = [
-  { id: 1, nome: 'João Silva', username: 'joao.admin', ativo: true },
-  { id: 2, nome: 'Maria Santos', username: 'maria.admin', ativo: true },
-  { id: 3, nome: 'Carlos Oliveira', username: 'carlos.admin', ativo: true },
-];
-
 export default function AdminPage() {
   return (
     <div className="space-y-6">
@@ -24,21 +17,6 @@ export default function AdminPage() {
           <div>
             <h3 className="font-medium mb-2">Versão do Sistema</h3>
             <p className="text-sm text-muted-foreground">1.0.0</p>
-          </div>
-          <div>
-            <h3 className="font-medium mb-2">Administradores Ativos</h3>
-            <p className="text-sm text-muted-foreground">
-              {adminUsers.filter(admin => admin.ativo).length} contas ativas
-            </p>
-            <div className="mt-2 space-y-1">
-              {adminUsers
-                .filter(admin => admin.ativo)
-                .map(admin => (
-                  <p key={admin.id} className="text-sm text-muted-foreground">
-                    {admin.nome}
-                  </p>
-                ))}
-            </div>
           </div>
           <div>
             <h3 className="font-medium mb-2">Status do Sistema</h3>

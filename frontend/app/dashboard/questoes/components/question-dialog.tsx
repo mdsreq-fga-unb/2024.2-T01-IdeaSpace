@@ -1,50 +1,89 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Plus, Minus, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  createQuestion, 
-  updateQuestion, 
-  createQuestionOption, 
-  updateQuestionOption, 
+import {
+  createQuestion,
+  updateQuestion,
+  createQuestionOption,
+  updateQuestionOption,
   deleteQuestionOption,
-  fetchCategories, 
   getQuestion,
-  Category 
-} from '@/services/api';
+} from '@/services/questions';
+import { fetchCategories, Category } from '@/services/categories';
 
-interface QuestionDialogProps {
-  mode: 'create' | 'edit';
-  question?: {
+//
+// TIPAGENS
+//
+
+// Tipo da questão conforme o retorno da API.
+interface QuestionProp {
+  id: number;
+  text: string;
+  category_id: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  category: {
+    name: string;
+  };
+  options?: Array<{
     id: number;
     text: string;
-    category_id: number;
-    difficulty: 'easy' | 'medium' | 'hard';
-    category: {
-      id: number;
-      name: string;
-    };
-    options?: Array<{
-      id: number;
-      text: string;
-      is_answer: boolean;
-    }>;
-  };
+    is_answer: boolean;
+  }>;
+}
+
+// União discriminada para as props do diálogo
+
+interface CreateQuestionDialogProps {
+  mode: 'create';
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 }
 
-const initialFormState = {
+interface EditQuestionDialogProps {
+  mode: 'edit';
+  question: QuestionProp;
+  trigger?: React.ReactNode;
+  onSuccess?: () => void;
+}
+
+type QuestionDialogProps = CreateQuestionDialogProps | EditQuestionDialogProps;
+
+// Interface para os dados do formulário
+interface FormData {
+  text: string;
+  category_id: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  options: Array<{
+    id: number;
+    text: string;
+    is_answer: boolean;
+  }>;
+}
+
+const initialFormState: FormData = {
   text: '',
   category_id: '',
-  difficulty: 'easy' as const,
+  difficulty: 'easy',
   options: [
     { id: 0, text: '', is_answer: true },
     { id: 0, text: '', is_answer: false },
@@ -53,24 +92,27 @@ const initialFormState = {
   ],
 };
 
-export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionDialogProps) {
+export function QuestionDialog(props: QuestionDialogProps) {
+  // Não desestruture "mode" para preservar a união discriminada
+  const { trigger, onSuccess } = props;
+  const { toast } = useToast();
+
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const { toast } = useToast();
 
-  // Estado para os dados atuais do formulário
-  const [formData, setFormData] = useState({
+  // Estado do formulário
+  const [formData, setFormData] = useState<FormData>({
     ...initialFormState,
     options: [...initialFormState.options],
   });
 
-  // Armazena as opções removidas para processar a exclusão
+  // Armazena as opções removidas para posterior exclusão
   const [deletedOptions, setDeletedOptions] = useState<Array<{ id: number }>>([]);
 
-  // Armazena os dados originais carregados via API
-  const [originalQuestion, setOriginalQuestion] = useState<typeof question | null>(null);
+  // Dados originais da questão (somente no modo edição)
+  const [originalQuestion, setOriginalQuestion] = useState<QuestionProp | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -83,21 +125,22 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
       }
 
       try {
-        if (mode === 'edit' && question) {
+        if (props.mode === 'edit') {
+          // No modo edição, "question" é obrigatório
           setLoadingData(true);
           const [questionData, categoriesData] = await Promise.all([
-            getQuestion(question.id),
-            fetchCategories()
+            getQuestion(props.question.id),
+            fetchCategories(),
           ]);
           setCategories(categoriesData);
           setOriginalQuestion(questionData);
 
-          // Ordena as opções pelo id (ou outro critério desejado)
+          // Ordena as opções (por exemplo, pelo id)
           let sortedOptions = Array.isArray(questionData.options)
             ? [...questionData.options].sort((a, b) => a.id - b.id)
             : [...initialFormState.options];
 
-          // Se houver mais de uma opção marcada como correta, mantenha somente a primeira
+          // Caso haja mais de uma opção marcada como correta, mantém somente a primeira
           if (sortedOptions.filter(o => o.is_answer).length > 1) {
             let foundCorrect = false;
             sortedOptions = sortedOptions.map(o => {
@@ -120,6 +163,7 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
             options: sortedOptions,
           });
         } else {
+          // Modo criação: carrega as categorias
           const categoriesData = await fetchCategories();
           setCategories(categoriesData);
         }
@@ -138,14 +182,15 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
     loadData();
 
     if (!open) setDeletedOptions([]);
-  }, [open, mode, question, toast]);
+  }, [open, props, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (mode === 'create') {
+      if (props.mode === 'create') {
+        // Modo criação: envia a requisição de criação
         await createQuestion({
           question: {
             text: formData.text,
@@ -158,16 +203,19 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
           title: 'Sucesso',
           description: 'Questão criada com sucesso',
         });
-      } else if (mode === 'edit' && question && originalQuestion) {
+      } else {
+        // Modo edição:
+        // Agrupa todas as requisições necessárias para atualizar a questão e as opções
         const promises: Promise<any>[] = [];
 
+        // Atualiza os campos principais da questão se houver alteração
         if (
-          formData.text !== originalQuestion.text || 
-          formData.category_id !== originalQuestion.category_id.toString() ||
-          formData.difficulty !== originalQuestion.difficulty
+          formData.text !== originalQuestion?.text ||
+          formData.category_id !== originalQuestion?.category_id.toString() ||
+          formData.difficulty !== originalQuestion?.difficulty
         ) {
           promises.push(
-            updateQuestion(question.id, {
+            updateQuestion(props.question.id, {
               text: formData.text,
               category_id: parseInt(formData.category_id),
               difficulty: formData.difficulty,
@@ -175,26 +223,34 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
           );
         }
 
-        const originalOptions = originalQuestion.options || [];
+        // Atualiza as opções existentes ou cria novas
+        const originalOptions = originalQuestion?.options || [];
         for (const option of formData.options) {
           if (option.id) {
             const originalOption = originalOptions.find(o => o.id === option.id);
-            console.log("Comparando opção atual e original:", { current: option, original: originalOption });
-            if (originalOption && (originalOption.text !== option.text || originalOption.is_answer !== option.is_answer)) {
+            if (
+              originalOption &&
+              (option.text !== originalOption.text ||
+                option.is_answer !== originalOption.is_answer)
+            ) {
               promises.push(updateQuestionOption(option.id, option.text, option.is_answer));
             }
           } else {
-            promises.push(createQuestionOption(question.id, {
-              text: option.text,
-              is_answer: option.is_answer,
-            }));
+            promises.push(
+              createQuestionOption(props.question.id, {
+                text: option.text,
+                is_answer: option.is_answer,
+              })
+            );
           }
         }
 
+        // Envia requisições para excluir as opções removidas
         for (const removedOption of deletedOptions) {
           promises.push(deleteQuestionOption(removedOption.id));
         }
 
+        // Envia todas as requisições de uma vez (concorrentemente)
         await Promise.all(promises);
         toast({
           title: 'Sucesso',
@@ -235,7 +291,7 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
   const removeOption = (index: number) => {
     const optionToRemove = formData.options[index];
     // No modo edição não permite remover a alternativa correta
-    if (mode === 'edit' && optionToRemove.is_answer) {
+    if (props.mode === 'edit' && optionToRemove.is_answer) {
       toast({
         title: 'Atenção',
         description: 'Não é possível apagar a alternativa correta',
@@ -248,7 +304,7 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
       if (optionToRemove.id) {
         setDeletedOptions(prev => [...prev, optionToRemove]);
       }
-      // Em modo criação, se a opção removida era a correta, define a primeira como correta
+      // Se a opção removida era a correta, define a primeira como correta
       if (optionToRemove.is_answer && newOptions.length > 0) {
         newOptions[0] = { ...newOptions[0], is_answer: true };
       }
@@ -261,14 +317,14 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
       <DialogTrigger asChild>
         {trigger || (
           <Button className="bg-pink-600 hover:bg-pink-700">
-            {mode === 'create' ? 'Nova Questão' : 'Editar Questão'}
+            {props.mode === 'create' ? 'Nova Questão' : 'Editar Questão'}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Adicionar Nova Questão' : 'Editar Questão'}
+            {props.mode === 'create' ? 'Adicionar Nova Questão' : 'Editar Questão'}
           </DialogTitle>
         </DialogHeader>
 
@@ -284,7 +340,9 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                 <Textarea
                   id="text"
                   value={formData.text}
-                  onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, text: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -293,7 +351,9 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                 <Label htmlFor="category">Tema</Label>
                 <Select
                   value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category_id: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tema" />
@@ -312,8 +372,13 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                 <Label>Nível de Dificuldade</Label>
                 <Select
                   value={formData.difficulty}
-                  onValueChange={(value) => setFormData({ ...formData, difficulty: value as 'easy' | 'medium' | 'hard' })}
-                  disabled={mode === 'edit'} // Dificuldade não editável em modo edição
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      difficulty: value as 'easy' | 'medium' | 'hard',
+                    })
+                  }
+                  disabled={props.mode === 'edit'} // Em modo de edição, a dificuldade não pode ser alterada
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a dificuldade" />
@@ -344,15 +409,14 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                   <div className="flex items-center gap-2 mb-4">
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
                     <p className="text-sm font-medium">
-                      {mode === 'create'
+                      {props.mode === 'create'
                         ? 'Selecione o círculo ao lado da alternativa que será a resposta correta'
                         : 'Esta é a alternativa correta'}
                     </p>
                   </div>
 
-                  {/* Container com rolagem para as alternativas */}
                   <div className="max-h-80 overflow-y-auto">
-                    {mode === 'create' ? (
+                    {props.mode === 'create' ? (
                       <RadioGroup
                         value={formData.options.findIndex(opt => opt.is_answer).toString()}
                         onValueChange={(value) => {
@@ -367,12 +431,13 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                         {formData.options.map((option, index) => (
                           <div key={index} className="flex gap-2 items-start">
                             <div className="flex items-center gap-2">
-                              <RadioGroupItem 
-                                value={index.toString()} 
-                                id={`alternativa-${index}`} 
+                              <RadioGroupItem
+                                value={index.toString()}
+                                id={`alternativa-${index}`}
                                 className="mt-3"
                               />
-                              {index.toString() === formData.options.findIndex(opt => opt.is_answer).toString() && (
+                              {index.toString() ===
+                                formData.options.findIndex(opt => opt.is_answer).toString() && (
                                 <CheckCircle2 className="h-4 w-4 text-green-500 mt-3" />
                               )}
                             </div>
@@ -391,7 +456,7 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                                 size="icon"
                                 onClick={() => removeOption(index)}
                                 className="self-start"
-                                disabled={mode === 'edit' && option.is_answer} // Impede a remoção da alternativa correta
+                                disabled={props.mode === 'edit' && option.is_answer}
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
@@ -400,7 +465,7 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                         ))}
                       </RadioGroup>
                     ) : (
-                      // Modo edit: não permite alterar qual é a alternativa correta
+                      // No modo de edição, não é permitido alterar qual é a resposta correta
                       <div className="space-y-4">
                         {formData.options.map((option, index) => (
                           <div key={index} className="flex gap-2 items-start">
@@ -426,7 +491,7 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                                 size="icon"
                                 onClick={() => removeOption(index)}
                                 className="self-start"
-                                disabled={option.is_answer} // Não permite remover a alternativa correta
+                                disabled={option.is_answer}
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
@@ -454,7 +519,11 @@ export function QuestionDialog({ mode, question, trigger, onSuccess }: QuestionD
                 className="bg-pink-600 hover:bg-pink-700"
                 disabled={loading}
               >
-                {loading ? 'Salvando...' : mode === 'create' ? 'Adicionar' : 'Salvar'}
+                {loading
+                  ? 'Salvando...'
+                  : props.mode === 'create'
+                  ? 'Adicionar'
+                  : 'Salvar'}
               </Button>
             </div>
           </form>

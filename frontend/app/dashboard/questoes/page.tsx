@@ -21,7 +21,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { fetchQuestions, deleteQuestion, Question, fetchCategories, Category } from '@/services/api';
+import { fetchQuestions, deleteQuestion, Question } from '@/services/questions';
+import { fetchCategories, Category } from '@/services/categories';
+
 
 const difficultyColors = {
   easy: 'bg-green-500',
