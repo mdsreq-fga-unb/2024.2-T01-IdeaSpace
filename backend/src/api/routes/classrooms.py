@@ -4,6 +4,7 @@ import src.crud as crud
 from src.utils import get_slug
 from src.api.response_models import ClassroomResponse, ClassWithUsersResponse
 from src.models.country import ClassroomBase
+from src.utils import get_student_result
 
 router = APIRouter(prefix="/classrooms", tags=["classroom"])
 
@@ -219,3 +220,48 @@ def add_student_to_classroom(classroom_id: int, user_id: int, session: SessionDe
     student.classroom_id = classroom_id
     session.commit()
     return classroom
+
+
+@router.get(
+    "/{classroom_id}/statistics",
+)
+def get_classroom_statistics(classroom_id: int, session: SessionDep, current_user: CurrentUser):
+    """
+    Get classroom statistics
+    """
+    classroom = crud.get_classroom_by_id(session=session, classroom_id=classroom_id)
+    if classroom is None:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+
+    existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
+    has_permission = (
+        (existing_teacher and classroom_id in existing_teacher.classroom_ids)
+        or current_user.is_superuser
+    )
+
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="You don't have access to this classroom")
+    
+    total_questions = 0
+    correct_answers = 0
+    total_questionnaires = len(classroom.questionnaires)
+    total_students = len(classroom.students)
+    students_with_results = set()
+
+    for questionnaire in classroom.questionnaires:
+        for student in classroom.students:
+            try:
+                result = get_student_result(questionnaire.id, student.user_id, session) 
+                total_questions += result["total_questions"]
+                correct_answers += result["correct_answers"]
+                students_with_results.add(student.user_id)
+            except HTTPException:
+                continue
+    
+    return {
+        "total_questions": total_questions,
+        "correct_answers": correct_answers,
+        "total_questionnaires": total_questionnaires,
+        "total_students": total_students,
+        "students_with_results": len(students_with_results),
+    }
