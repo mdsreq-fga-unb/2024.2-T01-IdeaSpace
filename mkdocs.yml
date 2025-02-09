@@ -19,7 +19,8 @@ nav:
       - USM:
           - Miro: engenharia-requisitos/usm.md
           - Admin: engenharia-requisitos/adminACUS.md
-          - Aluno: engenharia-requisitos/profACUS.md
+          - Aluno: engenharia-requisitos/alunoACUS.md
+          - Professor: engenharia-requisitos/profACUS.md
   - Estudos de caso:
       - PBB TechFix:
           - Miro: estudos-caso/pbb_techfix_miro.md
