@@ -36,7 +36,7 @@ router = APIRouter(prefix="/questionnaire", tags=["questionnaire"])
 @router.post(
     "",
     status_code=201,
-    response_model=QuestionnaireResponse
+    response_model=QuestionnaireResponse,
 )
 def create_questionnaire(
     questionnaire: QuestionnaireBase, session: SessionDep, current_user: CurrentUser
@@ -47,7 +47,10 @@ def create_questionnaire(
         raise HTTPException(status_code=404, detail="Classroom not found.")
     
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
-    has_permission = current_user.is_superuser or (existing_teacher and questionnaire.classroom_id in existing_teacher.classrooms)
+    # Corrigindo a verificação de permissão:
+    has_permission = current_user.is_superuser or (
+        existing_teacher and questionnaire.classroom_id in [c.id for c in existing_teacher.classrooms]
+    )
     
     if not has_permission:
         raise HTTPException(status_code=403, detail="You don't have permission to create a questionnaire for this classroom.")
@@ -125,20 +128,24 @@ def read_questionnaire_answers(questionnaire_id: int, session: SessionDep, curre
     "/classroom/{classroom_id}",
     response_model=list[QuestionnaireResponse],
 )
-def read_questionnaires_by_classroom(classroom_id: int, session: SessionDep, current_user: CurrentUser):
+def read_questionnaires_by_classroom(
+    classroom_id: int, session: SessionDep, current_user: CurrentUser
+):
+    # Verifica se o usuário é professor e obtém suas turmas
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
     teacher_permission = existing_teacher and classroom_id in [c.id for c in existing_teacher.classrooms]
 
-
-    # Alunos também podem ver os questionários que já foram liberados
-    # Mas eles devem ter respondido o questionário para conseguir visualizar
-    # Portanto, essa verificação será feita depois
-    # existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
-    student_permission = False
+    # Verifica se o usuário é aluno e se sua turma é a mesma da requisição
+    existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
+    student_permission = existing_student and (existing_student.classroom_id == classroom_id)
     
     if not teacher_permission and not student_permission and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="You don't have permission to read questionnaires for this classroom.")
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to read questionnaires for this classroom."
+        )
     
+    # Se o usuário não for professor nem superusuário, assume que só pode ver os questionários liberados
     only_released = not teacher_permission and not current_user.is_superuser
     questionnaires = crud.get_questionnaires_by_classroom(
         session=session, classroom_id=classroom_id, only_released=only_released
@@ -188,26 +195,34 @@ def start_questionnaire(
         raise HTTPException(status_code=400, detail="Questionnaire is not available to start.")
 
     existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
-    has_permission = existing_student and questionnaire.classroom_id == existing_student.classroom_id
-
-    if not has_permission:
+    if not (existing_student and questionnaire.classroom_id == existing_student.classroom_id):
         raise HTTPException(status_code=403, detail="You don't have permission to start this questionnaire.")
     
     existing_info = crud.get_student_starts_questionnaire(
         session=session, student_id=current_user.id, questionnaire_id=start_info.questionnaire_id
     )
 
-    if existing_info is None:
-        existing_info = crud.create_start_questionnaire(session=session, student_id=current_user.id, questionnaire_id=start_info.questionnaire_id)
-    
-    duration = timedelta(minutes=questionnaire.duration)
-    if existing_info.started_at + duration < datetime.now() or existing_info.already_answered:
-        raise HTTPException(status_code=400, detail="Questionnaire has already expired or you have already answered it.")
+    # Se o aluno já respondeu, não pode reiniciar
+    if existing_info and existing_info.already_answered:
+        raise HTTPException(status_code=400, detail="You have already answered this questionnaire.")
 
+    # Se já existe registro mas não foi respondido, atualize a data de início para o momento atual;
+    # caso contrário, crie um novo registro com started_at = datetime.now()
+    if existing_info:
+        existing_info.started_at = datetime.now()
+        session.commit()
+    else:
+        existing_info = crud.create_start_questionnaire(
+            session=session,
+            student_id=current_user.id,
+            questionnaire_id=start_info.questionnaire_id
+        )
+    
     return {
         "info": existing_info,
         "questionnaire": questionnaire
     }
+
 
 
 @router.post(
@@ -224,9 +239,7 @@ def answer_questionnaire(
         raise HTTPException(status_code=404, detail="Questionnaire not found")
     
     existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
-    has_permission = existing_student and questionnaire.classroom_id == existing_student.classroom_id
-
-    if not has_permission:
+    if not (existing_student and questionnaire.classroom_id == existing_student.classroom_id):
         raise HTTPException(status_code=403, detail="You don't have permission to answer this questionnaire.")
     
     existing_info = crud.get_student_starts_questionnaire(
@@ -236,28 +249,32 @@ def answer_questionnaire(
     if existing_info is None:
         raise HTTPException(status_code=400, detail="You have not started this questionnaire yet.")
     
-    duration = timedelta(minutes=questionnaire.duration)
-    if existing_info.started_at + duration < datetime.now() or existing_info.already_answered:
-        raise HTTPException(status_code=400, detail="Questionnaire has already expired or you have already answered it.")
+    # Se já respondeu, não permita nova submissão
+    if existing_info.already_answered:
+        raise HTTPException(status_code=400, detail="You have already answered this questionnaire.")
     
-    # Verificar se as respostas são válidas
-    questions = crud.get_questions_by_ids(session=session, question_ids=[answer.question_id for answer in answer_info.answers])
+    # Opcional: Você pode deixar um comentário indicando que, se o tempo tiver expirado,
+    # o front-end chamou esta função para submeter as respostas parciais.
+    # Por isso, removemos a verificação de expiração baseada no tempo.
+
+    # Validação e salvamento das respostas (como no seu código)
+    questions = crud.get_questions_by_ids(
+        session=session, question_ids=[answer.question_id for answer in answer_info.answers]
+    )
     if len(questions) != len(answer_info.answers):
         raise HTTPException(status_code=400, detail="Some questions were not found or are duplicated.")
     
     for answer in answer_info.answers:
         option = session.get(Option, answer.option_id)
         if option is None or option.question_id != answer.question_id:
-            raise HTTPException(status_code=400, detail="Some options were not found or does not belong to the question.")
+            raise HTTPException(status_code=400, detail="Some options were not found or do not belong to the question.")
     
-    # Verificar se as respostas já foram respondidas
     existing_answers = crud.get_student_answers(
         session=session, student_id=current_user.id, questionnaire_id=answer_info.questionnaire_id
     )
     if existing_answers:
         raise HTTPException(status_code=400, detail="You have already answered this questionnaire.")
     
-    # Salvar as respostas
     for answer in answer_info.answers:
         crud.add_student_answer(
             session=session,
@@ -270,7 +287,6 @@ def answer_questionnaire(
     existing_info.already_answered = True
     session.commit()
     return {"message": "Answers saved successfully."}
-
 
 @router.get(
     "/{questionnaire_id}/results",
@@ -295,6 +311,7 @@ def read_questionnaire_answers_by_student(
     
     result = get_student_result(questionnaire_id=questionnaire_id, student_id=current_user.id, session=session)
     return result
+
 
 
 @router.get(

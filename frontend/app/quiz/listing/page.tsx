@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,9 @@ import { Search, Clock, Users, ArrowRight, ArrowLeft, Eye, CheckCircle2, XCircle
 import Link from 'next/link';
 import { MainNav } from '@/components/main-nav';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import { fetchQuestionnaires } from '@/services/questionnaire';
 import {
   Dialog,
   DialogContent,
@@ -21,113 +24,45 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function QuizListingPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMateria, setSelectedMateria] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [questionnaires, setQuestionnaires] = useState<any[]>([]);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Mock data - replace with actual data from your backend
-  const questionariosDisponiveis = [
-    {
-      id: 1,
-      titulo: 'Matemática Básica',
-      materia: 'Matemática',
-      duracao: '45min',
-      status: 'disponível',
-      totalQuestoes: 10,
-      professor: 'Maria Silva',
-    },
-    {
-      id: 2,
-      titulo: 'História do Brasil',
-      materia: 'História',
-      duracao: '30min',
-      status: 'disponível',
-      totalQuestoes: 8,
-      professor: 'João Santos',
-    },
-    {
-      id: 3,
-      titulo: 'Geografia Mundial',
-      materia: 'Geografia',
-      duracao: '40min',
-      status: 'agendado',
-      totalQuestoes: 12,
-      professor: 'Ana Oliveira',
-    },
-  ];
+  useEffect(() => {
+    if (user?.student?.classroom?.id) {
+      loadQuestionnaires();
+    }
+  }, [user]);
 
-  const questionariosEncerrados = [
-    {
-      id: 4,
-      titulo: 'Física Básica',
-      materia: 'Física',
-      duracao: '50min',
-      totalQuestoes: 15,
-      professor: 'Carlos Eduardo',
-      dataRealizacao: '2024-03-20',
-      nota: 85,
-      questoes: [
-        {
-          pergunta: 'O que é velocidade?',
-          alternativas: [
-            'Distância percorrida',
-            'Distância percorrida por tempo',
-            'Tempo gasto no percurso',
-            'Força aplicada no movimento'
-          ],
-          respostaCorreta: 1,
-          respostaAluno: 1,
-        },
-        {
-          pergunta: 'Qual a unidade de medida de força no SI?',
-          alternativas: [
-            'Metro',
-            'Quilograma',
-            'Newton',
-            'Joule'
-          ],
-          respostaCorreta: 2,
-          respostaAluno: 3,
-        },
-      ],
-    },
-    {
-      id: 5,
-      titulo: 'Química Orgânica',
-      materia: 'Química',
-      duracao: '35min',
-      totalQuestoes: 10,
-      professor: 'Patricia Santos',
-      dataRealizacao: '2024-03-18',
-      nota: 90,
-      questoes: [
-        {
-          pergunta: 'O que são hidrocarbonetos?',
-          alternativas: [
-            'Compostos de H e O',
-            'Compostos de C e H',
-            'Compostos de C e O',
-            'Compostos de H e N'
-          ],
-          respostaCorreta: 1,
-          respostaAluno: 1,
-        },
-      ],
-    },
-  ];
+  const loadQuestionnaires = async () => {
+    if (!user?.student?.classroom?.id) return;
+    
+    setLoading(true);
+    try {
+      const data = await fetchQuestionnaires(user.student.classroom.id);
+      setQuestionnaires(data);
+    } catch (error) {
+      console.error('Error loading questionnaires:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os questionários',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const materias = [...new Set([
-    ...questionariosDisponiveis.map(q => q.materia),
-    ...questionariosEncerrados.map(q => q.materia)
-  ])];
-
-  const filteredDisponiveis = questionariosDisponiveis.filter(questionario => 
-    questionario.titulo.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (!selectedMateria || questionario.materia === selectedMateria)
+  const filteredQuestionnaires = questionnaires.filter(questionnaire =>
+    questionnaire.questions.some((q: any) =>
+      q.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.category.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
-  const filteredEncerrados = questionariosEncerrados.filter(questionario => 
-    questionario.titulo.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (!selectedMateria || questionario.materia === selectedMateria)
-  );
+  const availableQuestionnaires = filteredQuestionnaires.filter(q => !q.closed && q.released);
+  const closedQuestionnaires = filteredQuestionnaires.filter(q => q.closed);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -163,162 +98,142 @@ export default function QuizListingPage() {
                   className="pl-8"
                 />
               </div>
-              <Select value={selectedMateria} onValueChange={setSelectedMateria}>
-                <SelectTrigger className="sm:max-w-xs">
-                  <SelectValue placeholder="Filtrar por matéria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {materias.map(materia => (
-                    <SelectItem key={materia} value={materia}>{materia}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
-            <Tabs defaultValue="disponiveis" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="disponiveis">Disponíveis</TabsTrigger>
-                <TabsTrigger value="encerrados">Encerrados</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="disponiveis" className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredDisponiveis.map((questionario) => (
-                    <Card key={questionario.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-semibold">{questionario.titulo}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              <span>{questionario.duracao}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Users className="h-4 w-4" />
-                              <span>{questionario.totalQuestoes} questões</span>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground">
-                              Matéria: {questionario.materia}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Professor: {questionario.professor}
-                            </p>
-                          </div>
-                          <Link href={`/quiz?id=${questionario.id}`}>
-                            <Button className="w-full bg-pink-600 hover:bg-pink-700">
-                              Iniciar Questionário
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+            {!user?.student?.classroom ? (
+              <Card className="p-8 text-center">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Nenhuma turma encontrada</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Você precisa estar vinculado a uma turma para ver os questionários
+                  </p>
                 </div>
-              </TabsContent>
+              </Card>
+            ) : loading ? (
+              <div className="text-center py-8">
+                <p>Carregando questionários...</p>
+              </div>
+            ) : (
+              <Tabs defaultValue="available" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="available">Disponíveis</TabsTrigger>
+                  <TabsTrigger value="closed">Encerrados</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="encerrados" className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredEncerrados.map((questionario) => (
-                    <Card key={questionario.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-semibold">{questionario.titulo}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              <span>{questionario.duracao}</span>
+                <TabsContent value="available" className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {availableQuestionnaires.map((questionnaire) => (
+                      <Card key={questionnaire.id}>
+                        <CardHeader>
+                          <CardTitle className="text-lg font-semibold">
+                            Questionário #{questionnaire.id}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                                <span>{questionnaire.duration}min</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>{questionnaire.questions.length} questões</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Users className="h-4 w-4" />
-                              <span>{questionario.totalQuestoes} questões</span>
+                            <div className="flex gap-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" className="w-full gap-2">
+                                    <Eye className="h-4 w-4" />
+                                    Visualizar
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-3xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Questionário #{questionnaire.id}</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div className="grid gap-4">
+                                      <div>
+                                        <h4 className="text-sm font-medium text-muted-foreground">Duração</h4>
+                                        <p className="text-base">{questionnaire.duration} minutos</p>
+                                      </div>
+                                      <div>
+                                        <h4 className="text-sm font-medium text-muted-foreground">Total de Questões</h4>
+                                        <p className="text-base">{questionnaire.questions.length} questões</p>
+                                      </div>
+                                    </div>
+                                    <div className="border-t pt-4">
+                                      <p className="text-sm text-muted-foreground">
+                                        Ao iniciar o questionário, você terá {questionnaire.duration} minutos para responder todas as questões.
+                                        Certifique-se de ter um ambiente tranquilo e boa conexão com a internet.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              <Link href={`/quiz/${questionnaire.id}`} className="flex-1">
+                                <Button className="w-full gap-2 bg-pink-600 hover:bg-pink-700">
+                                  <ArrowRight className="h-4 w-4" />
+                                  Iniciar
+                                </Button>
+                              </Link>
                             </div>
                           </div>
-                          <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground">
-                              Matéria: {questionario.materia}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Professor: {questionario.professor}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Data: {new Date(questionario.dataRealizacao).toLocaleDateString('pt-BR')}
-                            </p>
-                            <p className="text-lg font-semibold text-pink-600">
-                              Nota: {questionario.nota}%
-                            </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {availableQuestionnaires.length === 0 && (
+                      <div className="col-span-full text-center py-8 text-muted-foreground">
+                        Nenhum questionário disponível no momento
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="closed" className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {closedQuestionnaires.map((questionnaire) => (
+                      <Card key={questionnaire.id}>
+                        <CardHeader>
+                          <CardTitle className="text-lg font-semibold">
+                            Questionário #{questionnaire.id}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                                <span>{questionnaire.duration}min</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>{questionnaire.questions.length} questões</span>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Link href={`/quiz/${questionnaire.id}/results`} className="w-full">
+                                <Button variant="outline" className="w-full gap-2">
+                                  <Eye className="h-4 w-4" />
+                                  Ver Resultados
+                                </Button>
+                              </Link>
+                            </div>
                           </div>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button className="w-full" variant="outline">
-                                <Eye className="mr-2 h-4 w-4" />
-                                Revisar Questionário
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-3xl">
-                              <DialogHeader>
-                                <DialogTitle>Revisão - {questionario.titulo}</DialogTitle>
-                              </DialogHeader>
-                              <ScrollArea className="max-h-[600px]">
-                                <div className="space-y-6 p-4">
-                                  {questionario.questoes.map((questao, index) => (
-                                    <Card key={index}>
-                                      <CardHeader>
-                                        <CardTitle className="text-lg">
-                                          Questão {index + 1}
-                                        </CardTitle>
-                                      </CardHeader>
-                                      <CardContent className="space-y-4">
-                                        <p className="font-medium">{questao.pergunta}</p>
-                                        <div className="grid gap-3">
-                                          {questao.alternativas.map((alternativa, altIndex) => (
-                                            <div
-                                              key={altIndex}
-                                              className={`p-3 rounded-lg border ${
-                                                altIndex === questao.respostaCorreta
-                                                  ? 'border-green-200 bg-green-50'
-                                                  : altIndex === questao.respostaAluno && questao.respostaAluno !== questao.respostaCorreta
-                                                  ? 'border-red-200 bg-red-50'
-                                                  : 'border-gray-200'
-                                              }`}
-                                            >
-                                              <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                  <span className="font-medium">
-                                                    {String.fromCharCode(65 + altIndex)}
-                                                  </span>
-                                                  <span>{alternativa}</span>
-                                                </div>
-                                                {altIndex === questao.respostaCorreta && (
-                                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                                )}
-                                                {altIndex === questao.respostaAluno && questao.respostaAluno !== questao.respostaCorreta && (
-                                                  <XCircle className="h-5 w-5 text-red-500" />
-                                                )}
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  ))}
-                                </div>
-                              </ScrollArea>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {closedQuestionnaires.length === 0 && (
+                      <div className="col-span-full text-center py-8 text-muted-foreground">
+                        Nenhum questionário encerrado
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            )}
           </div>
         </div>
       </main>
