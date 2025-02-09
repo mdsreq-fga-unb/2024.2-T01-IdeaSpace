@@ -7,6 +7,10 @@ from src.models.country import CountryBase, Country, CityBase, City, SchoolBase,
 from src.models.question import (
     Category,
     Question,
+    QuestionBase,
+    OptionBase,
+    Option,
+    CategoryBase,
     Questionnaire,
     QuestionnaireUpdate,
     StudentStartsQuestionnaire,
@@ -400,3 +404,27 @@ def get_student_questionnaires(*, session: Session, student_id: int) -> list[Stu
     )
     student_questionnaires = session.exec(statement).all()
     return student_questionnaires
+
+
+def create_question(*, session: Session, question: QuestionBase) -> Question:
+    question = Question.model_validate(question)
+    session.add(question)
+    session.commit()
+    session.refresh(question)
+    return question
+
+
+def create_option(*, session: Session, option: OptionBase, question_id: int) -> Option:
+    option = Option.model_validate(option, update={"question_id": question_id})
+    session.add(option)
+    session.commit()
+    session.refresh(option)
+    return option
+
+
+def create_category(*, session: Session, category_in: CategoryBase) -> Category:
+    category = Category.model_validate(category_in, update={"slug_name": get_slug(category_in.name)})
+    session.add(category)
+    session.commit()
+    session.refresh(category)
+    return category
