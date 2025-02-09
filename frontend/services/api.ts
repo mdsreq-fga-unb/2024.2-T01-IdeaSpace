@@ -538,27 +538,6 @@ export async function getStudentsByLocation(
 //  QUESTÕES / QUESTIONÁRIOS / OPCÕES      //
 //////////////////////////////////////////////
 
-// Criar nova questão
-export async function createQuestion(data: {
-  id: number;
-  category_id: number;
-  options: number[];
-  category: number;
-  questionnaires: number[];
-  created_at: Date;
-  updated_at: Date;
-}) {
-  const response = await fetch(`${API_URL}/questions/`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || "Erro ao criar questao");
-  }
-  return response.json();
-}
 
 // Criar novo questionário
 export async function createQuestionnaire(data: {
@@ -610,5 +589,265 @@ export async function fetchStatistics() {
     const errorData = await response.json();
     throw new Error(errorData.detail || "Erro ao buscar estatísticas");
   }
+  return response.json();
+}
+
+//////////////////////////////////////////////
+//                Questões                  //
+//////////////////////////////////////////////
+
+// Add these interfaces to the existing services/api.ts file
+
+export interface Question {
+  id: number;
+  text: string;
+  category_id: number;
+  difficulty: 'FACIL' | 'MEDIO' | 'DIFICIL';
+  category: {
+    name: string;
+  };
+  created_at: string;
+  updated_at: string;
+  options: Array<{
+    id: number;
+    text: string;
+    is_answer: boolean;
+  }>;
+}
+
+// Mapping for difficulty levels
+const difficultyMapping = {
+  easy: 'FACIL',
+  medium: 'MEDIO',
+  hard: 'DIFICIL',
+} as const;
+
+const reverseDifficultyMapping = {
+  FACIL: 'easy',
+  MEDIO: 'medium',
+  DIFICIL: 'hard',
+} as const;
+
+export async function fetchQuestions() {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_URL}/questions/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao buscar questões");
+  }
+
+  const data = await response.json();
+  // Convert backend difficulty to frontend format
+  return data.map((question: any) => ({
+    ...question,
+    difficulty: reverseDifficultyMapping[question.difficulty],
+  }));
+}
+
+export async function createQuestion(data: {
+  question: {
+    text: string;
+    category_id: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+  };
+  options: Array<{
+    text: string;
+    is_answer: boolean;
+  }>;
+}) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_URL}/questions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...data,
+      question: {
+        ...data.question,
+        difficulty: difficultyMapping[data.question.difficulty],
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar questão");
+  }
+
+  const responseData = await response.json();
+  return {
+    ...responseData,
+    difficulty: reverseDifficultyMapping[responseData.difficulty],
+  };
+}
+
+export async function getQuestion(id: number): Promise<Question> {
+  const response = await fetch(`${API_URL}/questions/${id}`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao buscar questão");
+  }
+
+  const data = await response.json();
+  return {
+    ...data,
+    difficulty: reverseDifficultyMapping[data.difficulty],
+    options: data.options || []
+  };
+}
+
+
+
+export async function deleteQuestion(questionId: number) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_URL}/questions/${questionId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao excluir questão");
+  }
+
+  return response.json();
+}
+
+
+
+export interface Category {
+  id: number;
+  name: string;
+  slug_name: string;
+}
+
+export async function fetchCategories(): Promise<Category[]> {
+  const response = await fetch(`${API_URL}/category/`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao buscar categorias");
+  }
+
+  return response.json();
+}
+
+//////////////////////////////////////////////
+//                Categorias                //
+//////////////////////////////////////////////
+
+export async function createCategory(name: string): Promise<Category> {
+  const response = await fetch(`${API_URL}/category`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar categoria");
+  }
+
+  return response.json();
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  const response = await fetch(`${API_URL}/category/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao excluir categoria");
+  }
+}
+
+export async function updateQuestion(questionId: number, data: {
+  text?: string;
+  category_id?: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+}) {
+  const response = await fetch(`${API_URL}/questions/${questionId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      ...data,
+      difficulty: data.difficulty ? difficultyMapping[data.difficulty] : undefined,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao atualizar questão");
+  }
+
+  const responseData = await response.json();
+  return {
+    ...responseData,
+    difficulty: reverseDifficultyMapping[responseData.difficulty],
+  };
+}
+
+export async function createQuestionOption(questionId: number, data: {
+  text: string;
+  is_answer: boolean;
+}) {
+  const response = await fetch(`${API_URL}/questions/${questionId}/options`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao criar opção");
+  }
+
+  return response.json();
+}
+
+export async function updateQuestionOption(optionId: number, text: string, is_answer: boolean) {
+  const url = `${API_URL}/questions/options/${optionId}?option_text=${encodeURIComponent(text)}&is_answer=${is_answer}`;
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: getAuthHeaders(), // Certifique-se de que esse header inclui o Authorization
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao atualizar opção");
+  }
+
+  return response.json();
+}
+
+
+
+export async function deleteQuestionOption(optionId: number) {
+  const response = await fetch(`${API_URL}/questions/options/${optionId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Erro ao excluir opção");
+  }
+
   return response.json();
 }

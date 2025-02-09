@@ -151,3 +151,19 @@ def update_option(
     session.commit()
     session.refresh(option_db)
     return option_db
+
+
+@router.delete(
+    "/options/{option_id}",
+    response_model=OptionBase,
+    dependencies=[Depends(get_current_active_superuser)],
+)
+def delete_option(option_id: int, session: SessionDep):
+    option = session.get(Option, option_id)
+    
+    if not option:
+        raise HTTPException(status_code=404, detail="Opção não encontrada")
+    
+    session.delete(option)
+    session.commit()
+    return option

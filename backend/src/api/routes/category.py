@@ -49,3 +49,19 @@ def read_category(category_id: int, session: SessionDep):
 def read_categories(*, session: SessionDep, skip: int = 0, limit: int = 100):
     categories = crud.get_categories(session=session, skip=skip, limit=limit)
     return categories
+
+
+
+@router.delete(
+    "/{category_id}",
+    dependencies=[Depends(get_current_active_superuser)],
+    status_code=204,
+)
+def delete_category(category_id: int, session: SessionDep):
+    category = session.get(Category, category_id)
+    if category is None:
+        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+    
+    session.delete(category)
+    session.commit()
+    return
