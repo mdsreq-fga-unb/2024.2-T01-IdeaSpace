@@ -4,7 +4,7 @@ from pydantic import field_validator
 from src.models.country import ClassroomBase, School
 
 class UserBase(SQLModel):
-    username: str = Field(min_length=3, max_length=32, unique=True)
+    username: str = Field(min_length=1, max_length=32, unique=True)
     full_name: Optional[str] = Field(max_length=255, default=None)
     is_active: bool = True
     is_superuser: bool = False
@@ -44,7 +44,7 @@ class Teacher(SQLModel, table=True):
 
 class Classroom(ClassroomBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    slug_name: str | None = Field(default=None, max_length=256, min_length=3)
+    slug_name: str | None = Field(default=None, max_length=256, min_length=1)
     school: School = Relationship(back_populates="classrooms")
     teachers: list["Teacher"] = Relationship(back_populates="classrooms", link_model=ClassroomTeacher)
     students: list["Student"] = Relationship(back_populates="classroom", cascade_delete=True)
