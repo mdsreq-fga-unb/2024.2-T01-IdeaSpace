@@ -105,3 +105,16 @@ export async function getStudentsByLocation(
   }
   return response.json();
 }
+
+export async function getStudentResults(userId: number) {
+  const response = await fetch(`${API_URL}/users/${userId}/student`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to fetch student results');
+  }
+
+  return response.json();
+}
