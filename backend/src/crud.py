@@ -391,3 +391,12 @@ def get_all_users_answered_questionnaire(*, session: Session, questionnaire_id: 
     )
     students = session.exec(statement).all()
     return students
+
+
+def get_student_questionnaires(*, session: Session, student_id: int) -> list[StudentStartsQuestionnaire]:
+    statement = select(StudentStartsQuestionnaire).where(
+        StudentStartsQuestionnaire.student_id == student_id,
+        StudentStartsQuestionnaire.already_answered == True
+    )
+    student_questionnaires = session.exec(statement).all()
+    return student_questionnaires

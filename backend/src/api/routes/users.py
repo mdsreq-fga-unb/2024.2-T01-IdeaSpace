@@ -6,6 +6,7 @@ import src.crud as crud
 from src.models.user import UserPublic, UsersPublic, UserCreate, UserUpdate, User, Classroom
 from src.api.deps import get_current_active_superuser, SessionDep, CurrentUser
 from src.api.response_models import TeacherResponse, UserResponse, StudentResponse
+from src.utils import get_student_result
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -231,3 +232,49 @@ def delete_user(*, session: SessionDep, user_id: int, current_user: CurrentUser)
 
     db_user = crud.delete_user(session=session, user_id=user_id)
     return db_user
+
+
+@router.get(
+    "/{user_id}/student",
+)
+def read_student_results(*, session: SessionDep, user_id: int, current_user: CurrentUser) -> Any:
+    """
+    Retrieve student results
+    """
+    student = crud.get_student_by_user_id(session=session, user_id=user_id)
+
+    if not student:
+        raise HTTPException(
+            status_code=400, detail="Student with this id does not exist in the system"
+        )
+
+    existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
+    has_permission = (
+        (existing_teacher and student.classroom_id in existing_teacher.classroom_ids)
+        or student.user_id == current_user.id
+        or current_user.is_superuser
+    )
+
+    if not has_permission:
+        raise HTTPException(
+            status_code=400, detail="You do not have permission to view this student's results"
+        )
+
+    questionnaires = crud.get_student_questionnaires(session=session, student_id=student.user_id)
+    global_questions_amount = 0
+    global_correct_answers = 0
+    results = []
+
+    for questionnaire in questionnaires:
+        result = get_student_result(questionnaire_id=questionnaire.questionnaire_id, student_id=student.user_id, session=session)
+        results.append(result)
+
+        global_questions_amount += result["total_questions"]
+        global_correct_answers += result["correct_answers"]
+    
+    return {
+        "global_questions_amount": global_questions_amount,
+        "global_correct_answers": global_correct_answers,
+        "total_questionnaires": len(questionnaires),
+        "results": results,
+    }
