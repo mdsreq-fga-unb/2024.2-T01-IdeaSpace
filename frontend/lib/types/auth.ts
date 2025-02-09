@@ -82,7 +82,10 @@ export const rolePermissions = {
       'view_own_profile',
       'manage_class_quizzes',
       'view_class_performance',
-      'assign_quizzes'
+      'assign_quizzes',
+      'view_own_classrooms', 
+      'manage_own_classrooms',
+      'view_questions' 
     ]
   },
   administrador: {

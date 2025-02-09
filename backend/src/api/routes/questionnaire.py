@@ -79,11 +79,24 @@ def read_questionnaire(questionnaire_id: int, session: SessionDep, current_user:
 
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
     existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
-    student_has_permission = existing_student and questionnaire.classroom_id == existing_student.classroom_id and questionnaire.released and not questionnaire.closed
-    teacher_has_permission = existing_teacher and questionnaire.classroom_id in existing_teacher.classrooms
+    
+    student_has_permission = (
+        existing_student and 
+        questionnaire.classroom_id == existing_student.classroom_id and 
+        questionnaire.released and 
+        not questionnaire.closed
+    )
+    
+    teacher_has_permission = (
+        existing_teacher and 
+        questionnaire.classroom_id in [classroom.id for classroom in existing_teacher.classrooms]
+    )
     
     if not student_has_permission and not teacher_has_permission and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="You don't have permission to read this questionnaire.")
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to read this questionnaire."
+        )
     
     return questionnaire
 
@@ -109,12 +122,13 @@ def read_questionnaire_answers(questionnaire_id: int, session: SessionDep, curre
 
 
 @router.get(
-    "/{classroom_id}",
+    "/classroom/{classroom_id}",
     response_model=list[QuestionnaireResponse],
 )
 def read_questionnaires_by_classroom(classroom_id: int, session: SessionDep, current_user: CurrentUser):
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
-    teacher_permission = existing_teacher and classroom_id in existing_teacher.classrooms
+    teacher_permission = existing_teacher and classroom_id in [c.id for c in existing_teacher.classrooms]
+
 
     # Alunos também podem ver os questionários que já foram liberados
     # Mas eles devem ter respondido o questionário para conseguir visualizar
@@ -144,7 +158,10 @@ def update_questionnaire(
         raise HTTPException(status_code=404, detail="Questionnaire not found")
     
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
-    has_permission = current_user.is_superuser or (existing_teacher and questionnaire.classroom_id in existing_teacher.classrooms)
+    has_permission = current_user.is_superuser or (
+        existing_teacher and 
+        questionnaire.classroom_id in [classroom.id for classroom in existing_teacher.classrooms]
+    )
     
     if not has_permission:
         raise HTTPException(status_code=403, detail="You don't have permission to update this questionnaire.")

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src.api.deps import get_current_active_superuser, SessionDep
+from src.api.deps import get_current_active_superuser,get_current_active_superuser_or_teacher, SessionDep
 from src.models.question import Question, Option, QuestionBase, OptionBase, Category, QuestionBaseOptional
 from pydantic import BaseModel
 from src.api.response_models import QuestionWithOptionsAnswer, QuestionResponse
@@ -64,7 +64,7 @@ def read_question(question_id: int, session: SessionDep):
 @router.get(
     "/",
     response_model=list[QuestionResponse],
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_active_superuser_or_teacher)],
 )
 def read_questions(*, session: SessionDep, skip: int = 0, limit: int = 100):
     questions = crud.get_questions(session=session, skip=skip, limit=limit)

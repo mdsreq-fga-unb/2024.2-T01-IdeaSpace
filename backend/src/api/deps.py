@@ -56,3 +56,15 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
         )
 
     return current_user
+
+def get_current_active_superuser_or_teacher(current_user: CurrentUser) -> User:
+    if current_user.is_superuser:
+        return current_user
+
+    if getattr(current_user, "teacher", None) is not None:
+        return current_user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="The user doesn't have enough privileges"
+    )
