@@ -1,4 +1,4 @@
-export const API_URL = "http://localhost:8000/api";
+export const API_URL = "https://ideia-space-4fddfd01c45c.herokuapp.com/";
 
 export const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
