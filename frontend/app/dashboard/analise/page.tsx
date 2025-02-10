@@ -143,7 +143,7 @@ export default function AnalisePage() {
       } catch (error) {
         if (isActive) {
           console.error('Error loading student results:', error);
-          setStudentResultsError('Esse usuário não possui questionários respondidos');
+          setStudentResultsError('Esse usuário não possui o questionário selecionado respondido');
           toast({
             title: 'Erro',
             description: 'Não foi possível carregar os resultados do aluno',

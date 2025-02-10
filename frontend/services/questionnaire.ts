@@ -159,3 +159,16 @@ export async function getQuestionnaireStudentResults(questionnaireId: number, st
 
   return response.json();
 }
+
+export async function getClassroomStatistics(classroomId: number) {
+  const response = await fetch(`${API_URL}/classrooms/${classroomId}/statistics`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to fetch classroom statistics');
+  }
+
+  return response.json();
+}
