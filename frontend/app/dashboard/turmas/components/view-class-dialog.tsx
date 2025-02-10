@@ -1,30 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getClassroomWithUsers } from '@/services/classrooms';
+import { useToast } from '@/hooks/use-toast';
 
 interface ViewClassDialogProps {
-  class: {
-    id: number;
-    nome: string;
-    escola: string;
-    localizacao: string;
-    alunos: number;
-  };
+  classroom: any;
 }
 
-// Simulated student data - replace with actual data from your backend
-const classStudents = [
-  { id: 1, nome: 'Ana Silva', email: 'ana.silva@email.com', ano: '1º Ano' },
-  { id: 2, nome: 'Bruno Santos', email: 'bruno.santos@email.com', ano: '2º Ano' },
-  { id: 3, nome: 'Carla Oliveira', email: 'carla.oliveira@email.com', ano: '3º Ano' },
-];
-
-export function ViewClassDialog({ class: classData }: ViewClassDialogProps) {
+export function ViewClassDialog({ classroom }: ViewClassDialogProps) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [classroomDetails, setClassroomDetails] = useState<any>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (open) {
+      loadClassroomDetails();
+    }
+  }, [open]);
+
+  const loadClassroomDetails = async () => {
+    try {
+      const data = await getClassroomWithUsers(classroom.id);
+      setClassroomDetails(data);
+    } catch (error) {
+      console.error('Error loading classroom details:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os detalhes da turma',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,40 +52,84 @@ export function ViewClassDialog({ class: classData }: ViewClassDialogProps) {
           <DialogTitle>Detalhes da Turma</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4">
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">Nome da Turma</h4>
-              <p className="text-base">{classData.nome}</p>
-            </div>
-            <div>
-              <h4 className="text-sm font-medium text-muted-foreground">Total de Alunos</h4>
-              <p className="text-base">{classData.alunos}</p>
+              <p className="text-base">{classroom.name}</p>
             </div>
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">Escola</h4>
-              <p className="text-base">{classData.escola}</p>
+              <p className="text-base">{classroom.school.name}</p>
             </div>
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground">Localização</h4>
-              <p className="text-base">{classData.localizacao}</p>
+              <h4 className="text-sm font-medium text-muted-foreground">Cidade</h4>
+              <p className="text-base">{classroom.school.city.name}</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">País</h4>
+              <p className="text-base">{classroom.school.city.country.name}</p>
             </div>
           </div>
 
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Lista de Alunos</h4>
-            <ScrollArea className="h-[200px] border rounded-md p-4">
-              <div className="space-y-4">
-                {classStudents.map((student) => (
-                  <div key={student.id} className="grid gap-1">
-                    <p className="font-medium">{student.nome}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {student.email} • {student.ano}
-                    </p>
+          {loading ? (
+            <div className="text-center py-4">
+              <p>Carregando informações...</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Professores</h4>
+                <ScrollArea className="h-[120px] border rounded-md p-4">
+                  <div className="space-y-2">
+                    {classroomDetails?.teachers?.length > 0 ? (
+                      classroomDetails.teachers.map((teacher: any) => (
+                        <div key={teacher.user_id} className="flex items-center justify-between p-2 hover:bg-accent rounded-lg">
+                          <div>
+                            <p className="font-medium">
+                              {teacher.user.full_name || teacher.user.username}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {teacher.user.username}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Nenhum professor atribuído a esta turma
+                      </p>
+                    )}
                   </div>
-                ))}
+                </ScrollArea>
               </div>
-            </ScrollArea>
-          </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Alunos</h4>
+                <ScrollArea className="h-[280px] border rounded-md p-4">
+                  <div className="space-y-2">
+                    {classroomDetails?.students?.length > 0 ? (
+                      classroomDetails.students.map((student: any) => (
+                        <div key={student.user_id} className="flex items-center justify-between p-2 hover:bg-accent rounded-lg">
+                          <div>
+                            <p className="font-medium">
+                              {student.user.full_name || student.user.username}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {student.user.username}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Nenhum aluno matriculado nesta turma
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

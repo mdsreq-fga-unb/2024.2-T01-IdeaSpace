@@ -4,6 +4,7 @@ from src.api.deps import get_current_active_superuser, SessionDep
 import src.crud as crud
 from src.utils import get_slug
 from src.api.response_models import CityResponse
+from sqlmodel import select
 
 router = APIRouter(prefix="/cities", tags=["city"])
 
@@ -61,5 +62,19 @@ def delete_city(city_id: int, session: SessionDep):
     city = crud.get_city_by_id(session=session, city_id=city_id)
     if city is None:
         raise HTTPException(status_code=404, detail="City not found")
-    city = crud.delete_city(session=session, city=city)
-    return city
+    
+    # Check if city has any schools
+    statement = select(crud.School).where(crud.School.city_id == city_id)
+    schools = session.exec(statement).all()
+    
+    if schools:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete city because it has schools associated with it. Delete the schools first."
+        )
+    
+    # Load the country relationship before deletion
+    _ = city.country
+    
+    deleted_city = crud.delete_city(session=session, city=city)
+    return deleted_city

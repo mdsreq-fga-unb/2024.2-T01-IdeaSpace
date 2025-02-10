@@ -3,6 +3,7 @@ from src.models.country import CountryBase, Country
 from src.api.deps import get_current_active_superuser, SessionDep
 import src.crud as crud
 from src.utils import get_slug
+from sqlmodel import select
 
 router = APIRouter(prefix="/countries", tags=["country"])
 
@@ -49,5 +50,16 @@ def delete_country(country_id: int, session: SessionDep):
     country = crud.get_country_by_id(session=session, country_id=country_id)
     if country is None:
         raise HTTPException(status_code=404, detail="Country not found")
+    
+    # Check if country has any cities
+    statement = select(crud.City).where(crud.City.country_id == country_id)
+    cities = session.exec(statement).all()
+    
+    if cities:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete country because it has cities associated with it. Delete the cities first."
+        )
+    
     country = crud.delete_country(session=session, country=country)
     return country

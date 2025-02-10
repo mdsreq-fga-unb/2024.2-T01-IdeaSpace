@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PencilIcon, Trash2, UserPlus, Search } from 'lucide-react';
 import { TeacherDialog } from './components/teacher-dialog';
 import { ViewTeacherDialog } from './components/view-teacher-dialog';
@@ -18,55 +17,69 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { fetchTeachers, deleteTeacher } from '@/services/teachers';
 
 export default function ProfessoresPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDisciplina, setSelectedDisciplina] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<number | null>(null);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const professores = [
-    {
-      id: 1,
-      nome: 'Maria Silva',
-      username: 'mariasilva',
-      disciplinas: ['Matemática', 'Física'],
-      turmas: ['Turma A', 'Turma B'],
-    },
-    {
-      id: 2,
-      nome: 'João Santos',
-      username: 'joaosantos',
-      disciplinas: ['Português', 'História'],
-      turmas: ['Turma C'],
-    },
-    {
-      id: 3,
-      nome: 'Ana Oliveira',
-      username: 'anaoliveira',
-      disciplinas: ['Química', 'Biologia'],
-      turmas: ['Turma A', 'Turma B', 'Turma C'],
-    },
-  ];
+  useEffect(() => {
+    loadTeachers();
+  }, []);
 
-  const disciplinas = [...new Set(professores.flatMap(p => p.disciplinas))];
+  const loadTeachers = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchTeachers();
+      setTeachers(data);
+    } catch (error) {
+      console.error('Error loading teachers:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os professores',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredProfessores = professores.filter(professor => 
-    professor.nome.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (!selectedDisciplina || professor.disciplinas.includes(selectedDisciplina))
-  );
-
-  const handleDelete = (id: number) => {
-    setSelectedTeacher(id);
+  const handleDelete = (userId: number) => {
+    setSelectedTeacher(userId);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log('Deleting teacher:', selectedTeacher);
+  const confirmDelete = async () => {
+    if (!selectedTeacher) return;
+
+    try {
+      await deleteTeacher(selectedTeacher);
+      toast({
+        title: 'Sucesso',
+        description: 'Professor excluído com sucesso',
+      });
+      loadTeachers();
+    } catch (error: any) {
+      console.error('Error deleting teacher:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Erro ao excluir professor',
+        variant: 'destructive',
+      });
+    }
     setDeleteDialogOpen(false);
     setSelectedTeacher(null);
   };
+
+  const filteredTeachers = teachers.filter(teacher => 
+    (teacher.user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     teacher.user.username.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6">
@@ -74,6 +87,7 @@ export default function ProfessoresPage() {
         <h1 className="text-3xl font-bold">Professores</h1>
         <TeacherDialog
           mode="create"
+          onSuccess={loadTeachers}
           trigger={
             <Button className="bg-pink-600 hover:bg-pink-700">
               <UserPlus className="mr-2 h-4 w-4" />
@@ -93,62 +107,54 @@ export default function ProfessoresPage() {
             className="pl-8"
           />
         </div>
-        <Select value={selectedDisciplina} onValueChange={setSelectedDisciplina}>
-          <SelectTrigger className="sm:max-w-xs">
-            <SelectValue placeholder="Filtrar por disciplina" />
-          </SelectTrigger>
-          <SelectContent>
-            {disciplinas.map(disciplina => (
-              <SelectItem key={disciplina} value={disciplina}>
-                {disciplina}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProfessores.map((professor) => (
-          <Card key={professor.id} className="overflow-hidden">
-            <CardHeader className="p-4">
-              <CardTitle className="text-lg font-semibold">{professor.nome}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{professor.username}</p>
-                <div className="flex flex-wrap gap-1">
-                  {professor.disciplinas.map((disciplina) => (
-                    <Badge key={disciplina} variant="secondary" className="text-xs">
-                      {disciplina}
-                    </Badge>
-                  ))}
+      {loading ? (
+        <div className="text-center py-8">
+          <p>Carregando...</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredTeachers.map((teacher) => (
+            <Card key={teacher.user_id} className="overflow-hidden">
+              <CardHeader className="p-4">
+                <CardTitle className="text-lg font-semibold">
+                   {teacher.user.full_name || teacher.user.username}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Usuário: {teacher.user.username}</p>
+                  <p className="text-sm">
+                    Turmas: {teacher.classrooms?.length || 0}
+                  </p>
+                  <div className="flex gap-2 mt-4">
+                    <ViewTeacherDialog teacher={teacher} />
+                    <TeacherDialog
+                      mode="edit"
+                      teacher={teacher}
+                      onSuccess={loadTeachers}
+                      trigger={
+                        <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
+                          <PencilIcon className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => handleDelete(teacher.user_id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <p className="text-sm">Turmas: {professor.turmas.length}</p>
-                <div className="flex gap-2 mt-4">
-                  <ViewTeacherDialog teacher={professor} />
-                  <TeacherDialog
-                    mode="edit"
-                    teacher={professor}
-                    trigger={
-                      <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
-                        <PencilIcon className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="text-red-500 hover:text-red-600"
-                    onClick={() => handleDelete(professor.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

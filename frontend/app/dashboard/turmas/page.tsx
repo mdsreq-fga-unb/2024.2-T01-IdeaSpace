@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,38 +20,156 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { fetchClassrooms, deleteClassroom } from '@/services/classrooms';
 
 export default function TurmasPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSchool, setSelectedSchool] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<number | null>(null);
+  const [selectedClassroom, setSelectedClassroom] = useState<number | null>(null);
+  const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const turmas = [
-    { id: 1, nome: 'Turma A', escola: 'Escola Municipal João Paulo', localizacao: 'São Paulo, SP', alunos: 32 },
-    { id: 2, nome: 'Turma B', escola: 'Escola Estadual Maria Silva', localizacao: 'Rio de Janeiro, RJ', alunos: 28 },
-    { id: 3, nome: 'Turma C', escola: 'Colégio Pedro II', localizacao: 'Belo Horizonte, MG', alunos: 30 },
-  ];
+  useEffect(() => {
+    loadClassrooms();
+  }, []);
 
-  const locations = [...new Set(turmas.map(t => t.localizacao))];
-
-  const filteredTurmas = turmas.filter(turma => 
-    turma.nome.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (!selectedSchool || turma.escola === selectedSchool) &&
-    (!selectedLocation || turma.localizacao === selectedLocation)
-  );
+  const loadClassrooms = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchClassrooms();
+      setClassrooms(data);
+    } catch (error) {
+      console.error('Error loading classrooms:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as turmas',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = (id: number) => {
-    setSelectedClass(id);
+    setSelectedClassroom(id);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log('Deleting class:', selectedClass);
+  const confirmDelete = async () => {
+    if (!selectedClassroom) return;
+
+    try {
+      await deleteClassroom(selectedClassroom);
+      toast({
+        title: 'Sucesso',
+        description: 'Turma excluída com sucesso',
+      });
+      loadClassrooms();
+    } catch (error: any) {
+      console.error('Error deleting classroom:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Erro ao excluir turma',
+        variant: 'destructive',
+      });
+    }
     setDeleteDialogOpen(false);
-    setSelectedClass(null);
+    setSelectedClassroom(null);
   };
+
+  // Get unique countries from classrooms using a Map to ensure uniqueness
+  const countries = Array.from(
+    new Map(
+      classrooms.map(classroom => [
+        classroom.school.city.country.id,
+        {
+          id: classroom.school.city.country.id,
+          name: classroom.school.city.country.name
+        }
+      ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Get cities filtered by selected country using a Map
+  const cities = Array.from(
+    new Map(
+      classrooms
+        .filter(classroom => 
+          !selectedCountry || 
+          classroom.school.city.country.id.toString() === selectedCountry
+        )
+        .map(classroom => [
+          classroom.school.city.id,
+          {
+            id: classroom.school.city.id,
+            name: classroom.school.city.name
+          }
+        ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Get schools filtered by selected city using a Map
+  const schools = Array.from(
+    new Map(
+      classrooms
+        .filter(classroom => 
+          (!selectedCountry || classroom.school.city.country.id.toString() === selectedCountry) &&
+          (!selectedCity || classroom.school.city.id.toString() === selectedCity)
+        )
+        .map(classroom => [
+          classroom.school.id,
+          {
+            id: classroom.school.id,
+            name: classroom.school.name
+          }
+        ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Reset dependent selections when parent selection changes
+  const handleCountryChange = (value: string) => {
+    if (value === 'all') {
+      setSelectedCountry(null);
+      setSelectedCity(null);
+      setSelectedSchool(null);
+    } else {
+      setSelectedCountry(value);
+      setSelectedCity(null);
+      setSelectedSchool(null);
+    }
+  };
+
+  const handleCityChange = (value: string) => {
+    if (value === 'all') {
+      setSelectedCity(null);
+      setSelectedSchool(null);
+    } else {
+      setSelectedCity(value);
+      setSelectedSchool(null);
+    }
+  };
+
+  const handleSchoolChange = (value: string) => {
+    if (value === 'all') {
+      setSelectedSchool(null);
+    } else {
+      setSelectedSchool(value);
+    }
+  };
+
+  const filteredClassrooms = classrooms.filter(classroom => {
+    const matchesSearch = classroom.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCountry = !selectedCountry || classroom.school.city.country.id.toString() === selectedCountry;
+    const matchesCity = !selectedCity || classroom.school.city.id.toString() === selectedCity;
+    const matchesSchool = !selectedSchool || classroom.school.id.toString() === selectedSchool;
+    
+    return matchesSearch && matchesCountry && matchesCity && matchesSchool;
+  });
 
   return (
     <div className="space-y-6">
@@ -78,6 +196,7 @@ export default function TurmasPage() {
           />
           <ClassDialog
             mode="create"
+            onSuccess={loadClassrooms}
             trigger={
               <Button className="bg-pink-600 hover:bg-pink-700">
                 <div className="relative flex items-center mr-2">
@@ -101,75 +220,115 @@ export default function TurmasPage() {
             className="pl-8"
           />
         </div>
-        <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+
+        <Select 
+          value={selectedCountry || ''} 
+          onValueChange={handleCountryChange}
+        >
           <SelectTrigger className="sm:max-w-xs">
-            <SelectValue placeholder="Filtrar por escola" />
+            <SelectValue placeholder="Filtrar por país" />
           </SelectTrigger>
           <SelectContent>
-            {[...new Set(turmas.map(t => t.escola))].map(escola => (
-              <SelectItem key={escola} value={escola}>
-                {escola}
+            <SelectItem value="all">Todos os países</SelectItem>
+            {countries.map((country: any) => (
+              <SelectItem key={country.id} value={country.id.toString()}>
+                {country.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+
+        <Select 
+          value={selectedCity || ''} 
+          onValueChange={handleCityChange}
+          disabled={!selectedCountry}
+        >
           <SelectTrigger className="sm:max-w-xs">
-            <SelectValue placeholder="Filtrar por localização" />
+            <SelectValue placeholder={selectedCountry ? "Filtrar por cidade" : "Selecione um país primeiro"} />
           </SelectTrigger>
           <SelectContent>
-            {locations.map(location => (
-              <SelectItem key={location} value={location}>
-                {location}
+            <SelectItem value="all">Todas as cidades</SelectItem>
+            {cities.map((city: any) => (
+              <SelectItem key={city.id} value={city.id.toString()}>
+                {city.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select 
+          value={selectedSchool || ''} 
+          onValueChange={handleSchoolChange}
+          disabled={!selectedCity}
+        >
+          <SelectTrigger className="sm:max-w-xs">
+            <SelectValue placeholder={selectedCity ? "Filtrar por escola" : "Selecione uma cidade primeiro"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as escolas</SelectItem>
+            {schools.map((school: any) => (
+              <SelectItem key={school.id} value={school.id.toString()}>
+                {school.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredTurmas.map((turma) => (
-          <Card key={turma.id}>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">{turma.nome}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm">{turma.escola}</p>
-                <p className="text-sm text-muted-foreground">{turma.localizacao}</p>
-                <p className="text-sm">Alunos: {turma.alunos}</p>
-                <div className="flex gap-2 mt-4">
-                  <ViewClassDialog class={turma} />
-                  <ClassDialog
-                    mode="edit"
-                    class={turma}
-                    trigger={
-                      <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
-                        <PencilIcon className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="text-red-500 hover:text-red-600"
-                    onClick={() => handleDelete(turma.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {loading ? (
+        <div className="text-center py-8">
+          <p>Carregando...</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredClassrooms.map((classroom) => (
+            <Card key={classroom.id}>
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">{classroom.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        Escola: {classroom.school.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Localização: {classroom.school.city.name} - {classroom.school.city.country.name}
+                      </p>
+                      <div className="flex gap-2 mt-4">
+                        <ViewClassDialog classroom={classroom} />
+                        <ClassDialog
+                          mode="edit"
+                          classroom={classroom}
+                          onSuccess={loadClassrooms}
+                          trigger={
+                            <Button size="icon" variant="outline" className="text-amber-500 hover:text-amber-600">
+                              <PencilIcon className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => handleDelete(classroom.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                </CardContent>
+
+            </Card>
+          ))}
+        </div>
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir esta turma? Esta ação não pode ser desfeita.
+            Tem certeza de que deseja excluir esta turma? Essa ação é irreversível e removerá permanentemente todos os alunos vinculados a ela.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

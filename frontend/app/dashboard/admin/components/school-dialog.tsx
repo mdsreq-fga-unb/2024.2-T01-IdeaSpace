@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, PencilIcon, Trash2, Search } from 'lucide-react';
+import { Building, PencilIcon, Trash2, Search, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -19,45 +18,102 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { fetchCities } from '@/services/cities';
+import { fetchSchools, createSchool, deleteSchool } from '@/services/schools';
+
 
 interface SchoolDialogProps {
   mode: 'create' | 'edit';
-  school?: {
-    id: number;
-    nome: string;
-    localizacao: string;
-  };
   trigger?: React.ReactNode;
 }
 
-// Mock data - replace with actual data from your backend
-const schools = [
-  { id: 1, nome: 'Escola Municipal João Paulo', localizacao: 'São Paulo, SP' },
-  { id: 2, nome: 'Escola Estadual Maria Silva', localizacao: 'Rio de Janeiro, RJ' },
-  { id: 3, nome: 'Colégio Pedro II', localizacao: 'Belo Horizonte, MG' },
-];
+interface City {
+  id: number;
+  name: string;
+  country_id: number;
+  slug_name: string;
+  country: {
+    id: number;
+    name: string;
+    slug_name: string;
+  };
+}
 
-export function SchoolDialog({ mode, school, trigger }: SchoolDialogProps) {
+interface School {
+  id: number;
+  name: string;
+  city_id: number;
+  slug_name: string;
+  city: City;
+}
+
+export function SchoolDialog({ mode, trigger }: SchoolDialogProps) {
   const [open, setOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
-    nome: school?.nome || '',
-    localizacao: school?.localizacao || '',
+    name: '',
+    cityId: '',
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<number | null>(null);
+  const [cities, setCities] = useState<City[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const { toast } = useToast();
 
-  const filteredSchools = schools.filter(school => 
-    school.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    school.localizacao.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    if (open) {
+      loadData();
+    }
+  }, [open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const loadData = async () => {
+    try {
+      const [citiesData, schoolsData] = await Promise.all([
+        fetchCities(),
+        fetchSchools()
+      ]);
+      setCities(citiesData);
+      setSchools(schoolsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os dados',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setShowForm(false);
-    setFormData({ nome: '', localizacao: '' });
+    try {
+      if (!formData.cityId) {
+        toast({
+          title: 'Erro',
+          description: 'Selecione uma cidade',
+          variant: 'destructive',
+        });
+        return;
+      }
+      await createSchool(formData.name, parseInt(formData.cityId));
+      toast({
+        title: 'Sucesso',
+        description: 'Escola criada com sucesso',
+      });
+      setShowForm(false);
+      setFormData({ name: '', cityId: '' });
+      loadData();
+    } catch (error) {
+      console.error('Error creating school:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao criar escola',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -65,23 +121,40 @@ export function SchoolDialog({ mode, school, trigger }: SchoolDialogProps) {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log('Deleting school:', selectedSchool);
+  const confirmDelete = async () => {
+    if (!selectedSchool) return;
+
+    try {
+      await deleteSchool(selectedSchool);
+      toast({
+        title: 'Sucesso',
+        description: 'Escola excluída com sucesso',
+      });
+      loadData();
+    } catch (error) {
+      console.error('Error deleting school:', error);
+      toast({
+        title: 'Erro',
+        description: 'Escola possui turmas associadas.',
+        variant: 'destructive',
+      });
+    }
     setDeleteDialogOpen(false);
     setSelectedSchool(null);
   };
 
-  const handleEdit = (school: { id: number; nome: string; localizacao: string }) => {
-    setFormData({ nome: school.nome, localizacao: school.localizacao });
-    setShowForm(true);
-  };
+  const filteredSchools = schools.filter(school =>
+    school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.city.country.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
           <Button className="bg-pink-600 hover:bg-pink-700">
-            Nova Escola
+            Gerenciar Escolas
           </Button>
         )}
       </DialogTrigger>
@@ -92,31 +165,37 @@ export function SchoolDialog({ mode, school, trigger }: SchoolDialogProps) {
 
         {showForm ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome da Escola</Label>
-              <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                required
-              />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome da Escola</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">Cidade</Label>
+                <Select
+                  value={formData.cityId}
+                  onValueChange={(value) => setFormData({ ...formData, cityId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma cidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map((city) => (
+                      <SelectItem key={city.id} value={city.id.toString()}>
+                        {city.name} - {city.country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="localizacao">Localização</Label>
-              <Select
-                value={formData.localizacao}
-                onValueChange={(value) => setFormData({ ...formData, localizacao: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a localização" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="São Paulo, SP">São Paulo, SP</SelectItem>
-                  <SelectItem value="Rio de Janeiro, RJ">Rio de Janeiro, RJ</SelectItem>
-                  <SelectItem value="Belo Horizonte, MG">Belo Horizonte, MG</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                 Cancelar
@@ -139,30 +218,27 @@ export function SchoolDialog({ mode, school, trigger }: SchoolDialogProps) {
                 />
               </div>
               <Button onClick={() => setShowForm(true)} className="bg-pink-600 hover:bg-pink-700 ml-4">
+                <Plus className="h-4 w-4 mr-2" />
                 Nova Escola
               </Button>
             </div>
 
             <ScrollArea className="h-[400px]">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {filteredSchools.map((school) => (
                   <Card key={school.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Building className="h-4 w-4 text-muted-foreground" />
-                        <p className="font-medium truncate">{school.nome}</p>
-                      </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">{school.localizacao}</p>
+                        <div className="flex items-center gap-2">
+                          <Building className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{school.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {school.city.name} - {school.city.country.name}
+                            </p>
+                          </div>
+                        </div>
                         <div className="flex gap-2">
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 text-amber-500 hover:text-amber-600"
-                            onClick={() => handleEdit(school)}
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </Button>
                           <Button
                             size="icon"
                             variant="outline"

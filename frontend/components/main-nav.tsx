@@ -26,15 +26,25 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
+import { getUserRole } from '@/lib/types/auth';
 
 export function MainNav() {
   const pathname = usePathname();
   const { user, logout, hasPermission } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const routes = [
+  const userRole = user ? getUserRole(user) : null;
+
+  const getHomeRoute = () => {
+    if (userRole === 'aluno') return '/dashboard/home/alunos';
+    if (userRole === 'professor') return '/dashboard/home/professores';
+    if (userRole === 'administrador') return '/dashboard/home/admin';
+    return '/dashboard/home';
+  };
+
+   const routes = [
     {
-      href: '/dashboard',
+      href: getHomeRoute(),
       label: 'Geral',
       icon: LayoutDashboard,
       permission: 'view_own_profile',
@@ -107,12 +117,12 @@ export function MainNav() {
     },
   ].filter(route => 
     hasPermission(route.permission) && 
-    (!route.roles || route.roles.includes(user?.role || ''))
+    (!route.roles || (userRole && route.roles.includes(userRole)))
   );
 
   return (
     <div className="flex-1 flex items-center">
-      <Link href="/dashboard" className="flex items-center gap-2 mr-6">
+      <Link href={getHomeRoute()} className="flex items-center gap-2 mr-6">
         <div className="w-8 h-8 bg-pink-600 rounded-lg flex items-center justify-center">
           <Rocket className="w-5 h-5 text-white" />
         </div>
@@ -155,7 +165,7 @@ export function MainNav() {
               })}
               <div className="pt-4 mt-4 border-t">
                 <p className="text-sm text-muted-foreground mb-2">
-                  Logado como {user?.username} ({user?.role})
+                  Usuário: {user?.username} ({userRole})
                 </p>
                 <button
                   onClick={logout}
@@ -194,9 +204,9 @@ export function MainNav() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <p className="text-sm text-muted-foreground hidden lg:block">
-            {user?.username} ({user?.role})
+            Usuário: {user?.username} ({userRole})
           </p>
-          {user?.role === 'administrador' && (
+          {user?.is_superuser && (
             <Link href="/dashboard/admin">
               <Button
                 variant="ghost"

@@ -6,14 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 
 interface ViewStudentDialogProps {
-  student: {
-    id: number;
-    nome: string;
-    username: string;
-    ano: string;
-    turma: string;
-    escola: string;
-  };
+  student: any;
 }
 
 export function ViewStudentDialog({ student }: ViewStudentDialogProps) {
@@ -33,23 +26,23 @@ export function ViewStudentDialog({ student }: ViewStudentDialogProps) {
         <div className="space-y-4">
           <div>
             <h4 className="text-sm font-medium text-muted-foreground">Nome</h4>
-            <p className="text-base">{student.nome}</p>
+            <p className="text-base">{student.user.full_name || student.user.username}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium text-muted-foreground">Nome de Usuário</h4>
-            <p className="text-base">{student.username}</p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-muted-foreground">Ano</h4>
-            <p className="text-base">{student.ano}</p>
+            <p className="text-base">{student.user.username}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium text-muted-foreground">Turma</h4>
-            <p className="text-base">{student.turma}</p>
+            <p className="text-base">{student.classroom?.name || 'Sem turma'}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium text-muted-foreground">Escola</h4>
-            <p className="text-base">{student.escola}</p>
+            <p className="text-base">{student.classroom?.school.name || 'Sem escola'}</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground">Cidade</h4>
+            <p className="text-base">{student.classroom?.school.city.name || 'N/A'}</p>
           </div>
         </div>
       </DialogContent>

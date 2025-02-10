@@ -1,9 +1,6 @@
 from sqlmodel import Session, create_engine, select
 
-from src import crud
 from src.core.config import settings
-
-from src.models.user import User, UserCreate, Role
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
@@ -24,6 +21,8 @@ def init_db() -> None:
 
 
 def create_first_superuser(session: Session) -> None:
+    from src import crud
+    from src.models.user import User, UserCreate
     user = session.exec(
         select(User).where(User.username == settings.FIRST_SUPERUSER)
     ).first()
@@ -32,6 +31,6 @@ def create_first_superuser(session: Session) -> None:
         user_in = UserCreate(
             username=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,
-            role=Role.ADMIN,
+            is_superuser=True,
         )
         user = crud.create_user(session=session, user_create=user_in)

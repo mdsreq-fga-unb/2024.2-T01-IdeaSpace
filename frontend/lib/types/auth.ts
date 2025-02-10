@@ -1,16 +1,67 @@
-export type UserRole = 'aluno' | 'professor' | 'administrador';
+export type UserRole = 'student' | 'teacher' | 'admin';
 
 export interface User {
-  id: string;
-  name: string;
+  id: number;
   username: string;
-  role: UserRole;
+  full_name: string | null;
+  is_active: boolean;
+  is_superuser: boolean;
+  teacher: {
+    classrooms: Array<{
+      id: number;
+      name: string;
+      school_id: number;
+      slug_name: string;
+      school: {
+        id: number;
+        name: string;
+        city_id: number;
+        slug_name: string;
+        city: {
+          id: number;
+          name: string;
+          country_id: number;
+          slug_name: string;
+          country: {
+            id: number;
+            name: string;
+            slug_name: string;
+          };
+        };
+      };
+    }>;
+  } | null;
+  student: {
+    classroom: {
+      id: number;
+      name: string;
+      school_id: number;
+      slug_name: string;
+      school: {
+        id: number;
+        name: string;
+        city_id: number;
+        slug_name: string;
+        city: {
+          id: number;
+          name: string;
+          country_id: number;
+          slug_name: string;
+          country: {
+            id: number;
+            name: string;
+            slug_name: string;
+          };
+        };
+      };
+    };
+  } | null;
 }
 
 export const rolePermissions = {
   aluno: {
     allowedRoutes: [
-      '/dashboard',
+      '/dashboard/home/alunos',
       '/quiz',
       '/dashboard/desempenho'
     ],
@@ -22,7 +73,7 @@ export const rolePermissions = {
   },
   professor: {
     allowedRoutes: [
-      '/dashboard',
+      '/dashboard/home/professores',
       '/dashboard/turmas',
       '/dashboard/questionarios',
       '/dashboard/analise'
@@ -31,28 +82,45 @@ export const rolePermissions = {
       'view_own_profile',
       'manage_class_quizzes',
       'view_class_performance',
-      'assign_quizzes'
+      'assign_quizzes',
+      'view_own_classrooms', 
+      'manage_own_classrooms',
+      'view_questions' 
     ]
   },
   administrador: {
     allowedRoutes: [
       '/dashboard',
+      '/dashboard/admin',
       '/dashboard/alunos',
+      '/dashboard/professores',
       '/dashboard/turmas',
       '/dashboard/questoes',
       '/dashboard/questionarios',
-      '/dashboard/analise',
-      '/dashboard/admin'
+      '/dashboard/analytics'
     ],
     features: [
       'view_own_profile',
       'manage_students',
+      'manage_teachers',
       'manage_classes',
       'create_questions',
       'manage_quizzes',
       'view_all_performance',
-      'manage_teachers',
       'manage_system'
     ]
   }
 };
+
+export function getUserRole(user: User): 'aluno' | 'professor' | 'administrador' {
+  if (user.is_superuser) {
+    return 'administrador';
+  }
+  if (user.teacher) {
+    return 'professor';
+  }
+  if (user.student) {
+    return 'aluno';
+  }
+  return 'aluno'; 
+}

@@ -6,9 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Rocket } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import Loading from '@/app/loading';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,12 +21,22 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(username, password);
+      // Show loading screen for at least 1.0 seconds after successful login
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       console.error('Login failed:', error);
-    } finally {
+      toast({
+        title: 'Erro ao fazer login',
+        description: 'Usuário ou senha inválidos',
+        variant: 'destructive',
+      });
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4">
@@ -66,12 +79,6 @@ export default function LoginPage() {
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
-            <div className="text-sm text-center text-muted-foreground">
-              <p>Para testar diferentes perfis, use:</p>
-              <p>aluno123</p>
-              <p>prof123</p>
-              <p>admin123</p>
-            </div>
           </form>
         </CardContent>
       </Card>
