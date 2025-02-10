@@ -191,7 +191,7 @@ Eu, como técnico de campo, quero ser capaz de remover todos os dados de uma pe�
 **E** o equipamento deve ser removido do banco de dados,  
 **E** não deve mais aparecer na listagem de equipamentos.
 
-#### BDD Negativo 1:
+#### BDD Negativo - 1:
 
 **Dado** que o técnico acessou o sistema
 **E** visualizou o equipamento "Impressora Laser X123",  
@@ -202,7 +202,7 @@ Eu, como técnico de campo, quero ser capaz de remover todos os dados de uma pe�
 **Então** deve voltar para a tela de registro do equipamento,  
 **E** o equipamento não deve ser removido do banco de dados.
 
-#### BDD Negativo 2:
+#### BDD Negativo - 2:
 
 **Dado** que o técnico acessou o sistema e visualizou o equipamento "Impressora Laser X123",  
 **E** o equipamento está associado a registros no histórico,  
@@ -234,7 +234,7 @@ Eu, como técnico de campo, quero poder atualizar os datos técnicos de um equip
 **E** os dados atualizados devem ser exibidos na listagem do equipamento,  
 **E** a alteração deve ser registrada no histórico do equipamento, incluindo a data e o usuário responsável.
 
-### BDD Negativo 1:
+### BDD Negativo - 1:
 
 **Dado** que o técnico acessou o sistema e visualizou o equipamento "Impressora Laser X123",  
 **E** ele clicou no botão "Editar" e alterou o campo "Modelo" para "2025",  
@@ -246,7 +246,7 @@ Eu, como técnico de campo, quero poder atualizar os datos técnicos de um equip
 **E** não deve alterar os dados do equipamento,  
 **E** a alteração não deve ser registrada no histórico do equipamento, incluindo a data e o usuário responsável.
 
-### BDD Negativo 2:
+### BDD Negativo - 2:
 
 **Dado** que o técnico acessou o sistema e visualizou o equipamento "Impressora Laser X123",  
 **E** ele clicou no botão "Editar" e alterou o campo "Modelo" para "@@@@@@",  
@@ -279,14 +279,14 @@ Eu, como atendente quero visualizar os agendamentos que os técnicos têm inclui
 **Então** o sistema deve exibir todos os agendamentos da semana para João Silva,  
 **E** os detalhes de cada agendamento devem ser apresentados, incluindo cliente, horário e status.
 
-### BDD Negativo:
+### BDD Negativo - 1:
 
 **Dado** que o atendente acessou o sistema,  
 **E** não existem agendamentos cadastrados,  
 **Quando** ele tentar visualizar a agenda,  
 **Então** o sistema deve exibir uma mensagem: "Nenhum agendamento encontrado."
 
-### BDD Negativo 2:
+### BDD Negativo - 2:
 
 **Dado** que o atendente acessou o sistema,  
 **E** existem agendamentos cadastrados,  
@@ -317,7 +317,7 @@ Eu, como atendente quero reservar um agendamento no horário de um técnico, na 
 **E** exibir a mensagem: "Agendamento criado com sucesso!",  
 **E** o agendamento deve ser adicionado à agenda.
 
-### BDD Negativo:
+### BDD Negativo - 1:
 
 **Dado** que o atendente acessou o sistema,  
 **E** o técnico João Silva já possui um agendamento no mesmo horário,  
@@ -325,7 +325,7 @@ Eu, como atendente quero reservar um agendamento no horário de um técnico, na 
 **Então** o sistema deve exibir a mensagem: "Erro: Técnico indisponível para o horário selecionado.",  
 **E** o agendamento não deve ser criado.
 
-### BDD Negativo 2:
+### BDD Negativo - 2:
 
 **Dado** que o atendente acessou o sistema,  
 **E** não preencheu os campos obrigatórios: "Cliente: Maria Souza", "Data: 22/01/2025", "Horário: 14h", "Serviço: Manutenção de impressora", "Técnico: João Silva",
@@ -357,7 +357,7 @@ Eu, como atendente quero cancelar um agendamento no horário de um técnico, par
 **E** remover o agendamento da agenda,  
 **E** registrar o cancelamento no histórico do cliente e do técnico.
 
-### BDD Negativo 1:
+### BDD Negativo - 1:
 
 **Dado** que o atendente acessou o sistema e selecionou o agendamento "Cliente: Maria Souza, Data: 22/01/2025, Horário: 14h",  
 **Quando** ele clicar no botão "Cancelar" e confirmar a ação,  
@@ -367,7 +367,7 @@ Eu, como atendente quero cancelar um agendamento no horário de um técnico, par
 **E** não remover o agendamento da agenda,  
 **E** registrar não o cancelamento no histórico do cliente e do técnico.
 
-### BDD Negativo 2:
+### BDD Negativo - 2:
 
 **Dado** que o atendente acessou o sistema e selecionou um agendamento,  
 **Quando** ele clicar no botão "Cancelar" e desistir da ação,  
