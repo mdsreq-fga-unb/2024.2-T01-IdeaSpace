@@ -32,11 +32,11 @@
 
 ## Funcionalidade 6: Monitorar solicitações dos clientes.
 
-- **História 6.1:** Eu, como gerente de operações quero criar tarefas definindo o título, a descrição, prazo de conclusão e responsável, para dividir as solicitações dos clientes e acompanhar seu progresso.
+- **História 6.1:** Eu, como diretora de operações quero criar tarefas definindo o título, a descrição, prazo de conclusão e responsável, para dividir as solicitações dos clientes e acompanhar seu progresso.
 
 ## Funcionalidade 7: Monitorar desempenho
 
-- **História 7.1:** Eu, como gerente de operações, quero visualizar gráficos de desempenho baseados em tarefas concluídas em relação ao tempo, para observar mudanças na eficácia dos funcionários e tomar medidas se necessário.
+- **História 7.1:** Eu, como diretora de operações, quero visualizar gráficos de desempenho baseados em tarefas concluídas em relação ao tempo, para observar mudanças na eficácia dos funcionários e tomar medidas se necessário.
 
 # Critérios de Aceitação e BDDs
 
