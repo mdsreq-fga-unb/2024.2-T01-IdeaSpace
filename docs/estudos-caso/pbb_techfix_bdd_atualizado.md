@@ -1,3 +1,43 @@
+# Histórias de Usuário
+
+# Pessoa: Técnico de Campo
+
+## Funcionalidade 1: Acessar informações de equipamentos
+
+- **História 1.1:** Eu, como técnico de campo, quero acessar todas as informações que pertencem a uma peça de equipamento, incluindo detalhes de fabricação para poder realizar diagnósticos mais precisos e rápidos.
+- **História 1.2:** Eu, como técnico de campo, quero acessar as informações de todas as operações que foram realizadas em um equipamento para descartar opções rapidamente e continuar os trabalhos que podem ter ficado inconclusivos.
+
+## Funcionalidade 2: Gerenciar especificações de equipamentos
+
+- **História 2.1:** Eu, como técnico de campo, quero poder registrar datos técnicos de um equipamento incluindo nome, modelo, fabricante e descrição para aumentar a quantidade de informação disponível que pode ser usada na resolução de problemas.
+- **História 2.2:** Eu, como técnico de campo, quero poder atualizar os datos técnicos de um equipamento incluindo nome, modelo, fabricante e descrição para que a informação disponível para resolução de problemas seja verdadeira e útil ao longo do tempo.
+- **História 2.3:** Eu, como técnico de campo, quero ser capaz de remover todos os dados de uma peça de equipamento, para não poluir as informações disponíveis com dados inúteis sobre equipamentos com que já não se trabalha.
+
+## Funcionalidade 3: Registrar histórico de equipamentos
+
+- **História 3.1:** Eu, como técnico de campo, quero poder registrar dados sobre os trabalhos realizados em uma peça de equipamento incluindo a data, descrição e o técnico que realiza a operação para manter o controle do estado do equipamento atualizado.
+
+# Pessoa: Atendente
+
+## Funcionalidade 4: Acessar agendas de técnicos 
+
+- **História 4.1:** Eu, como atendente quero visualizar os agendamentos que os técnicos têm incluindo data, horário, cliente e serviço para saber onde estarão os técnicos em que dia e em que horários estarão disponíveis.
+
+## Funcionalidade 5: Gerenciar agendamentos de técnicos
+
+- **História 5.1:** Eu, como atendente quero reservar um agendamento no horário de um técnico, na qual se incluem informações como dia, hora, cliente, serviço e técnico responsável, para garantir a atenção oportuna do cliente e atualizar a disponibilidade do técnico.
+- **História 5.2:** Eu, como atendente quero cancelar um agendamento no horário de um técnico, para liberar o horário e permitir que outro agendamento seja realizado em seu lugar.
+
+# Pessoa: Diretora de Operações
+
+## Funcionalidade 6: Monitorar solicitações dos clientes.
+
+- **História 6.1:** Eu, como gerente de operações quero criar tarefas definindo o título, a descrição, prazo de conclusão e responsável, para dividir as solicitações dos clientes e acompanhar seu progresso.
+
+## Funcionalidade 7: Monitorar desempenho
+
+- **História 7.1:** Eu, como gerente de operações, quero visualizar gráficos de desempenho baseados em tarefas concluídas em relação ao tempo, para observar mudanças na eficácia dos funcionários e tomar medidas se necessário.
+
 # Critérios de Aceitação e BDDs
 
 # Técnico de Campo
@@ -5,6 +45,8 @@
 ## 1. Catalogar equipamentos vistos
 
 ### Acessar especificações de equipamentos
+
+Eu, como técnico de campo, quero acessar todas as informações que pertencem a uma peça de equipamento, incluindo detalhes de fabricação para poder realizar diagnósticos mais precisos e rápidos.
 
 #### Critérios de Aceitação:
 
@@ -32,6 +74,8 @@
 ---
 
 ## 2. Registrar especificações de equipamentos
+
+Eu, como técnico de campo, quero poder registrar datos técnicos de um equipamento incluindo nome, modelo, fabricante e descrição para aumentar a quantidade de informação disponível que pode ser usada na resolução de problemas.
 
 #### Critérios de Aceitação:
 
@@ -66,6 +110,8 @@
 
 ## 3. Acessar histórico de equipamentos
 
+Eu, como técnico de campo, quero acessar as informações de todas as operações que foram realizadas em um equipamento para descartar opções rapidamente e continuar os trabalhos que podem ter ficado inconclusivos.
+
 #### Critérios de Aceitação:
 
 - O técnico deve visualizar um histórico detalhado de todas as ações realizadas em um equipamento específico.
@@ -91,6 +137,8 @@
 ---
 
 ## 4. Registrar histórico de equipamentos
+
+Eu, como técnico de campo, quero poder registrar dados sobre os trabalhos realizados em uma peça de equipamento incluindo a data, descrição e o técnico que realiza a operação para manter o controle do estado do equipamento atualizado.
 
 #### Critérios de Aceitação:
 
@@ -121,6 +169,8 @@
 ---
 
 ## 5. Deletar especificações de equipamentos
+
+Eu, como técnico de campo, quero ser capaz de remover todos os dados de uma peça de equipamento, para não poluir as informações disponíveis com dados inúteis sobre equipamentos com que já não se trabalha.
 
 #### Critérios de Aceitação:
 
@@ -161,6 +211,8 @@
 **E** a exclusão não deve ser permitida.
 
 ## 6. Editar especificações de equipamentos
+
+Eu, como técnico de campo, quero poder atualizar os datos técnicos de um equipamento incluindo nome, modelo, fabricante e descrição para que a informação disponível para resolução de problemas seja verdadeira e útil ao longo do tempo.
 
 ### Critérios de Aceitação:
 
@@ -210,6 +262,8 @@
 
 ## 7. Visualizar agenda
 
+Eu, como atendente quero visualizar os agendamentos que os técnicos têm incluindo data, horário, cliente e serviço para saber onde estarão os técnicos em que dia e em que horários estarão disponíveis.
+
 ### Critérios de Aceitação:
 
 - O atendente deve visualizar a agenda de serviços com opções de exibição por dia, semana ou mês.
@@ -243,6 +297,8 @@
 ---
 
 ## 8. Agendar cliente
+
+Eu, como atendente quero reservar um agendamento no horário de um técnico, na qual se incluem informações como dia, hora, cliente, serviço e técnico responsável, para garantir a atenção oportuna do cliente e atualizar a disponibilidade do técnico.
 
 ### Critérios de Aceitação:
 
@@ -283,6 +339,8 @@
 
 ## 9. Cancelar agendamento
 
+Eu, como atendente quero cancelar um agendamento no horário de um técnico, para liberar o horário e permitir que outro agendamento seja realizado em seu lugar.
+
 ### Critérios de Aceitação:
 
 - O atendente deve visualizar os detalhes do agendamento antes de cancelá-lo.
@@ -322,6 +380,8 @@
 
 ## 12. Cadastrar tarefas
 
+Eu, como gerente de operações quero criar tarefas definindo o título, a descrição, prazo de conclusão e responsável, para dividir as solicitações dos clientes e acompanhar seu progresso.
+
 ### Critérios de Aceitação:
 
 - O sistema deve permitir o cadastro de tarefas informando obrigatoriamente: título, descrição, prazo de conclusão e responsável.
@@ -350,6 +410,8 @@
 ---
 
 ## 13. Visualizar gráfico de desempenho
+
+Eu, como gerente de operações, quero visualizar gráficos de desempenho baseados em tarefas concluídas em relação ao tempo, para observar mudanças na eficácia dos funcionários e tomar medidas se necessário.
 
 ### Critérios de Aceitação:
 
