@@ -134,3 +134,28 @@ export async function getQuestionnaireResults(questionnaireId: number) {
   return response.json();
 }
 
+export async function getQuestionnaireAllResults(questionnaireId: number) {
+  const response = await fetch(`${API_URL}/questionnaire/${questionnaireId}/results/all`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to fetch questionnaire results');
+  }
+
+  return response.json();
+}
+
+export async function getQuestionnaireStudentResults(questionnaireId: number, studentId: number) {
+  const response = await fetch(`${API_URL}/questionnaire/${questionnaireId}/results/student/${studentId}`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to fetch student results');
+  }
+
+  return response.json();
+}

@@ -1,103 +1,223 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useTheme } from 'next-themes';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, CheckCircle2, Download } from 'lucide-react';
+import { Eye, Download, CheckCircle2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import { getQuestionnaireAllResults, getQuestionnaireStudentResults, fetchQuestionnaires, getQuestionnaire } from '@/services/questionnaire';
+import { getClassroomWithUsers } from '@/services/classrooms';
 import { generatePDF } from '@/lib/utils/pdf';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+
+interface QuestionResult {
+  question_id: number;
+  question_text: string;
+  options: Array<{
+    id: number;
+    text: string;
+    is_answer: boolean;
+  }>;
+  student_answer: number | null;
+  correct_answer: number;
+  is_correct: boolean;
+}
+
+interface StudentResult {
+  total_questions: number;
+  correct_answers: number;
+  result: QuestionResult[];
+}
 
 export default function AnalisePage() {
   const [selectedTurma, setSelectedTurma] = useState('');
   const [selectedQuestionario, setSelectedQuestionario] = useState('');
-  const [selectedAluno, setSelectedAluno] = useState('');
+  const [selectedAluno, setSelectedAluno] = useState('all');
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<Record<string, StudentResult>>({});
+  const [questionnaires, setQuestionnaires] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [selectedQuestionnaireDetails, setSelectedQuestionnaireDetails] = useState<any>(null);
+  const [studentResultsError, setStudentResultsError] = useState<string | null>(null);
   const { theme } = useTheme();
-  
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const performanceChartRef = useRef<HTMLDivElement>(null);
-  const detailsChartRef = useRef<HTMLDivElement>(null);
 
-  // Mock data - replace with actual data from your backend
-  const turmas = ['Turma A', 'Turma B', 'Turma C'];
-  const alunos = ['Ana Silva', 'Bruno Santos', 'Carla Oliveira'];
-  const questionarios = [
-    {
-      id: 1,
-      titulo: 'Matemática Básica',
-      questoes: [
-        {
-          pergunta: 'Quanto é 2 + 2?',
-          alternativas: ['3', '4', '5', '6'],
-          respostaCorreta: 1,
-          estatisticas: {
-            acertos: 85,
-            erros: 15,
-            tempoMedio: '45s',
-            distribuicaoRespostas: [10, 85, 3, 2],
-          },
-        },
-        {
-          pergunta: 'Qual é a raiz quadrada de 16?',
-          alternativas: ['2', '4', '6', '8'],
-          respostaCorreta: 1,
-          estatisticas: {
-            acertos: 78,
-            erros: 22,
-            tempoMedio: '60s',
-            distribuicaoRespostas: [15, 78, 5, 2],
-          },
-        },
-      ],
-    },
-    {
-      id: 2,
-      titulo: 'História do Brasil',
-      questoes: [
-        {
-          pergunta: 'Em que ano o Brasil foi descoberto?',
-          alternativas: ['1498', '1500', '1502', '1504'],
-          respostaCorreta: 1,
-          estatisticas: {
-            acertos: 90,
-            erros: 10,
-            tempoMedio: '30s',
-            distribuicaoRespostas: [5, 90, 3, 2],
-          },
-        },
-      ],
-    },
-  ];
+  const classrooms = user?.teacher?.classrooms || [];
 
-  const selectedQuestionarioData = questionarios.find(q => q.titulo === selectedQuestionario);
-  
-  const questionsData = selectedQuestionarioData?.questoes.map((q, index) => ({
-    questao: `Questão ${index + 1}`,
-    acertos: q.estatisticas.acertos,
-    erros: q.estatisticas.erros,
-  })) || [];
+  useEffect(() => {
+    const loadQuestionnaires = async () => {
+      if (!selectedTurma) {
+        setQuestionnaires([]);
+        return;
+      }
+
+      try {
+        const data = await fetchQuestionnaires(parseInt(selectedTurma));
+        setQuestionnaires(data);
+      } catch (error) {
+        console.error('Error loading questionnaires:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar os questionários',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    loadQuestionnaires();
+  }, [selectedTurma, toast]);
+
+  useEffect(() => {
+    const loadStudents = async () => {
+      if (!selectedTurma) {
+        setStudents([]);
+        return;
+      }
+
+      try {
+        const data = await getClassroomWithUsers(parseInt(selectedTurma));
+        setStudents(data.students || []);
+      } catch (error) {
+        console.error('Error loading students:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar os alunos',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    loadStudents();
+  }, [selectedTurma, toast]);
+
+  useEffect(() => {
+    const loadResults = async () => {
+      if (!selectedQuestionario) return;
+      setLoading(true);
+      setStudentResultsError(null);
+      setResults({});
+      try {
+        const data = await getQuestionnaireAllResults(parseInt(selectedQuestionario));
+        setResults(data);
+      } catch (error) {
+        console.error('Error loading results:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar os resultados',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (selectedAluno === 'all') {
+      loadResults();
+    }
+  }, [selectedQuestionario, selectedAluno, toast]);
+
+  useEffect(() => {
+    let isActive = true; 
+    const loadStudentResults = async () => {
+      if (!selectedQuestionario || selectedAluno === 'all') return;
+
+      setLoading(true);
+      setStudentResultsError(null);
+      setResults({});
+      try {
+        const data = await getQuestionnaireStudentResults(
+          parseInt(selectedQuestionario),
+          parseInt(selectedAluno)
+        );
+        if (isActive) {
+          setResults({ [selectedAluno]: data });
+        }
+      } catch (error) {
+        if (isActive) {
+          console.error('Error loading student results:', error);
+          setStudentResultsError('Esse usuário não possui questionários respondidos');
+          toast({
+            title: 'Erro',
+            description: 'Não foi possível carregar os resultados do aluno',
+            variant: 'destructive',
+          });
+        }
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (selectedAluno !== 'all') {
+      loadStudentResults();
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedAluno, selectedQuestionario, toast]);
+
+  useEffect(() => {
+    const loadQuestionnaireDetails = async () => {
+      if (!selectedQuestionario) {
+        setSelectedQuestionnaireDetails(null);
+        return;
+      }
+
+      try {
+        const data = await getQuestionnaire(parseInt(selectedQuestionario));
+        setSelectedQuestionnaireDetails(data);
+      } catch (error) {
+        console.error('Error loading questionnaire details:', error);
+      }
+    };
+
+    loadQuestionnaireDetails();
+  }, [selectedQuestionario]);
+
+  useEffect(() => {
+    setSelectedQuestionario('');
+    setSelectedAluno('all');
+    setStudentResultsError(null);
+    setResults({});
+  }, [selectedTurma]);
+
+  useEffect(() => {
+    setSelectedAluno('all');
+    setStudentResultsError(null);
+    setResults({});
+  }, [selectedQuestionario]);
+
+  const chartData =
+    selectedQuestionario && results
+      ? Object.values(results)[0]?.result.map((q, index) => ({
+          questao: `Questão ${index + 1}`,
+          acertos: Object.values(results).reduce(
+            (acc, student) => acc + (student.result[index]?.is_correct ? 1 : 0),
+            0
+          ),
+          erros: Object.values(results).reduce(
+            (acc, student) => acc + (student.result[index]?.is_correct ? 0 : 1),
+            0
+          ),
+        }))
+      : [];
 
   const handleDownloadPDF = async () => {
-    if (!selectedQuestionarioData) return;
-    
-    const elements = [
-      performanceChartRef.current,
-      detailsChartRef.current,
-    ].filter(Boolean) as HTMLElement[];
-
-    await generatePDF(elements, `Análise - ${selectedQuestionarioData.titulo}`);
+    if (!selectedQuestionnaireDetails) return;
+    const elements = [performanceChartRef.current].filter(Boolean) as HTMLElement[];
+    await generatePDF(elements, `Análise - Questionário #${selectedQuestionario}`);
   };
 
-  // Chart configuration
   const chartConfig = {
     xAxis: {
       axisLine: true,
@@ -122,12 +242,6 @@ export default function AnalisePage() {
     },
   };
 
-  // Chart colors
-  const chartColors = {
-    pink: '#ec4899',
-    blue: '#3b82f6',
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -135,53 +249,71 @@ export default function AnalisePage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Select value={selectedQuestionario} onValueChange={setSelectedQuestionario}>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecionar Questionário" />
-          </SelectTrigger>
-          <SelectContent>
-            {questionarios.map(questionario => (
-              <SelectItem key={questionario.id} value={questionario.titulo}>
-                {questionario.titulo}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Select value={selectedTurma} onValueChange={setSelectedTurma}>
           <SelectTrigger>
             <SelectValue placeholder="Selecionar Turma" />
           </SelectTrigger>
           <SelectContent>
-            {turmas.map(turma => (
-              <SelectItem key={turma} value={turma}>{turma}</SelectItem>
+            {classrooms.map((classroom) => (
+              <SelectItem key={classroom.id} value={classroom.id.toString()}>
+                {classroom.name} - {classroom.school.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <Select value={selectedAluno} onValueChange={setSelectedAluno}>
+        <Select
+          value={selectedQuestionario}
+          onValueChange={setSelectedQuestionario}
+          disabled={!selectedTurma}
+        >
           <SelectTrigger>
-            <SelectValue placeholder="Selecionar Aluno" />
+            <SelectValue
+              placeholder={selectedTurma ? 'Selecionar Questionário' : 'Selecione uma turma primeiro'}
+            />
           </SelectTrigger>
           <SelectContent>
-            {alunos.map(aluno => (
-              <SelectItem key={aluno} value={aluno}>{aluno}</SelectItem>
+            {questionnaires.map((questionnaire) => (
+              <SelectItem key={questionnaire.id} value={questionnaire.id.toString()}>
+                Questionário #{questionnaire.id}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={selectedAluno}
+          onValueChange={setSelectedAluno}
+          disabled={!selectedQuestionario}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={selectedQuestionario ? 'Selecionar Aluno' : 'Selecione um questionário primeiro'}
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os alunos</SelectItem>
+            {students.map((student) => (
+              <SelectItem key={student.user_id} value={student.user_id.toString()}>
+                {student.user.full_name || student.user.username}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      {selectedQuestionario ? (
-        <div className="grid gap-6">
+      {loading ? (
+        <Card className="p-8">
+          <div className="text-center">
+            <p>Carregando resultados...</p>
+          </div>
+        </Card>
+      ) : selectedQuestionario ? (
+        <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">{selectedQuestionario}</h2>
+            <h2 className="text-xl font-semibold">Questionário #{selectedQuestionario}</h2>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={handleDownloadPDF}
-              >
+              <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadPDF}>
                 <Download className="h-4 w-4" />
                 Baixar Relatório
               </Button>
@@ -194,63 +326,66 @@ export default function AnalisePage() {
                 </DialogTrigger>
                 <DialogContent className="max-w-3xl">
                   <DialogHeader>
-                    <DialogTitle>{selectedQuestionario}</DialogTitle>
+                    <DialogTitle>Questionário #{selectedQuestionario}</DialogTitle>
                   </DialogHeader>
                   <ScrollArea className="max-h-[600px]">
                     <div className="space-y-6 p-4">
-                      {selectedQuestionarioData?.questoes.map((questao, index) => (
-                        <Card key={index}>
-                          <CardHeader>
-                            <CardTitle className="text-lg">
-                              Questão {index + 1}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <p className="font-medium">{questao.pergunta}</p>
-                            <div className="grid gap-3">
-                              {questao.alternativas.map((alternativa, altIndex) => (
-                                <div
-                                  key={altIndex}
-                                  className={`p-3 rounded-lg border ${
-                                    altIndex === questao.respostaCorreta
-                                      ? 'border-green-500/20 bg-green-500/10 dark:border-green-500/30 dark:bg-green-500/20'
-                                      : 'border-gray-200 dark:border-gray-800'
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                      <span className="font-medium">
-                                        {String.fromCharCode(65 + altIndex)}
-                                      </span>
-                                      <span>{alternativa}</span>
+                      <div className="grid gap-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground">Duração</h4>
+                          <p className="text-base">{selectedQuestionnaireDetails?.duration} minutos</p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground">Total de Questões</h4>
+                          <p className="text-base">{selectedQuestionnaireDetails?.questions?.length || 0} questões</p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
+                          <p className="text-base">
+                            {selectedQuestionnaireDetails?.closed ? 'Encerrado' : 'Em andamento'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Questões</h3>
+                        <div className="space-y-6">
+                          {selectedQuestionnaireDetails?.questions?.map((question: any, index: number) => (
+                            <Card key={question.id}>
+                              <CardHeader>
+                                <CardTitle className="text-lg">Questão {index + 1}</CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-4">
+                                <p className="font-medium">{question.text}</p>
+                                <div className="grid gap-3">
+                                  {question.options.map((option: any, altIndex: number) => (
+                                    <div
+                                      key={option.id}
+                                      className={`p-3 rounded-lg border ${
+                                        option.is_answer
+                                          ? 'border-green-500/20 bg-green-500/10 dark:border-green-500/30 dark:bg-green-500/20'
+                                          : 'border-gray-200 dark:border-gray-800'
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                          <span className="font-medium">
+                                            {String.fromCharCode(65 + altIndex)}
+                                          </span>
+                                          <span>{option.text}</span>
+                                        </div>
+                                        {option.is_answer && (
+                                          <CheckCircle2 className="h-5 w-5 text-green-500 dark:text-green-400" />
+                                        )}
+                                      </div>
                                     </div>
-                                    {altIndex === questao.respostaCorreta && (
-                                      <CheckCircle2 className="h-5 w-5 text-green-500 dark:text-green-400" />
-                                    )}
-                                  </div>
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
-                            <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg space-y-2">
-                              <h4 className="font-medium">Estatísticas</h4>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Taxa de Acerto</p>
-                                  <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-                                    {questao.estatisticas.acertos}%
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Tempo Médio</p>
-                                  <p className="text-lg font-semibold">
-                                    {questao.estatisticas.tempoMedio}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </ScrollArea>
                 </DialogContent>
@@ -258,86 +393,51 @@ export default function AnalisePage() {
             </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Desempenho por Questão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]" ref={performanceChartRef}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={questionsData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="questao"
-                      {...chartConfig.xAxis}
-                    />
-                    <YAxis
-                      {...chartConfig.yAxis}
-                    />
-                    <Tooltip
-                      {...chartConfig.tooltip}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey="acertos"
-                      name="Acertos"
-                      fill={chartColors.pink}
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar
-                      dataKey="erros"
-                      name="Erros"
-                      fill={chartColors.blue}
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+          {selectedAluno !== 'all' && studentResultsError ? (
+            <Card className="p-8">
+              <div className="text-center">
+                <p className="text-red-500 font-semibold">{studentResultsError}</p>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Detalhamento por Questão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[300px]" ref={detailsChartRef}>
-                <div className="space-y-4">
-                  {selectedQuestionarioData?.questoes.map((questao, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
-                    >
-                      <div>
-                        <p className="font-medium">Questão {index + 1}</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Tempo médio: {questao.estatisticas.tempoMedio}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                          {questao.estatisticas.acertos}%
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          taxa de acerto
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Desempenho por Questão</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px]" ref={performanceChartRef}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="questao" {...chartConfig.xAxis} />
+                      <YAxis {...chartConfig.yAxis} />
+                      <Tooltip {...chartConfig.tooltip} />
+                      <Legend />
+                      <Bar
+                        dataKey="acertos"
+                        name="Acertos"
+                        fill={theme === 'dark' ? '#3b82f6' : '#3b82f6'}
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar
+                        dataKey="erros"
+                        name="Erros"
+                        fill={theme === 'dark' ? '#ec4899' : '#ec4899'}
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       ) : (
-        <Card className="p-8 text-center">
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">Selecione um questionário</h3>
-            <p className="text-sm text-muted-foreground">
-              Escolha um questionário para visualizar as análises de desempenho
+        <Card className="p-8">
+          <div className="text-center">
+            <h3 className="text-lg font-medium">Selecione uma turma e um questionário</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              Escolha uma turma e um questionário para visualizar as análises de desempenho
             </p>
           </div>
         </Card>

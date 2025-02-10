@@ -131,11 +131,9 @@ def read_questionnaire_answers(questionnaire_id: int, session: SessionDep, curre
 def read_questionnaires_by_classroom(
     classroom_id: int, session: SessionDep, current_user: CurrentUser
 ):
-    # Verifica se o usuário é professor e obtém suas turmas
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
     teacher_permission = existing_teacher and classroom_id in [c.id for c in existing_teacher.classrooms]
 
-    # Verifica se o usuário é aluno e se sua turma é a mesma da requisição
     existing_student = crud.get_student_by_user_id(session=session, user_id=current_user.id)
     student_permission = existing_student and (existing_student.classroom_id == classroom_id)
     
@@ -145,7 +143,6 @@ def read_questionnaires_by_classroom(
             detail="You don't have permission to read questionnaires for this classroom."
         )
     
-    # Se o usuário não for professor nem superusuário, assume que só pode ver os questionários liberados
     only_released = not teacher_permission and not current_user.is_superuser
     questionnaires = crud.get_questionnaires_by_classroom(
         session=session, classroom_id=classroom_id, only_released=only_released
@@ -202,12 +199,9 @@ def start_questionnaire(
         session=session, student_id=current_user.id, questionnaire_id=start_info.questionnaire_id
     )
 
-    # Se o aluno já respondeu, não pode reiniciar
     if existing_info and existing_info.already_answered:
         raise HTTPException(status_code=400, detail="You have already answered this questionnaire.")
 
-    # Se já existe registro mas não foi respondido, atualize a data de início para o momento atual;
-    # caso contrário, crie um novo registro com started_at = datetime.now()
     if existing_info:
         existing_info.started_at = datetime.now()
         session.commit()
@@ -249,15 +243,9 @@ def answer_questionnaire(
     if existing_info is None:
         raise HTTPException(status_code=400, detail="You have not started this questionnaire yet.")
     
-    # Se já respondeu, não permita nova submissão
     if existing_info.already_answered:
         raise HTTPException(status_code=400, detail="You have already answered this questionnaire.")
     
-    # Opcional: Você pode deixar um comentário indicando que, se o tempo tiver expirado,
-    # o front-end chamou esta função para submeter as respostas parciais.
-    # Por isso, removemos a verificação de expiração baseada no tempo.
-
-    # Validação e salvamento das respostas (como no seu código)
     questions = crud.get_questions_by_ids(
         session=session, question_ids=[answer.question_id for answer in answer_info.answers]
     )
@@ -317,35 +305,47 @@ def read_questionnaire_answers_by_student(
 @router.get(
     "/{questionnaire_id}/results/all",
 )
+@router.get("/{questionnaire_id}/results/all")
 def read_questionnaire_answers_all_students(
     questionnaire_id: int, session: SessionDep, current_user: CurrentUser
 ):
     """
-    Professor ou superusuário vê as respostas de todos os estudantes
+    Professor ou superusuário vê as respostas de todos os estudantes.
     """
     questionnaire = session.get(Questionnaire, questionnaire_id)
     if questionnaire is None:
         raise HTTPException(status_code=404, detail="Questionnaire not found")
-    
+
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
-    has_permission = current_user.is_superuser or (existing_teacher and questionnaire.classroom_id in existing_teacher.classrooms)
     
-    if not has_permission:
-        raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
+    if not current_user.is_superuser:
+        if not existing_teacher:
+            raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
+        has_permission = any(
+            classroom.id == questionnaire.classroom_id
+            for classroom in existing_teacher.classrooms
+        )
+        if not has_permission:
+            raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
     
     student_answers = crud.get_all_users_answered_questionnaire(session=session, questionnaire_id=questionnaire_id)
     result = {}
     for student_answer in student_answers:
-        result[student_answer.student_id] = get_student_result(questionnaire_id=questionnaire_id, student_id=student_answer.student_id, session=session)
+        result[student_answer.student_id] = get_student_result(
+            questionnaire_id=questionnaire_id,
+            student_id=student_answer.student_id,
+            session=session
+        )
     
     return result
 
 
-@router.get(
-    "/{questionnaire_id}/results/student/{student_id}",
-)
+@router.get("/{questionnaire_id}/results/student/{student_id}")
 def read_questionnaire_answers_by_student_id(
-    questionnaire_id: int, student_id: int, session: SessionDep, current_user: CurrentUser
+    questionnaire_id: int, 
+    student_id: int, 
+    session: SessionDep, 
+    current_user: CurrentUser
 ):
     """
     Professor ou superusuário vê as respostas de um estudante específico
@@ -355,18 +355,31 @@ def read_questionnaire_answers_by_student_id(
         raise HTTPException(status_code=404, detail="Questionnaire not found")
     
     existing_teacher = crud.get_teacher_by_user_id(session=session, user_id=current_user.id)
-    has_permission = current_user.is_superuser or (existing_teacher and questionnaire.classroom_id in existing_teacher.classrooms)
     
-    if not has_permission:
-        raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
+    if not current_user.is_superuser:
+        if not existing_teacher:
+            raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
+        
+        has_permission = any(
+            classroom.id == questionnaire.classroom_id
+            for classroom in existing_teacher.classrooms
+        )
+        if not has_permission:
+            raise HTTPException(status_code=403, detail="You don't have permission to see the results.")
     
     student_answer = crud.get_student_starts_questionnaire(
-        session=session, student_id=student_id, questionnaire_id=questionnaire_id
+        session=session, 
+        student_id=student_id, 
+        questionnaire_id=questionnaire_id
     )
     if student_answer is None or not student_answer.already_answered:
         raise HTTPException(status_code=400, detail="Student has not answered this questionnaire yet.")
     
-    result = get_student_result(questionnaire_id=questionnaire_id, student_id=student_id, session=session)
+    result = get_student_result(
+        questionnaire_id=questionnaire_id, 
+        student_id=student_id, 
+        session=session
+    )
     return result
 
 
