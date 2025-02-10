@@ -16,7 +16,11 @@ nav:
       - Lista de requisitos: engenharia-requisitos/lista-requisitos.md
       - DoR e DoD: engenharia-requisitos/Dor_dod.md
       - Backlog: engenharia-requisitos/backlog.md
-      - USM: engenharia-requisitos/usm.md
+      - USM:
+          - Miro: engenharia-requisitos/usm.md
+          - Admin: engenharia-requisitos/adminACUS.md
+          - Aluno: engenharia-requisitos/alunoACUS.md
+          - Professor: engenharia-requisitos/profACUS.md
   - Estudos de caso:
       - PBB TechFix:
           - Miro: estudos-caso/pbb_techfix_miro.md
