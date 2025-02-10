@@ -456,7 +456,8 @@ export function QuestionDialog(props: QuestionDialogProps) {
                                 size="icon"
                                 onClick={() => removeOption(index)}
                                 className="self-start"
-                                disabled={props.mode === 'edit' && option.is_answer}
+                                // Em modo "create", não é necessária a checagem do modo; o botão permanece habilitado.
+                                disabled={false}
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
@@ -465,7 +466,7 @@ export function QuestionDialog(props: QuestionDialogProps) {
                         ))}
                       </RadioGroup>
                     ) : (
-                      // No modo de edição, não é permitido alterar qual é a resposta correta
+                      // Modo de edição: não é permitido alterar qual é a resposta correta
                       <div className="space-y-4">
                         {formData.options.map((option, index) => (
                           <div key={index} className="flex gap-2 items-start">
