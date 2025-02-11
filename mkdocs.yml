@@ -28,6 +28,9 @@ nav:
       - USM Educonnect:
           - Miro: estudos-caso/usm_educonnect_miro.md
           - US: estudos-caso/educonnect_US.md
+      - Caso de Uso ConnectCare:
+          - Miro: estudos-caso/caso_de_uso_connectcare.md
+          - Especificações: estudos-caso/especificacoes_connectcare.md
   - Apresentações:
       - Unidade 1: apresentacoes/apresentacao1.md
       - Unidade 2: apresentacoes/apresentacao2.md
