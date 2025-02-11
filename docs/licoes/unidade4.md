@@ -1,0 +1,3 @@
+## Unidade 4
+
+Esta unidade fez parte do momento de maior carga de trabalho da equipe, envolvendo o desenvolvimento em capacidade máxima do nosso produto visando a entrega do MVP dentro do prazo, a realização das atividades de caso de uso e a reavaliação do método de desenvolvimento de software adotado para este projeto, como foi apontado pelo feedback do professor na apresentação da terceira unidade. Ao manter a comunicação mais aberta entre a equipe, conseguimos trabalhar de forma mais efetiva e desenvolvemos nossas capacidades dentro da disciplina de requisitos de forma conjunta, ajudando uns aos outros a superar as dificuldades técnicas e de aprendizado ainda pendentes durante a reta final do projeto.

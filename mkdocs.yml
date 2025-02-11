@@ -40,6 +40,7 @@ nav:
       - Unidade 1: licoes/unidade1.md
       - Unidade 2: licoes/unidade2.md
       - Unidade 3: licoes/unidade3.md
+      - Unidade 4: licoes/unidade4.md
 
 theme:
   name: material

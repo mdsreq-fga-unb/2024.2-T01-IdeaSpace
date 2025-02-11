@@ -108,29 +108,9 @@ Administrador
 4. O sistema apresenta os dados em gráficos ou tabelas, permitindo que o administrador analise tendências e tome decisões informadas.
 5. O administrador pode realizar ajustes no sistema, como adicionar novos parceiros ou serviços, com base nos indicadores observados.
 
-
-
-#### Fluxos Alternativos 
+### Fluxos Alternativos  
 
 FA01: Falha na Geração de Relatórios
-
-1. O administrador tenta gerar um relatório sobre indicadores de impacto.
-2. O sistema encontra um erro ao tentar compilar os dados (ex.: dados incompletos ou erro de conexão).
-3. O sistema exibe uma mensagem de erro e sugere que o administrador tente novamente ou entre em contato com a equipe de suporte.
-4. O administrador tenta gerar o relatório novamente após algum tempo ou solicita ajuda para resolver o problema.
-
-FA02: Dados Inconsistentes nos Relatórios
-
-1. O administrador gera um relatório sobre a eficácia de uma campanha de saúde.
-2. O sistema apresenta dados inconsistentes ou fora do esperado.
-3. O administrador revê as configurações de filtro do relatório e tenta novamente.
-4. Caso o erro persista, o administrador realiza uma investigação mais detalhada ou entra em contato com a equipe técnica para corrigir os dados.
-
-
-
-### Fluxos de Exceção  
-
-FE01: Falha na Geração de Relatórios
 
 1. O administrador tenta gerar um relatório sobre indicadores de impacto.
 2. O sistema encontra um erro ao compilar os dados para gerar o relatório (ex.: dados incompletos, falha no banco de dados).
@@ -138,7 +118,7 @@ FE01: Falha na Geração de Relatórios
 4. O administrador tenta gerar o relatório novamente após alguns minutos.
 5. Caso o erro persista, o administrador é instruído a contatar a equipe técnica para corrigir o problema.
 
-FE02: Dados Inconsistentes nos Relatórios
+FA02: Dados Inconsistentes nos Relatórios
 
 1. O administrador gera um relatório e descobre que os dados são inconsistentes ou incorretos (ex.: números divergentes ou resultados fora do esperado).
 2. O sistema avisa que os dados podem estar incompletos ou incorretos.
