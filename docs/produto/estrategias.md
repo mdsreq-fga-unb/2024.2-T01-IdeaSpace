@@ -2,7 +2,7 @@
 
 **Abordagem**: Dirigida por plano
 
-**Ciclo de Vida**: Predativo
+**Ciclo de Vida**: Preditivo
 
 **Processo**: Cascata
 
