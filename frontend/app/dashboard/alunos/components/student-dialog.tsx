@@ -274,6 +274,11 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
                   disabled={mode === 'edit'}
                   className={isUsernameInvalid ? 'border-red-500 focus:ring-red-500' : ''}
                 />
+                {isUsernameInvalid && (
+                  <p className="text-sm text-red-500">
+                    O nome de usuário não pode conter espaços
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">
