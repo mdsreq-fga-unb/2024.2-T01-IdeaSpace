@@ -120,12 +120,14 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     }
   };
 
+  const isUsernameInvalid = mode === 'create' && /\s/.test(formData.username);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     // Validação para evitar espaços no nome de usuário
-    if (mode === 'create' && /\s/.test(formData.username)) {
+    if (mode === 'create' && isUsernameInvalid) {
       toast({
         title: 'Erro',
         description: 'O nome de usuário não pode conter espaços',
@@ -285,6 +287,7 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
                   }
                   required
                   disabled={mode === 'edit'}
+                  className={isUsernameInvalid ? 'border-red-500 focus:ring-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
