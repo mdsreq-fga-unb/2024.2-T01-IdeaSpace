@@ -47,7 +47,7 @@ export function ViewClassDialog({ classroom }: ViewClassDialogProps) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-full sm:max-w-2xl p-4">
+      <DialogContent className="w-full max-w-full sm:max-w-2xl p-4 overflow-y-auto max-h-[calc(100vh-2rem)]">
         <DialogHeader>
           <DialogTitle>Detalhes da Turma</DialogTitle>
         </DialogHeader>
