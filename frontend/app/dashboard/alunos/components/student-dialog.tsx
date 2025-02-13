@@ -108,12 +108,14 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
     }
   };
 
+  const isUsernameInvalid = mode === 'create' && /\s/.test(formData.username);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validação para impedir espaços no nome de usuário (apenas no modo "create")
-    if (mode === 'create' && /\s/.test(formData.username)) {
+    // Validação para impedir espaços no nome de usuário
+    if (mode === 'create' && isUsernameInvalid) {
       toast({
         title: 'Erro',
         description: 'O nome de usuário não pode conter espaços',
@@ -270,6 +272,7 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
                   }
                   required
                   disabled={mode === 'edit'}
+                  className={isUsernameInvalid ? 'border-red-500 focus:ring-red-500' : ''}
                 />
               </div>
               <div className="space-y-2">
