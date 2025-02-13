@@ -120,6 +120,7 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     }
   };
 
+  // Verifica se o nome de usuário é inválido (contém espaços)
   const isUsernameInvalid = mode === 'create' && /\s/.test(formData.username);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -289,6 +290,11 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
                   disabled={mode === 'edit'}
                   className={isUsernameInvalid ? 'border-red-500 focus:ring-red-500' : ''}
                 />
+                {isUsernameInvalid && (
+                  <p className="text-sm text-red-500">
+                    O nome de usuário não pode conter espaços
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">
