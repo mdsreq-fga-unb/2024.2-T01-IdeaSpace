@@ -110,6 +110,18 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
+    // Validação para impedir espaços no nome de usuário (apenas no modo "create")
+    if (mode === 'create' && /\s/.test(formData.username)) {
+      toast({
+        title: 'Erro',
+        description: 'O nome de usuário não pode conter espaços',
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    }
 
     if (mode === 'create' && formData.classrooms.length === 0) {
       toast({
@@ -117,10 +129,9 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
         description: 'Selecione uma turma.',
         variant: 'destructive',
       });
+      setLoading(false);
       return;
     }
-
-    setLoading(true);
 
     try {
       if (mode === 'create') {

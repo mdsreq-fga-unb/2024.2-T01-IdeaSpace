@@ -30,7 +30,7 @@ import {
 
 interface TeacherDialogProps {
   mode: 'create' | 'edit';
-  teacher?: any; // ajuste o tipo conforme sua necessidade
+  teacher?: any; 
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 }
@@ -123,6 +123,17 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validação para evitar espaços no nome de usuário
+    if (mode === 'create' && /\s/.test(formData.username)) {
+      toast({
+        title: 'Erro',
+        description: 'O nome de usuário não pode conter espaços',
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
       if (mode === 'create') {
