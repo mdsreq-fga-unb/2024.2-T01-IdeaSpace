@@ -108,7 +108,6 @@ export function StudentDialog({ mode, student, trigger, onSuccess }: StudentDial
     }
   };
 
-  // Verifica se o nome de usuário contém espaços
   const isUsernameInvalid = mode === 'create' && /\s/.test(formData.username);
 
   const handleSubmit = async (e: React.FormEvent) => {

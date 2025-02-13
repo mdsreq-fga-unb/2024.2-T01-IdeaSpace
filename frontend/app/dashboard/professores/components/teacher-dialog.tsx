@@ -120,7 +120,6 @@ export function TeacherDialog({ mode, teacher, trigger, onSuccess }: TeacherDial
     }
   };
 
-  // Verifica se o nome de usuário é inválido (contém espaços)
   const isUsernameInvalid = mode === 'create' && /\s/.test(formData.username);
 
   const handleSubmit = async (e: React.FormEvent) => {
