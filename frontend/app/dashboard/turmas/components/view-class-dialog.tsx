@@ -47,7 +47,7 @@ export function ViewClassDialog({ classroom }: ViewClassDialogProps) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-full max-w-full sm:max-w-2xl p-4">
         <DialogHeader>
           <DialogTitle>Detalhes da Turma</DialogTitle>
         </DialogHeader>
@@ -79,7 +79,7 @@ export function ViewClassDialog({ classroom }: ViewClassDialogProps) {
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">Professores</h4>
-                <ScrollArea className="h-[120px] border rounded-md p-4">
+                <ScrollArea className="border rounded-md p-4 h-32 sm:h-[120px]">
                   <div className="space-y-2">
                     {classroomDetails?.teachers?.length > 0 ? (
                       classroomDetails.teachers.map((teacher: any) => (
@@ -105,7 +105,7 @@ export function ViewClassDialog({ classroom }: ViewClassDialogProps) {
 
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">Alunos</h4>
-                <ScrollArea className="h-[280px] border rounded-md p-4">
+                <ScrollArea className="border rounded-md p-4 h-48 sm:h-[280px]">
                   <div className="space-y-2">
                     {classroomDetails?.students?.length > 0 ? (
                       classroomDetails.students.map((student: any) => (
